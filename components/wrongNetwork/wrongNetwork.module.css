@@ -1,0 +1,64 @@
+.changeNetworkContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.chainContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.chainIcon {
+  margin-right: 12px;
+  height: 30px;
+  width: 30px;
+}
+
+.buttonText {
+  width: 180px;
+  text-align: left;
+}
+
+.sectionHeading {
+  margin-bottom: 24px !important;
+}
+
+.settingsContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.settingContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.setting {
+  padding: 12px 0px;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.value {
+  color: #2F80ED;
+  margin-top: 6px;
+}
+
+.infoText {
+  padding: 12px;
+  border: 1px solid rgba(128, 128,  128, 0.5);
+  border-radius: 10px;
+  margin-bottom: 12px;
+}

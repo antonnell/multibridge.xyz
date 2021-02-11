@@ -1,0 +1,28 @@
+.changeNetworkContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.chainContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.chainIcon {
+  margin-right: 12px;
+  height: 30px;
+  width: 30px;
+}
+
+.buttonText {
+  width: 180px;
+  text-align: left;
+}
+
+.sectionHeading {
+  margin-bottom: 24px !important;
+}

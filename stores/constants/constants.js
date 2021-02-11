@@ -1,0 +1,53 @@
+import BigNumber from 'bignumber.js'
+
+// URLS
+export const GAS_PRICE_API = 'https://gasprice.poa.network/'
+export const ETHERSCAN_URL = 'https://etherscan.io/'
+
+// GENERAL
+export const ERROR = 'ERROR'
+export const STORE_UPDATED = 'STORE_UPDATED'
+export const TX_SUBMITTED = 'TX_SUBMITTED'
+
+export const CONNECTION_CONNECTED = 'CONNECTION_CONNECTED'
+export const CONNECTION_DISCONNECTED = 'CONNECTION_DISCONNECTED'
+export const CONNECT_WALLET = 'CONNECT_WALLET'
+export const CONFIGURE_NETWORK = 'CONFIGURE_NETWORK'
+export const CHANGE_NETWORK = 'CHANGE_NETWORK'
+export const NETWORK_CHANGED = 'NETWORK_CHANGED'
+
+export const CONFIGURE = 'CONFIGURE'
+export const CONFIGURE_RETURNED = 'CONFIGURE_RETURNED'
+
+export const CONFIGURE_SWAP = 'CONFIGURE_SWAP'
+export const SWAP_CONFIGURED = 'SWAP_CONFIGURED'
+
+export const GET_GAS_PRICES = 'GET_GAS_PRICES'
+export const GAS_PRICES_RETURNED = 'GAS_PRICES_RETURNED'
+
+
+// SWAP
+export const SWAP_UPDATED = 'SWAP_UPDATED'
+
+export const GET_SWAP_BALANCES = 'GET_SWAP_BALANCES'
+export const SWAP_BALANCES_RETURNED = 'SWAP_BALANCES_RETURNED'
+
+export const APPROVE_SWAP = 'APPROVE_SWAP'
+export const APPROVE_SWAP_RETURNED = 'APPROVE_SWAP_RETURNED'
+
+export const SWAP = 'SWAP'
+export const SWAP_RETURNED = 'SWAP_RETURNED'
+
+export const SWAP_GET_DEPOSIT_ADDRESS = 'SWAP_GET_DEPOSIT_ADDRESS'
+export const SWAP_DEPOSIT_ADDRESS_RETURNED = 'SWAP_DEPOSIT_ADDRESS_RETURNED'
+
+
+// ACCOUNT
+export const ACCOUNT_CONFIGURED = 'ACCOUNT_CONFIGURED'
+export const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
+
+
+export const MAX_UINT256 = new BigNumber(2)
+  .pow(256)
+  .minus(1)
+  .toFixed(0);

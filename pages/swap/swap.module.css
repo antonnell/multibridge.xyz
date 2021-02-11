@@ -1,0 +1,140 @@
+.swapContainer {
+  height: 100%;
+  padding: 48px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+.textField {
+
+}
+
+.inputTitleContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inputTitle {
+  padding-bottom: 6px;
+  margin-left: 12px;
+}
+
+
+.inputBalance {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 12px;
+  padding-bottom: 6px;
+}
+
+.value {
+  cursor: pointer;
+}
+
+.assetContainer {
+  margin-left: -14px;
+}
+
+.assetSelectMenu {
+  padding: 12px 24px !important;
+  min-height: 57px !important;
+}
+
+.assetSelectIcon {
+  margin-right: 12px;
+  min-width: 30px;
+}
+
+.selectedAssetIcon {
+  margin: -8px 0px;
+}
+
+.textField {
+  margin-bottom: 12px;
+}
+
+.equals {
+  margin-bottom: 12px !important;
+}
+
+.leverageContainer {
+  margin-bottom: 12px;
+  margin-top: 12px;
+}
+.leverageSlider {
+  margin-top: 12px;
+}
+.actionButton {
+  margin-top: 24px;
+}
+
+.inputTitleWithIcon {
+  display: flex;
+  align-items: center;
+}
+
+.tooltipIcon {
+  font-size: 1rem !important;
+  margin-left: 12px;
+}
+
+.explanationContainer {
+  min-width: 300px;
+  max-width: 600px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-direction: column;
+  height: calc(100vh - 168px);
+  justify-content: center;
+}
+
+.explanationHeader {
+  width: fit-content;
+  padding: 24px;
+  text-align: center;
+}
+
+.explanationSubheader {
+  width: fit-content;
+  padding: 24px;
+}
+
+.explanationText {
+  padding: 24px;
+}
+
+.accentColor {
+  color: #2F80ED;
+}
+
+.explainerSpacing {
+  padding-bottom: 6px;
+  line-height: 1.3;
+}
+
+.leverageHeading {
+  padding-bottom: 24px;
+}
+
+.link {
+  color: #2F80ED;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+@media screen and (max-width: 1200px) {
+  .swapContainer {
+    padding: 24px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .swapContainer {
+    padding: 12px;
+  }
+}
