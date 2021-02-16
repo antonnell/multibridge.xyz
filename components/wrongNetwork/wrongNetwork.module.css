@@ -25,6 +25,8 @@
 
 .sectionHeading {
   margin-bottom: 24px !important;
+  display: flex;
+  align-items: center;
 }
 
 .settingsContainer {

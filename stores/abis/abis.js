@@ -1,11 +1,9 @@
 import { erc20ABI } from './erc20ABI'
-import { xVaultABI } from './xVaultABI'
-import { comptrollerABI } from './comptrollerABI'
-import { cERC20DelegatorABI } from './cERC20DelegatorABI'
-import { creamPriceOracleABI } from './creamPriceOracleABI'
+import { btcSwapAssetABI } from './btcSwapAssetABI'
+import { erc20SwapAssetABI } from './erc20SwapAssetABI'
+import { proxySwapAssetABI } from './proxySwapAssetABI'
 
 export const ERC20ABI = erc20ABI
-export const XVAULTABI = xVaultABI
-export const COMPTROLLERABI = comptrollerABI
-export const CERC20DELEGATORABI = cERC20DelegatorABI
-export const CREAMPRICEORACLEABI = creamPriceOracleABI
+export const BTCSWAPASSETABI = btcSwapAssetABI
+export const ERC20SWAPASSETABI = erc20SwapAssetABI
+export const PROXYSWAPASSETABI = proxySwapAssetABI

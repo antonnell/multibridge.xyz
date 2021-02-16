@@ -6,11 +6,12 @@ import {
   Button,
   MenuItem,
   Paper,
-  Tabs,
-  Tab,
   IconButton,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  Fade
 } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab'
 import {
   withStyles,
   withTheme,
@@ -19,6 +20,8 @@ import AccountBalanceWalletOutlinedIcon from '@material-ui/icons/AccountBalanceW
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import CropFreeIcon from '@material-ui/icons/CropFree';
+import SearchIcon from '@material-ui/icons/Search';
+
 import BigNumber from 'bignumber.js'
 import Skeleton from '@material-ui/lab/Skeleton';
 import { formatCurrency, formatAddress, formatCurrencyWithSymbol } from '../../utils'
@@ -31,13 +34,14 @@ import stores from '../../stores'
 import {
   ERROR,
   SWAP_UPDATED,
-  SWAP_GET_DEPOSIT_ADDRESS,
+  SWAP_CONFIRM_SWAP,
   SWAP_DEPOSIT_ADDRESS_RETURNED,
   CHANGE_NETWORK,
   NETWORK_CHANGED,
   ACCOUNT_CHANGED,
   CONNECT_WALLET,
-  CONFIGURE_NETWORK
+  CONFIGURE_NETWORK,
+  SWAP_RETURN_DEPOSIT_ADDRESS
 } from '../../stores/constants'
 
 const HugeInput = withStyles({
@@ -61,57 +65,44 @@ const HugeInput = withStyles({
   },
 })(TextField);
 
-const HugeInputAssetSelect = withStyles({
-  root: {
-    '& .MuiOutlinedInput-root': {
-      padding: '0px',
-    },
-  },
-})(TextField);
-
 function Swap({ theme }) {
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
 
   const storeAccount = stores.accountStore.getStore('account')
-  const storeSwapChains = stores.swapStore.getStore('swapChains')
 
   const [ loading, setLoading ] = useState(false)
-  const [ tabValue, setTabValue ] = useState(0)
-  const [ currentScreen, setCurrentScreen ] = useState('setup') //setup, confirm, submitTX, waitTX, confirmedTX
+  const [ currentScreen, setCurrentScreen ] = useState('setup') //setup, confirm, depositAddress, submitTX, waitTX, confirmedTX
 
   const [ swapFee, setSwapFee ] = useState(null)
-  const [ asset, setAsset ] = useState(null)
-  const [ receiveAsset, setReceiveAsset ] = useState(null)
 
   const [ account, setAccount ] = useState(storeAccount)
-  const [ swapChains, setSwapChains ] = useState(storeSwapChains)
+  const [ swapAssets, setSwapAssets ] = useState(stores.swapStore.getStore('swapAssets'))
   const [ receiveAmount, setReceiveAmount ] = useState('')
 
-  const [ fromAsset, setFromAsset ] = useState('')
-  const [ fromAssetObject, setFromAssetObject ] = useState(null)
+  const [ fromAssetValue, setFromAssetValue ] = useState(null)
+  const [ fromAsset, setFromAsset ] = useState(null)
   const [ fromAssetAmount, setFromAssetAmount ] = useState('')
   const [ fromAssetError, setFromAssetError ] = useState(false)
 
-  const [ metaMaskChainID, setMetaMaskChainID ] = useState(stores.accountStore.getStore('chainID'))
+  const [ toAsset, setToAsset ] = useState(null)
+  const [ toAssetError, setToAssetError ] = useState(false)
 
+  const [ metaMaskChainID, setMetaMaskChainID ] = useState(stores.accountStore.getStore('chainID'))
   const [ chain, setChain ] = useState(useState(stores.accountStore.getStore('selectedChainID')))
-  const [ chainObject, setChainObject ] = useState(null)
 
   const [ receiveAddress, setReceiveAddress ] = useState(storeAccount ? storeAccount.address : '')
   const [ receiveAddressError, setReceiveAddressError ] = useState(false)
 
   const [ depositInfo, setDepositInfo ] = useState(null)
+  const [ depositAddress, setDepositAddress ] = useState(null)
   const [ qrCodeOpen, setQRCodeOpen ] = useState(false)
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [fromOpen, setFromOpen] = useState(false);
+  const [toOpen, setToOpen] = useState(false);
 
-    if(fromAssetObject) {
-      setAsset(newValue === 0 ? fromAssetObject.sourceAsset : fromAssetObject.destinationAsset)
-      setReceiveAsset(newValue === 0 ? fromAssetObject.destinationAsset : fromAssetObject.sourceAsset)
-    }
-  };
+  const [ search, setSearch ] = useState('')
 
   const handleConnectWallet = () => {
     stores.emitter.emit(CONNECT_WALLET)
@@ -123,6 +114,7 @@ function Swap({ theme }) {
 
   const handleNext = () => {
     setFromAssetError(false)
+    setToAssetError(false)
     setReceiveAddressError(false)
 
     let error = false
@@ -132,8 +124,13 @@ function Swap({ theme }) {
       error = true
     }
 
-    if(!fromAsset || fromAsset === '') {
+    if(!fromAsset || fromAsset === null) {
       setFromAssetError(true)
+      error = true
+    }
+
+    if(!toAsset || toAsset === null) {
+      setToAssetError(true)
       error = true
     }
 
@@ -151,7 +148,7 @@ function Swap({ theme }) {
           setCurrentScreen(newScreen)
           break;
         case 'confirm':
-          stores.dispatcher.dispatch({ type: SWAP_GET_DEPOSIT_ADDRESS, content: { receiveAccount: receiveAddress, chainID: chain, coinType: tabValue === 0 ? receiveAsset.key : asset.key } })
+          stores.dispatcher.dispatch({ type: SWAP_CONFIRM_SWAP, content: { fromAsset: fromAsset, toAsset: toAsset, receiveAddress: receiveAddress, amount: fromAssetAmount } })
           setLoading(true)
           break;
         default:
@@ -161,16 +158,17 @@ function Swap({ theme }) {
   }
 
   const handleBack = () => {
+    setLoading(false)
+    
     let newScreen = ''
     switch (currentScreen) {
       case 'confirm':
         newScreen = 'setup'
         break;
-      case 'submitTX':
+      case 'depositAddress':
         newScreen = 'confirm'
         break;
       default:
-
     }
 
     setCurrentScreen(newScreen)
@@ -178,44 +176,31 @@ function Swap({ theme }) {
 
   useEffect(function() {
     const swapUpdated = () => {
-      const storeSwapChains = stores.swapStore.getStore('swapChains')
+      const storeSwapAssets = stores.swapStore.getStore('swapAssets')
       const storeSelectedChainID = stores.accountStore.getStore('selectedChainID')
-      const storeChainID = stores.accountStore.getStore('chainID')
-      setSwapChains(storeSwapChains)
+
+      setMetaMaskChainID(stores.accountStore.getStore('chainID'))
+      setSwapAssets(storeSwapAssets)
 
       let index = 0
       if(storeSelectedChainID != null) {
-        index = storeSwapChains.findIndex(chain => chain.key === storeSelectedChainID)
+        index = storeSwapAssets.findIndex(asset => asset.chainID === storeSelectedChainID)
       }
 
-      setChainObject(storeSwapChains[index])
-      setChain(storeSwapChains[index].key)
-      setMetaMaskChainID(storeChainID)
+      setChain(storeSwapAssets[index].chainID)
 
-      const pair = storeSwapChains[index].pairs[0]
+      setFromAsset(storeSwapAssets[index])
 
-      setFromAssetObject(pair)
-      setFromAsset(pair.key)
+      const targetOption = swapAssets.filter((asset) => {
+        return storeSwapAssets[index].targets.map((as) => { return as.id }).includes(asset.id)
+      })
 
-      setAsset(tabValue === 0 ? pair.sourceAsset : pair.destinationAsset)
-      setReceiveAsset(tabValue === 0 ? pair.destinationAsset : pair.sourceAsset)
+      setToAsset(targetOption[0])
     }
 
     const networkChanged = () => {
-      const storeChainID = stores.accountStore.getStore('chainID')
-      const storeSelectedChainID = stores.accountStore.getStore('selectedChainID')
-      const theOption = swapChains.filter(chain => chain.key === storeSelectedChainID)
-      setChainObject(theOption[0])
-      setChain(storeSelectedChainID)
-      setMetaMaskChainID(storeChainID)
-
-      const pair = theOption[0].pairs[0]
-
-      setFromAssetObject(pair)
-      setFromAsset(pair.key)
-
-      setAsset(tabValue === 0 ? pair.sourceAsset : pair.destinationAsset)
-      setReceiveAsset(tabValue === 0 ? pair.destinationAsset : pair.sourceAsset)
+      setChain(stores.accountStore.getStore('selectedChainID'))
+      setMetaMaskChainID(stores.accountStore.getStore('chainID'))
     }
 
     const accountChanged = () => {
@@ -225,11 +210,17 @@ function Swap({ theme }) {
     const getDepositAddress = () => {
       setLoading(false)
       setDepositInfo(stores.swapStore.getStore('depositInfo'))
-      setCurrentScreen('submitTX')
+      setCurrentScreen('depositAddress')
     }
 
     const errorReturned = () => {
       setLoading(false)
+    }
+
+    const depositAddressReturned = (address) => {
+      setLoading(false)
+      setDepositAddress(address)
+      setCurrentScreen('depositAddress')
     }
 
     stores.emitter.on(SWAP_UPDATED, swapUpdated)
@@ -238,47 +229,69 @@ function Swap({ theme }) {
     stores.emitter.on(SWAP_DEPOSIT_ADDRESS_RETURNED, getDepositAddress)
     stores.emitter.on(ERROR, errorReturned)
 
+    stores.emitter.on(SWAP_RETURN_DEPOSIT_ADDRESS, depositAddressReturned)
+
     return () => {
       stores.emitter.removeListener(SWAP_UPDATED, swapUpdated)
       stores.emitter.removeListener(NETWORK_CHANGED, networkChanged)
       stores.emitter.removeListener(ACCOUNT_CHANGED, accountChanged)
       stores.emitter.removeListener(SWAP_DEPOSIT_ADDRESS_RETURNED, getDepositAddress)
       stores.emitter.removeListener(ERROR, errorReturned)
+
+      stores.emitter.removeListener(SWAP_RETURN_DEPOSIT_ADDRESS, depositAddressReturned)
     }
   },[]);
 
-  const onFromAssetChange = (event) => {
-    const theOption = chainObject.pairs.filter(pair => pair.key === event.target.value)
+  const onFromAssetChange = (event, newVal) => {
+    setFromAsset(newVal)
 
-    setFromAssetObject(theOption[0])
-    setFromAsset(event.target.value)
-    if(theOption[0]) {
-      setAsset(tabValue === 0 ? theOption[0].sourceAsset : theOption[0].destinationAsset)
-      setReceiveAsset(tabValue === 0 ? theOption[0].destinationAsset : theOption[0].sourceAsset)
+    if(newVal) {
+      const targetOption = swapAssets.filter((asset) => {
+        return newVal.targets.map((as) => { return as.id }).includes(asset.id)
+      })
+
+      setToAsset(targetOption[0])
+      let chainID = getRequiredChain(newVal, targetOption[0])
+      stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: chainID } } })
     }
 
     calculateReceiveAmount(fromAssetAmount)
   }
 
-  const onChainChange = (event) => {
-    const theOption = swapChains.filter(chain => chain.key === event.target.value)
-    setChainObject(theOption[0])
-    setChain(event.target.value)
-
-    // also set swapAsset
-
-    const pair = theOption[0].pairs[0]
-
-    setFromAssetObject(pair)
-    setFromAsset(pair.key)
-    if(pair) {
-      setAsset(tabValue === 0 ? pair.sourceAsset : pair.destinationAsset)
-      setReceiveAsset(tabValue === 0 ? pair.destinationAsset : pair.sourceAsset)
+  const getRequiredChain = (from, to) => {
+    let requiredChain = '1'
+    if(['BTC', 'LTC', 'BLOCK', 'ANY'].includes(from.chainID)) {
+      requiredChain = to.chainID
+    } else if(['BTC', 'LTC', 'BLOCK', 'ANY'].includes(to.chainID)) {
+      requiredChain = from.chainID
+    } else if (from.chainID !== '1') {
+      requiredChain = from.chainID
     }
 
-    calculateReceiveAmount(fromAssetAmount)
+    /*
 
-    stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID:  event.target.value } } })
+      else if (from.chainID === '1') {
+       requiredChain = to.chainID
+     } else if (to.chainID === '1') {
+       requiredChain = from.chainID
+     } else {
+       console.log("I dont know")
+       console.log(from)
+       console.log(to)
+     }
+
+    */
+
+    return requiredChain
+  }
+
+  const onToAssetChange = (event, newVal) => {
+    setToAsset(newVal)
+
+    let chainID = getRequiredChain(fromAsset, newVal)
+    stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: chainID } } })
+
+    calculateReceiveAmount(fromAssetAmount)
   }
 
   const onReceiveAddressChanged = (event) => {
@@ -290,11 +303,11 @@ function Swap({ theme }) {
     let receive = 0
     let fee = 0
     if(amount && amount !== '' && !isNaN(amount)) {
-      fee = BigNumber(amount).times(asset.swapFeeRate).toNumber()
-      if(fee > asset.maximumSwapFee) {
-        fee = asset.maximumSwapFee
-      } else if (fee < asset.minimumSwapFee) {
-        fee = asset.minimumSwapFee
+      fee = BigNumber(amount).times(fromAsset.swapFeeRate).toNumber()
+      if(fee > fromAsset.maximumSwapFee) {
+        fee = fromAsset.maximumSwapFee
+      } else if (fee < fromAsset.minimumSwapFee) {
+        fee = fromAsset.minimumSwapFee
       }
       receive = BigNumber(amount).minus(fee).toNumber()
       if(receive < 0) {
@@ -327,80 +340,12 @@ function Swap({ theme }) {
 
   const onGenerateQR = (event, val) => {
     event.stopPropagation()
-    setQRCodeOpen(true)
+    setQRCodeOpen(!qrCodeOpen)
   }
 
-  const renderChainSelect = () => {
+  const renderAssetOption = (type, asset) => {
     return (
-      <HugeInputAssetSelect
-        select
-        value={ chain }
-        onChange={ onChainChange }
-        SelectProps={{
-          native: false
-        }}
-        fullWidth
-        placeholder={ 'Select' }
-        variant='outlined'
-      >
-        { swapChains ? swapChains.map(renderChainOption) : <div></div> }
-      </HugeInputAssetSelect>
-    )
-  }
-
-  const renderChainOption = (option) => {
-    return (
-      <MenuItem key={option.key} value={option.key} className={ classes.assetSelectMenu }>
-        <div className={ classes.assetSelectMenuItem }>
-          <div className={ classes.assetSelectIcon }>
-            <img
-              alt=""
-              src={ option.icon }
-              height="30px"
-            />
-          </div>
-          <div className={ classes.assetSelectIconName }>
-            <Typography variant='h5'>{ option.symbol }</Typography>
-            <Typography variant='subtitle1' color='textSecondary'>{ option.name }</Typography>
-          </div>
-        </div>
-      </MenuItem>
-    )
-  }
-
-  const renderAssetSelect = (type) => {
-    let value = ''
-    let onChange = null
-
-    switch (type) {
-      case 'From':
-        value = fromAsset
-        onChange = onFromAssetChange
-        break;
-    }
-
-    return (
-      <HugeInputAssetSelect
-        select
-        value={ value }
-        onChange={ onChange }
-        SelectProps={{
-          native: false
-        }}
-        fullWidth
-        placeholder={ 'Select' }
-        variant='outlined'
-      >
-        { chainObject && chainObject.pairs ? chainObject.pairs.map(renderAssetOption) : <div></div> }
-      </HugeInputAssetSelect>
-    )
-  }
-
-  const renderAssetOption = (option) => {
-    const asset = tabValue === 0 ? option.sourceAsset : option.destinationAsset
-
-    return (
-      <MenuItem key={option.key} value={option.key} className={ classes.assetSelectMenu }>
+      <MenuItem val={ asset.id } key={ asset.id } className={ classes.assetSelectMenu } onClick={ () => { onSearchAssetClicked(type, asset) } }>
         <div className={ classes.assetSelectMenuItem }>
           <div className={ classes.assetSelectIcon }>
             <img
@@ -418,32 +363,85 @@ function Swap({ theme }) {
     )
   }
 
-  let size = "hugeInputFontSizeLarge";
-  let chars = parseInt(fromAssetAmount.length)+parseInt(asset ? asset.tokenMetadata.symbol.length : 0)
-  if((asset ? asset.tokenMetadata.symbol.length : 0) >= 6) {
-    chars = chars + 2
+  const openSearch = (type) => {
+    if(type === 'From') {
+      setFromOpen(true)
+    }
+    if(type === 'To') {
+      setToOpen(true)
+    }
+  };
+
+  const onSearchChanged = (event) => {
+    setSearch(event.target.value)
   }
 
-  if (chars > 7 && chars <= 9) {
+  const closeSearch = () => {
+    setFromOpen(false)
+    setToOpen(false)
+  };
+
+  const onSearchAssetClicked = (type, asset) => {
+    if(type === 'From') {
+      onFromAssetChange(null, asset)
+    }
+    if(type === 'To') {
+      onToAssetChange(null, asset)
+    }
+    setFromOpen(false)
+    setToOpen(false)
+  }
+
+  const renderAssetSelect = (type) => {
+    let value = ''
+
+    switch (type) {
+      case 'From':
+        value = fromAsset
+        break;
+      case 'To':
+        value = toAsset
+        break;
+    }
+
+    return (
+      <React.Fragment>
+        <div className={ classes.displaySelectContainer } onClick={ () => { openSearch(type) } }>
+          <div className={ classes.assetSelectMenuItem }>
+            <div className={ classes.assetSelectIcon }>
+              <img
+                alt=""
+                src={ value ? value.tokenMetadata.icon : '' }
+                height="30px"
+              />
+            </div>
+            <div className={ classes.assetSelectIconName }>
+              <Typography variant='h5'>{ value ? value.tokenMetadata.symbol : '' }</Typography>
+              <Typography variant='subtitle1' color='textSecondary'>{ value ? value.tokenMetadata.description : '' }</Typography>
+            </div>
+          </div>
+        </div>
+      </React.Fragment>
+    )
+  }
+
+  let size = "hugeInputFontSizeLarge";
+  let chars = parseInt(fromAssetAmount.length)+parseInt(fromAsset ? fromAsset.tokenMetadata.symbol.length : 0)
+  if((fromAsset ? fromAsset.tokenMetadata.symbol.length : 0) >= 6) {
+    chars = chars + 1
+  }
+
+  if (chars > 8 && chars <= 10) {
     size = "hugeInputFontSizeMedium";
-  } else if (chars > 9 && chars <= 12) {
+  } else if (chars > 10 && chars <= 13) {
     size = "hugeInputFontSizeSmall";
-  } else if (chars > 12) {
+  } else if (chars > 13) {
     size = "hugeInputFontSizeSmallest";
   }
 
   const renderSetup = () => {
     return (
       <div>
-        <Tabs
-          variant='fullWidth'
-          indicatorColor='primary'
-          value={ tabValue }
-          onChange={ handleTabChange }
-        >
-          <Tab label="Mint" />
-          <Tab label="Release" />
-        </Tabs>
         <div className={ classes.swapInputs }>
           <HugeInput
             variant="outlined"
@@ -455,25 +453,42 @@ function Swap({ theme }) {
             InputProps={{
               className: classes[size],
               endAdornment: <InputAdornment position="end">
-                <Typography color='textSecondary' className={ classes[size]}>{ asset ? asset.tokenMetadata.symbol : '' }</Typography>
+                <Typography color='textSecondary' className={ classes[size]}>{ fromAsset ? fromAsset.tokenMetadata.symbol : '' }</Typography>
               </InputAdornment>,
             }}
           />
+
           <div className={ classes.textField }>
             <div className={ classes.inputTitleContainer }>
               <div className={ classes.inputTitle }>
-                <Typography variant='h5' noWrap className={ classes.inputTitleWithIcon }>Blockchain</Typography>
+                <Typography variant='h5' noWrap className={ classes.inputTitleWithIcon }>I have</Typography>
+              </div>
+              <div className={ classes.inputBalance }>
+                <Typography variant='h5' noWrap >
+                  { (fromAsset && fromAsset.tokenMetadata.balance) ?
+                    formatCurrency(fromAsset.tokenMetadata.balance) + ' ' + fromAsset.tokenMetadata.symbol :
+                    ''
+                  }
+                </Typography>
               </div>
             </div>
-            { renderChainSelect() }
+            { renderAssetSelect('From') }
           </div>
           <div className={ classes.textField }>
             <div className={ classes.inputTitleContainer }>
               <div className={ classes.inputTitle }>
-                <Typography variant='h5' noWrap className={ classes.inputTitleWithIcon }>Swap Asset</Typography>
+                <Typography variant='h5' noWrap className={ classes.inputTitleWithIcon }>I want</Typography>
+              </div>
+              <div className={ classes.inputBalance }>
+                <Typography variant='h5' noWrap >
+                  { (toAsset && toAsset.tokenMetadata.balance) ?
+                    formatCurrency(toAsset.tokenMetadata.balance) + ' ' + toAsset.tokenMetadata.symbol :
+                    ''
+                  }
+                </Typography>
               </div>
             </div>
-            { renderAssetSelect('From') }
+            { renderAssetSelect('To') }
           </div>
           <div className={ classes.textField }>
             <div className={ classes.inputTitleContainer }>
@@ -485,10 +500,9 @@ function Swap({ theme }) {
               variant="outlined"
               fullWidth
               placeholder="0x123..."
-              value={ tabValue === 1 ? account.address : receiveAddress }
+              value={ receiveAddress }
               error={ receiveAddressError }
               onChange={ onReceiveAddressChanged }
-              disabled={ tabValue === 1 }
               InputProps={{
                 startAdornment: <InputAdornment position="start">
                   <div className={ classes.assetInputIcon }><AccountBalanceWalletOutlinedIcon /></div>
@@ -508,13 +522,13 @@ function Swap({ theme }) {
                   <div className={ classes.assetSelectIcon }>
                     <img
                       alt=""
-                      src={ receiveAsset ? receiveAsset.tokenMetadata.icon : '' }
+                      src={ toAsset ? toAsset.tokenMetadata.icon : '' }
                       height="30px"
                     />
                   </div>
                 </div>
                 <Typography className={ classes.displayInputContent }>{ receiveAmount }</Typography>
-                <Typography color='textSecondary' >{ receiveAsset ? receiveAsset.tokenMetadata.symbol : '' }</Typography>
+                <Typography color='textSecondary' >{ toAsset ? toAsset.tokenMetadata.symbol : '' }</Typography>
               </div>
             </div>
           </div>
@@ -543,7 +557,7 @@ function Swap({ theme }) {
                   color='primary'
                   onClick={ handleConfigureNetwork }
                   >
-                  <Typography variant='h5'>Configure Network</Typography>
+                  <Typography variant='h5'>Connect to Network</Typography>
                 </Button>
               )
             }
@@ -609,34 +623,33 @@ function Swap({ theme }) {
               <ArrowBackIcon fontSize={ 'large' } />
             </Button>
           </div>
-          <Typography>{ tabValue === 0 ? 'Mint' : 'Release' }</Typography>
+          <Typography>{ 'Confirm Swap' }</Typography>
           <div className={ classes.backButton }>
           </div>
         </div>
         <div className={ classes.swapInputs }>
           <div className={ classes.hugeInputPreview }>
-            <Typography className={ classes[size] }>{ fromAssetAmount } { asset ? asset.tokenMetadata.symbol : '' }</Typography>
+            <Typography className={ classes[size] }>{ fromAssetAmount } { fromAsset ? fromAsset.tokenMetadata.symbol : '' }</Typography>
           </div>
           <div className={ classes.textField }>
             <div className={ classes.displaySummaryContainer }>
               <div className={ classes.displayInput }>
-                <Typography className={ classes.displayInputContent } color='textSecondary'>{ tabValue === 0 ? 'Minting' : 'Releasing' }</Typography>
+                <Typography className={ classes.displayInputContent } color='textSecondary'>{ 'Swapping' }</Typography>
                 <Typography className={ classes.displayInputContent } align='right'>
                   <div className={ classes.assetSelectIcon }>
                     <img
                       alt=""
-                      src={ asset.tokenMetadata.icon }
+                      src={ fromAsset.tokenMetadata.icon }
                       height="30px"
                     />
                   </div>
-                  { tabValue === 0 && (receiveAsset ? receiveAsset.tokenMetadata.symbol : '') }
-                  { tabValue === 1 && (asset ? asset.tokenMetadata.symbol : '') }
+                  { fromAsset ? fromAsset.tokenMetadata.symbol : '' }
                 </Typography>
               </div>
               <div className={ classes.displayInputGap}></div>
               <div className={ classes.displayInput }>
                 <Typography className={ classes.displayInputContent } color='textSecondary'>Destination address</Typography>
-                <Typography className={ classes.displayInputContent } align='right'>{ tabValue === 0 ? formatAddress(receiveAddress, 'short') : formatAddress(account.address, 'short')  }</Typography>
+                <Typography className={ classes.displayInputContent } align='right'>{ formatAddress(receiveAddress, 'short') }</Typography>
               </div>
               <div className={ classes.displayInputGap}></div>
               <div className={ classes.displayInput }>
@@ -645,11 +658,11 @@ function Swap({ theme }) {
                   <div className={ classes.assetSelectIcon }>
                     <img
                       alt=""
-                      src={ asset.tokenMetadata.icon }
+                      src={ fromAsset.tokenMetadata.icon }
                       height="30px"
                     />
                   </div>
-                  { swapFee } { asset ? asset.tokenMetadata.symbol : '' }
+                  { swapFee } { fromAsset ? fromAsset.tokenMetadata.symbol : '' }
                 </Typography>
               </div>
               <div className={ classes.displayInputGap}></div>
@@ -659,11 +672,11 @@ function Swap({ theme }) {
                   <div className={ classes.assetSelectIcon }>
                     <img
                       alt=""
-                      src={ asset.tokenMetadata.icon }
+                      src={ toAsset.tokenMetadata.icon }
                       height="30px"
                     />
                   </div>
-                  { receiveAmount } { receiveAsset ? receiveAsset.tokenMetadata.symbol : '' }
+                  { receiveAmount } { toAsset ? toAsset.tokenMetadata.symbol : '' }
                 </Typography>
               </div>
             </div>
@@ -687,7 +700,7 @@ function Swap({ theme }) {
     )
   }
 
-  const renderSubmit = () => {
+  const renderDepositAddress = () => {
     return (
       <div>
         <div className={ classes.header }>
@@ -700,38 +713,38 @@ function Swap({ theme }) {
               <ArrowBackIcon fontSize={ 'large' } />
             </Button>
           </div>
-          <Typography>{ tabValue === 0 ? 'Mint' : 'Release' }</Typography>
+          <Typography>{ 'Deposit' }</Typography>
           <div className={ classes.backButton }>
           </div>
         </div>
         <div className={ classes.swapInputs }>
           {
             qrCodeOpen && <div className={ classes.qrPreview }>
-              <QRCode value={ depositInfo.P2shAddress } />
+              <QRCode value={ depositAddress } />
             </div>
           }
           {
             !qrCodeOpen && <div className={ classes.hugeInputPreview }>
-              <Typography className={ classes[size] }>{ fromAssetAmount } { asset ? asset.tokenMetadata.symbol : '' }</Typography>
+              <Typography className={ classes[size] }>{ fromAssetAmount } { fromAsset ? fromAsset.tokenMetadata.symbol : '' }</Typography>
             </div>
           }
           <div className={ classes.textField }>
-            <Typography variant='h2' align='center' className={ classes.textFlex }>Deposit { fromAssetAmount } { asset.tokenMetadata.symbol }
+            <Typography variant='h2' align='center' className={ classes.textFlex }>Deposit { fromAssetAmount } { fromAsset.tokenMetadata.symbol }
               <img
                 alt=""
-                src={ receiveAsset.tokenMetadata.icon }
+                src={ toAsset.tokenMetadata.icon }
                 height="20px"
                 style={{ marginLeft: '6px', marginRight: '6px' }}
               />
             to
             </Typography>
             <div className={ classes.addressSummaryContainer }>
-              <Typography className={ classes.addressField }>{ depositInfo.P2shAddress }</Typography>
+              <Typography className={ classes.addressField }>{ depositAddress }</Typography>
               <div className={ classes.flexy }>
-                <Button onClick={ (event) => { onCopy(event, depositInfo.P2shAddress) } }>
+                <Button onClick={ (event) => { onCopy(event, depositAddress) } }>
                   <FileCopyIcon className={ classes.assetSelectIcon } /> Copy address
                 </Button>
-                <Button onClick={ (event) => { onGenerateQR(event, depositInfo.P2shAddress) } }>
+                <Button onClick={ (event) => { onGenerateQR(event, depositAddress) } }>
                   <CropFreeIcon className={ classes.assetSelectIcon } /> Generate QR
                 </Button>
               </div>
@@ -746,7 +759,45 @@ function Swap({ theme }) {
     <Paper elevation={ 2 } className={ classes.swapContainer }>
       { currentScreen === 'setup' && renderSetup() }
       { currentScreen === 'confirm' && renderConfirm() }
-      { currentScreen === 'submitTX' && renderSubmit() }
+      { currentScreen === 'depositAddress' && renderDepositAddress() }
+      <Dialog onClose={closeSearch} aria-labelledby="simple-dialog-title" open={fromOpen || toOpen} >
+        <div className={ classes.searchContainer }>
+          <TextField
+            autoFocus
+            variant="outlined"
+            fullWidth
+            placeholder="ETH, CRV, ..."
+            value={ search }
+            onChange={ onSearchChanged }
+            InputProps={{
+              startAdornment: <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>,
+            }}
+          />
+          <div className={ classes.assetSearchResults }>
+            {
+              swapAssets ? swapAssets.filter((asset) => {
+                if(search && search !== '') {
+                  return asset.tokenMetadata.symbol.toLowerCase().includes(search.toLowerCase()) ||
+                    asset.tokenMetadata.description.toLowerCase().includes(search.toLowerCase()) ||
+                    asset.tokenMetadata.name.toLowerCase().includes(search.toLowerCase())
+                } else {
+                  return true
+                }
+              }).filter((asset) => {
+                if(fromAsset && toOpen) {
+                  return fromAsset.targets.map((as) => { return as.id }).includes(asset.id)
+                } else {
+                  return true
+                }
+              }).map((asset) => {
+                return renderAssetOption(fromOpen ? 'From' : 'To', asset)
+              }) : []
+            }
+          </div>
+        </div>
+      </Dialog>
     </Paper>
   )
 

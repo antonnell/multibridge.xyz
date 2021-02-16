@@ -31,7 +31,12 @@ function WrongNetwork(props) {
 
   return (
     <div className={ classes.changeNetworkContainer }>
-      <Typography variant='h2' className={ classes.sectionHeading }>Setup your connection to { (storeChainIDMapping && selectedChainID) ? storeChainIDMapping[selectedChainID].name : '' }</Typography>
+      <Typography variant='h2' className={ classes.sectionHeading }>Connect to <img
+        alt=""
+        src={ `/blockchains/${storeChainIDMapping[selectedChainID].icon}` }
+        height="20px"
+        style={{ marginLeft: '6px', marginRight: '6px' }}
+      /> { (storeChainIDMapping && selectedChainID) ? storeChainIDMapping[selectedChainID].name : '' }</Typography>
       <div className={ classes.infoText }>
         <Typography>If you have already configured this network in MetaMask, then open <b>MetaMask -> Network Dropdown</b> at the top of MetaMask and select <b>{ (storeChainIDMapping && selectedChainID) ? storeChainIDMapping[selectedChainID].name : '' }</b>.</Typography>
       </div>

@@ -182,18 +182,33 @@ function Header(props) {
           onChange={ handleToggleChange }
         />
       </div>
-      <Button
-        disableElevation
-        className={ classes.accountButton }
-        variant='contained'
-        color='secondary'
-        onClick={ onNetworkClicked }
-        >
-        { chainIDMapping[selectedChainID] && <img src={ `/blockchains/${ chainIDMapping[selectedChainID].icon }`} className={ classes.accountIcon } width={ 30 } height={ 30 } />}
-        { chainIDMapping[selectedChainID] && <Typography variant='h5'>{ chainIDMapping[selectedChainID].name }</Typography> }
-      </Button>
       {
-        account && selectedChainID === chainID &&
+        account && chainID && selectedChainID && selectedChainID === chainID &&
+        <Button
+          disableElevation
+          className={ classes.accountButton }
+          variant='contained'
+          color='secondary'
+          onClick={ onNetworkClicked }
+          >
+          { chainIDMapping[selectedChainID] && <img src={ `/blockchains/${ chainIDMapping[selectedChainID].icon }`} className={ classes.accountIcon } width={ 30 } height={ 30 } />}
+          { chainIDMapping[selectedChainID] && <Typography variant='h5'>{ chainIDMapping[selectedChainID].name }</Typography> }
+        </Button>
+      }
+      {
+        account && chainID && selectedChainID && selectedChainID !== chainID &&
+        <Button
+          disableElevation
+          className={ classes.errorButton }
+          variant='contained'
+          color='secondary'
+          onClick={ onConfigureClicked }
+          >
+          <Typography variant='h5'>Wrong Network</Typography>
+        </Button>
+      }
+      {
+        account &&
         <Button
           disableElevation
           className={ classes.accountButton }
@@ -206,7 +221,7 @@ function Header(props) {
         </Button>
       }
       {
-        (!chainID || !account) &&
+        !account &&
         <Button
           disableElevation
           className={ classes.accountButton }
@@ -217,19 +232,6 @@ function Header(props) {
           <Typography variant='h5'>Connect Wallet</Typography>
         </Button>
       }
-      {
-        account && chainID && selectedChainID && selectedChainID !== chainID &&
-        <Button
-          disableElevation
-          className={ classes.errorButton }
-          variant='contained'
-          color='secondary'
-          onClick={ onConfigureClicked }
-          >
-          <Typography variant='h5'>Configure Network</Typography>
-        </Button>
-      }
-
 
       { unlockOpen && (
         <Unlock modalOpen={ unlockOpen } closeModal={ closeUnlock } />

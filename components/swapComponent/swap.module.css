@@ -1,5 +1,5 @@
 .swapContainer {
-  max-width: 460px;
+  max-width: 485px;
   width: 100%;
 }
 
@@ -38,8 +38,8 @@
 }
 
 .assetSelectMenu {
-  padding: 12px 24px !important;
-  min-height: 57px !important;
+  padding: 12px !important;
+  min-height: 64px !important;
 }
 
 .assetSelectMenuItem {
@@ -188,7 +188,7 @@
 }
 
 .qrPreview {
-  padding: 80px 24px 71px 24px;
+  padding: 76px 24px 94px 24px;
   text-align: center;
   height: 103px;
   box-sizing: content-box;
@@ -223,6 +223,37 @@
 
 .flexy {
   display: flex;
+}
+
+
+.displaySelectContainer {
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  padding: 14px;
+  min-height: 56px;
+  cursor: pointer;
+}
+
+.displaySelect {
+  display: flex;
+  align-items: center;
+}
+
+.displaySelectContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.searchContainer {
+  padding: 24px;
+  height: 600px;
+}
+
+.assetSearchResults {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 @media screen and (max-width: 576px) {

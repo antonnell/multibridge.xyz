@@ -10,7 +10,8 @@ import {
   CHANGE_NETWORK,
   NETWORK_CHANGED,
   GET_GAS_PRICES,
-  GAS_PRICES_RETURNED
+  GAS_PRICES_RETURNED,
+  GET_SWAP_BALANCES
 } from './constants';
 
 import stores from './'
@@ -30,7 +31,7 @@ class Store {
     this.store = {
       chainIDMapping: {
         1: {
-          name: 'Ehereum Mainnet',
+          name: 'Ethereum Mainnet',
           rpcURL: 'https://mainnet.anyswap.exchange',
           chainID: '1',
           explorer: 'https://etherscan.io',
@@ -156,7 +157,6 @@ class Store {
       this.updateAccount()
     } else {
 
-      console.log("REMOVING ACCOUNT CHANGED LISTENER")
       window.removeEventListener('ethereum#initialized', this.updateAccount)
       window.addEventListener('ethereum#initialized', this.updateAccount, {
         once: true,
@@ -166,8 +166,6 @@ class Store {
 
   updateAccount = () => {
     const that = this
-
-    console.log("ADDING ACCOUNT CHANGED LISTENER")
 
     window.ethereum.on('accountsChanged', (accounts) => {
       if(accounts.length === 0) {
