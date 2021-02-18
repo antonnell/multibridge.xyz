@@ -18,6 +18,10 @@ import { formatCurrency, formatAddress, formatCurrencyWithSymbol } from '../../u
 
 import classes from './swap.module.css'
 
+
+import stores from '../../stores'
+import { ERROR } from '../../stores/constants'
+
 function Confirm({ theme, swapState, handleBack, handleNext }) {
 
   const [ loading, setLoading ] = useState(false)
@@ -26,6 +30,18 @@ function Confirm({ theme, swapState, handleBack, handleNext }) {
     setLoading(true)
     handleNext()
   }
+
+  useEffect(function() {
+    const errorReturned = () => {
+      setLoading(false)
+    }
+
+    stores.emitter.on(ERROR, errorReturned)
+
+    return () => {
+      stores.emitter.removeListener(ERROR, errorReturned)
+    }
+  },[]);
 
   const isDark = theme.palette.type === 'dark'
 

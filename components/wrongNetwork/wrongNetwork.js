@@ -56,7 +56,7 @@ function WrongNetwork(props) {
         <div className={ classes.settingContainer}>
           <div className={ classes.setting }>
             <Typography className={ classes.title} variant='h5'>RPC URL</Typography>
-            <Typography className={ classes.value }>{ storeChainIDMapping[selectedChainID].rpcURL }</Typography>
+            <Typography className={ classes.value } noWrap>{ storeChainIDMapping[selectedChainID].rpcURL }</Typography>
           </div>
           <IconButton aria-label="copy" onClick={ (event) => { onCopy(event,  'rpcURL') } }>
             <FileCopyIcon />

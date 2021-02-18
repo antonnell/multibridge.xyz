@@ -21,6 +21,9 @@ import {
   ERROR,
   CONNECT_WALLET,
   ACCOUNT_CHANGED,
+  CHANGE_NETWORK,
+  NETWORK_CHANGED,
+  CONFIGURE_NETWORK,
 } from '../../stores/constants'
 import BigNumber from 'bignumber.js'
 
@@ -30,6 +33,9 @@ function Setup({ theme, handleNext, setSwapState }) {
   const storeAccount = stores.accountStore.getStore('account')
 
   const [ account, setAccount ] = useState(storeAccount)
+  const [ metaMaskChainID, setMetaMaskChainID ] = useState(stores.accountStore.getStore('chainID'))
+  const [ chain, setChain ] = useState(useState(stores.accountStore.getStore('selectedChainID')))
+
   const [ loading, setLoading ] = useState(false)
 
   const [ fromAmountValue, setFromAmountValue ] = useState('')
@@ -59,6 +65,7 @@ function Setup({ theme, handleNext, setSwapState }) {
       setFromAssetOptions(storeSwapAssets)
       if(!fromAssetValue) {
         setFromAssetValue(storeSwapAssets[index])
+        stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: storeSwapAssets[index].chainID } } })
       }
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(storeSwapAssets[index].chainID)) {
@@ -88,11 +95,14 @@ function Setup({ theme, handleNext, setSwapState }) {
       setFromAssetOptions(storeSwapAssets)
       if(!fromAssetValue) {
         setFromAssetValue(storeSwapAssets[index])
+        stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: storeSwapAssets[index].chainID } } })
       }
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(storeSwapAssets[index].chainID)) {
         setFromAddressValue(account ? account.address : '')
       }
+
+      setChain(storeSwapAssets[index].chainID)
 
       const targetOption = storeSwapAssets.filter((asset) => {
         return storeSwapAssets[index].targets.map((as) => { return as.id }).includes(asset.id)
@@ -116,14 +126,21 @@ function Setup({ theme, handleNext, setSwapState }) {
       setAccount(stores.accountStore.getStore('account'))
     }
 
+    const networkChanged = () => {
+      setChain(stores.accountStore.getStore('selectedChainID'))
+      setMetaMaskChainID(stores.accountStore.getStore('chainID'))
+    }
+
     stores.emitter.on(SWAP_UPDATED, swapUpdated)
     stores.emitter.on(ERROR, errorReturned)
     stores.emitter.on(ACCOUNT_CHANGED, accountChanged)
+    stores.emitter.on(NETWORK_CHANGED, networkChanged)
 
     return () => {
       stores.emitter.removeListener(SWAP_UPDATED, swapUpdated)
       stores.emitter.removeListener(ERROR, errorReturned)
       stores.emitter.removeListener(ACCOUNT_CHANGED, accountChanged)
+      stores.emitter.removeListener(NETWORK_CHANGED, networkChanged)
     }
   },[]);
 
@@ -131,9 +148,14 @@ function Setup({ theme, handleNext, setSwapState }) {
     stores.emitter.emit(CONNECT_WALLET)
   }
 
+  const handleConfigureNetwork = () => {
+    stores.emitter.emit(CONFIGURE_NETWORK)
+  }
+
   const onAssetSelect = (type, value) => {
     if(type === 'From') {
       setFromAssetValue(value)
+      stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: value.chainID } } })
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(value.chainID)) {
         setFromAddressValue(account ? account.address : '')
@@ -311,6 +333,7 @@ function Setup({ theme, handleNext, setSwapState }) {
       {
         (!account || !account.address) && (
           <Button
+            className={ classes.actionButton }
             size='large'
             fullWidth
             disableElevation
@@ -323,7 +346,7 @@ function Setup({ theme, handleNext, setSwapState }) {
         )
       }
       {
-        (account && account.address) && (
+        (account && account.address && chain === metaMaskChainID) && (
           <Button
             className={ classes.actionButton }
             size='large'
@@ -339,6 +362,21 @@ function Setup({ theme, handleNext, setSwapState }) {
           </Button>
         )
       }
+      {
+        account && account.address && chain !== metaMaskChainID && (
+          <Button
+            className={ classes.actionButton }
+            size='large'
+            fullWidth
+            disableElevation
+            variant='contained'
+            color='primary'
+            onClick={ handleConfigureNetwork }
+            >
+            <Typography variant='h5'>Connect to Network</Typography>
+          </Button>
+        )
+      }
     </div>
   )
 }
@@ -350,6 +388,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
 
   const openSearch = () => {
     setOpen(true)
+    setSearch('')
   };
 
   const onSearchChanged = (event) => {

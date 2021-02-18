@@ -15,7 +15,7 @@ import {
   SWAP_RETURN_DEPOSIT_ADDRESS,
   SWAP_SHOW_TX_STATUS,
   SWAP_DEPOSIT_TRANSACTION,
-  SWAP_TRANSFER_TRANSACTION
+  SWAP_TRANSFER_TRANSACTION,
 } from '../../stores/constants'
 
 function Swap({ theme }) {

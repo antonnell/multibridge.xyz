@@ -475,7 +475,6 @@ class Store {
     const context = this
     contract.methods[method](...params).send({ from: account.address, gasPrice: web3.utils.toWei(gasPrice, 'gwei') })
       .on('transactionHash', function(hash){
-        context.emitter.emit(TX_SUBMITTED, hash)
         callback(null, hash)
       })
       .on('confirmation', function(confirmationNumber, receipt){
@@ -586,14 +585,14 @@ class Store {
     //dirty...dirty
     let dontBeLazy = true
     while(dontBeLazy) {
-      await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, () => {
+      await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, '0x0000000000000000000000000000000000000000', () => {
         dontBeLazy = false
       })
     }
   }
 
 
-  _getNewTransfers = async (fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, callback) => {
+  _getNewTransfers = async (fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, burnAddress, callback) => {
     console.log('Checking again')
     const that = this
 
@@ -628,14 +627,14 @@ class Store {
     toERC20Contract.getPastEvents('Transfer', {
       fromBlock: toCurrentBlock,
       toBlock: 'latest',
-      filter: { _from: '0x0000000000000000000000000000000000000000', _to: toAddressValue }
+      filter: { _from: burnAddress, _to: toAddressValue }
     })
     .then(function(events){
       console.log(events)
       let event = events[events.length - 1]
 
       if(event && event.returnValues._to.toLowerCase() === toAddressValue.toLowerCase() &&
-        event.returnValues._from.toLowerCase() === '0x0000000000000000000000000000000000000000'.toLowerCase()) {
+        event.returnValues._from.toLowerCase() === burnAddress.toLowerCase()) {
 
         console.log(event.event)
         console.log(event.transactionHash)
@@ -652,7 +651,7 @@ class Store {
       console.log(ex)
     })
 
-    await this.sleep(30000)
+    await this.sleep(10000)
   }
 
   sleep = (ms) => {
@@ -676,12 +675,31 @@ class Store {
     const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
 
-    this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, (err, res) => {
+    console.log(tokenContract)
+    console.log('Swapout')
+    console.log(amountToSend, account.address)
+    console.log(account)
+    console.log(gasPrice)
+
+    this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, async (err, res) => {
       if(err) {
         return this.emitter.emit(ERROR, err);
       }
 
-      return this.emitter.emit(SWAP_SHOW_TX_STATUS, res)
+      this.emitter.emit(SWAP_SHOW_TX_STATUS, res)
+
+      const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
+      const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
+
+      const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
+      const toCurrentBlock = await toWeb3.eth.getBlockNumber()
+
+      let dontBeLazy = true
+      while(dontBeLazy) {
+        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, '0x0000000000000000000000000000000000000000', fromCurrentBlock, toCurrentBlock, account.address, account.address, toAsset.dcrmAddress, () => {
+          dontBeLazy = false
+        })
+      }
     })
   }
 }
