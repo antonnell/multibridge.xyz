@@ -14,6 +14,9 @@ const theme = createMuiTheme({
     accountButton: {
       default: '#EFEFEF'
     },
+    primary: {
+      main: '#2F80ED',
+    },
     type: 'light',
   },
   overrides: {

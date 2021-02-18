@@ -17,7 +17,8 @@ import {
 import stores from './'
 
 import {
-  injected
+  injected,
+  network
 } from './connectors';
 
 import Web3 from 'web3';
@@ -31,8 +32,8 @@ class Store {
     this.store = {
       chainIDMapping: {
         1: {
-          name: 'Ethereum Mainnet',
-          rpcURL: 'https://mainnet.anyswap.exchange',
+          name: 'Eth Mainnet',
+          rpcURL: 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31',
           chainID: '1',
           explorer: 'https://etherscan.io',
           symbol: 'ETH',
@@ -47,7 +48,7 @@ class Store {
           icon: 'BNB.svg'
         },
         128: {
-          name: 'Huobi Mainnet',
+          name: 'HT Mainnet',
           rpcURL: 'https://http-mainnet.hecochain.com',
           chainID: '128',
           explorer: 'https://scan.hecochain.com',
@@ -55,7 +56,7 @@ class Store {
           icon: 'HT.svg'
         },
         250: {
-          name: 'Fantom Mainnet',
+          name: 'FTM Mainnet',
           rpcURL: 'https://rpcapi.fantom.network',
           chainID: '250',
           explorer: 'https://ftmscan.com',
@@ -63,7 +64,7 @@ class Store {
           icon: 'FTM.png'
         },
         32659: {
-          name: 'Fusion Mainnet',
+          name: 'FSN Mainnet',
           rpcURL: 'https://mainnet.anyswap.exchange',
           chainID: '32659',
           explorer: 'https://fsnex.com',
@@ -277,6 +278,11 @@ class Store {
       return null
     }
     return new Web3(provider);
+  }
+
+  getReadOnlyWeb3 = async (chainID) => {
+    const chainIDMapping = this.getStore('chainIDMapping')
+    return new Web3(new Web3.providers.HttpProvider(chainIDMapping[chainID].rpcURL));
   }
 
   changeNetwork = (payload) => {

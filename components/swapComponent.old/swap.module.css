@@ -1,0 +1,279 @@
+.swapContainer {
+  max-width: 485px;
+  width: 100%;
+}
+
+.swapInputs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inputTitleContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.inputTitle {
+  padding-bottom: 6px;
+  margin-left: 12px;
+}
+
+
+.inputBalance {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 12px;
+  padding-bottom: 6px;
+}
+
+.value {
+  cursor: pointer;
+}
+
+.assetContainer {
+  margin-left: -14px;
+}
+
+.assetSelectMenu {
+  padding: 12px !important;
+  min-height: 64px !important;
+}
+
+.assetSelectMenuItem {
+  display: flex;
+  align-items: center;
+}
+
+.assetSelectIcon {
+  margin-right: 12px;
+  min-width: 30px;
+  height: 30px;
+}
+
+.assetInputIcon {
+  min-width: 30px;
+}
+
+.assetSelectIconName {
+
+}
+
+.selectedAssetIcon {
+  margin: -8px 0px;
+}
+
+.textField {
+  padding-left: 24px;
+  padding-right: 24px;
+  margin-bottom: 24px;
+}
+
+.equals {
+  margin-bottom: 12px !important;
+}
+
+.actionButton {
+  margin-bottom: 24px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.inputTitleWithIcon {
+  display: flex;
+  align-items: center;
+}
+
+.tooltipIcon {
+  font-size: 1rem !important;
+  margin-left: 12px;
+}
+.walletIcon {
+  font-size: 30px !important;
+}
+
+.displayInputContainer {
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  padding: 14px;
+  min-height: 56px;
+}
+
+.displayInput {
+  display: flex;
+  align-items: center;
+}
+
+.displayInputGap {
+  min-width: 100%;
+  height: 14px;
+}
+
+.displayInputContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.displaySummaryContainer {
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  padding: 14px;
+  min-height: 56px;
+}
+
+.swapInfo {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  border-radius: 10px;
+  padding: 12px;
+  margin-left: 24px;
+  margin-right: 24px;
+  margin-bottom: 24px;
+}
+
+.swapInfoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+}
+
+.flex1 {
+  flex: 1
+}
+
+.hugeInput {
+  padding: 100px 14px;
+}
+
+.hugeInputFontSizeLarge {
+  font-size: 60px !important;
+}
+
+.hugeInputFontSizeMedium{
+  font-size: 50px !important;
+}
+
+.hugeInputFontSizeSmall {
+  font-size: 40px !important;
+}
+
+.hugeInputFontSizeSmallest {
+  font-size: 30px !important;
+}
+
+.header {
+  padding: 12px 24px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hugeInputPreview {
+  padding: 76px 24px 94px 24px;
+  text-align: center;
+  height: 103px;
+  box-sizing: content-box;
+}
+
+.hugeInputPreviewHelper {
+  font-size: 0.8rem !important;
+  text-align: center;
+  margin-top: 32px !important;
+}
+
+.qrPreview {
+  padding: 76px 24px 94px 24px;
+  text-align: center;
+  height: 103px;
+  box-sizing: content-box;
+}
+
+.backButton {
+  min-width: 100px;
+}
+
+.addressSummaryContainer {
+  min-height: 100px;
+  margin: 12px 0px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.addressField {
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  padding: 12px;
+  width: 100%;
+  text-align: center;
+}
+
+.textFlex {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.flexy {
+  display: flex;
+}
+
+
+.displaySelectContainer {
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.5);
+  padding: 14px;
+  min-height: 56px;
+  cursor: pointer;
+}
+
+.displaySelect {
+  display: flex;
+  align-items: center;
+}
+
+.displaySelectContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.searchContainer {
+  padding: 24px;
+  height: 600px;
+}
+
+.assetSearchResults {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+@media screen and (max-width: 576px) {
+  .vaultActionContainer {
+    width: calc(100vw - 24px);
+    padding: 12px;
+    margin-right: 0px;
+    margin-bottom: 24px;
+  }
+
+  .depositContainer {
+    padding-top: 12px;
+  }
+
+  .actionButton {
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+
+  .scaleContainer {
+    margin: 24px 0px;
+  }
+}

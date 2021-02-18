@@ -162,6 +162,19 @@ const coreTheme = {
         }
       }
     },
+    MuiInputBase: {
+      root: {
+        margin: '0px',
+        '&:before': { //underline color when textfield is inactive
+          borderBottom: 'none !important',
+          height: '0px'
+        },
+        '&:after': { //underline color when textfield is inactive
+          borderBottom: 'none !important',
+          height: '0px'
+        },
+      }
+    },
     MuiAccordion: {
       root: {
         margin: '0px',

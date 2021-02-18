@@ -21,7 +21,9 @@ import {
   SWAP_CONFIRM_SWAP,
   SWAP_RETURN_DEPOSIT_ADDRESS,
   SWAP_RETURN_SWAP_PERFORMED,
-  SWAP_SHOW_TX_STATUS
+  SWAP_SHOW_TX_STATUS,
+  SWAP_DEPOSIT_TRANSACTION,
+  SWAP_TRANSFER_TRANSACTION
 } from './constants';
 
 import stores from './'
@@ -50,8 +52,8 @@ const ID_MAP = {
 
 const CHAIN_MAP = {
   1: {
-    name: 'Ethereum Mainnet',
-    rpcURL: 'https://mainnet.anyswap.exchange',
+    name: 'Eth Mainnet',
+    rpcURL: 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31',
     chainID: '1',
     explorer: 'https://etherscan.io',
     symbol: 'ETH',
@@ -66,7 +68,7 @@ const CHAIN_MAP = {
     icon: 'BNB.svg'
   },
   128: {
-    name: 'Huobi Mainnet',
+    name: 'HT Mainnet',
     rpcURL: 'https://http-mainnet.hecochain.com',
     chainID: '128',
     explorer: 'https://scan.hecochain.com',
@@ -74,7 +76,7 @@ const CHAIN_MAP = {
     icon: 'HT.svg'
   },
   250: {
-    name: 'Fantom Mainnet',
+    name: 'FTM Mainnet',
     rpcURL: 'https://rpcapi.fantom.network',
     chainID: '250',
     explorer: 'https://ftmscan.com',
@@ -82,7 +84,7 @@ const CHAIN_MAP = {
     icon: 'FTM.png'
   },
   32659: {
-    name: 'Fusion Mainnet',
+    name: 'FSN Mainnet',
     rpcURL: 'https://mainnet.anyswap.exchange',
     chainID: '32659',
     explorer: 'https://fsnex.com',
@@ -160,6 +162,8 @@ class Store {
           {
             id: sourceChainInfo.sourceChainID+'_'+key,
             chainID: sourceChainInfo.sourceChainID,
+            chainDescription: sourceChainInfo.sourceChainDescription,
+            icon: sourceChainInfo.sourceChainIcon,
             pairID: key,
             contractAddress: val.SrcToken.ContractAddress,
             dcrmAddress: val.SrcToken.DcrmAddress,
@@ -180,6 +184,8 @@ class Store {
           {
             id: chainKey+'_'+key,
             chainID: chainKey,
+            chainDescription: sourceChainInfo.destinationChainDescription,
+            icon: sourceChainInfo.destinationChainIcon,
             pairID: key,
             contractAddress: val.DestToken.ContractAddress,
             dcrmAddress: val.DestToken.DcrmAddress,
@@ -275,55 +281,71 @@ class Store {
     let sourceChainID = ''
     let sourceChainDescription = ''
     let destinationChainDescription = ''
+    let sourceChainIcon = ''
+    let destinationChainIcon = ''
+
     if(CHAIN_MAP[chainKey]) {
       destinationChainDescription = CHAIN_MAP[chainKey].name
+      destinationChainIcon = CHAIN_MAP[chainKey].icon
     } else {
       destinationChainDescription = 'Unknown Network'
+      destinationChainIcon = 'unknown-logo.png'
     }
     if(chainKey === '1') {
       switch (key) {
         case 'btc':
           sourceChainID = 'BTC'
-          sourceChainDescription = 'Bitcoin Mainnet'
+          sourceChainDescription = 'BTC Mainnet'
+          sourceChainIcon = 'BTC.png'
           break;
         case 'any':
           sourceChainID = 'ANY'
-          sourceChainDescription = 'Anyswap Mainnet'
+          sourceChainDescription = 'ANY Mainnet'
+          sourceChainIcon = 'ANY.png'
           break;
         case 'fsn':
           sourceChainID = '32659'
-          sourceChainDescription = 'Fusion Mainnet'
+          sourceChainDescription = 'FSN Mainnet'
+          sourceChainIcon = 'FSN.svg'
           break;
         case 'ltc':
           sourceChainID = 'LTC'
-          sourceChainDescription = 'Litecoin Mainnet'
+          sourceChainDescription = 'LTC Mainnet'
+          sourceChainIcon = 'LTC.png'
           break;
         case 'block':
           sourceChainID = 'BLOCK'
-          sourceChainDescription = 'Blocknet Mainnet'
+          sourceChainDescription = 'BLOCK Mainnet'
+          sourceChainIcon = 'BLOCK.png'
           break;
         case 'fantom':
           sourceChainID = '250'
-          sourceChainDescription = 'Fantom Mainnet'
+          sourceChainDescription = 'FTM Mainnet'
+          sourceChainIcon = 'FTM.png'
           break;
         default:
           sourceChainID = 'Unknown'
           sourceChainDescription = 'Unknown Network'
+          sourceChainIcon = 'unknown-logo.png'
       }
     } else {
       if(key === 'btc') {
         sourceChainID = 'BTC'
-        sourceChainDescription = 'Bitcoin Mainnet'
+        sourceChainDescription = 'BTC Mainnet'
+        sourceChainIcon = 'BTC.png'
       } else {
         sourceChainID = '1'
-        sourceChainDescription = 'Ethereum Mainnet'
+        sourceChainDescription = 'ETH Mainnet'
+        sourceChainIcon = 'ETH.svg'
       }
     }
 
     return {
       sourceChainID: sourceChainID,
       sourceChainDescription: sourceChainDescription,
-      destinationChainDescription: destinationChainDescription
+      destinationChainDescription: destinationChainDescription,
+      sourceChainIcon: sourceChainIcon,
+      destinationChainIcon: destinationChainIcon
     }
   }
 
@@ -444,12 +466,6 @@ class Store {
   }
 
   _callContract = (web3, contract, method, params, account, gasPrice, dispatchEvent, callback) => {
-    //todo: rewrite the callback unfctionality.
-
-    console.log(contract.methods)
-    console.log(contract.methods[method])
-    console.log(contract.methods[method](...params))
-
     const context = this
     contract.methods[method](...params).send({ from: account.address, gasPrice: web3.utils.toWei(gasPrice, 'gwei') })
       .on('transactionHash', function(hash){
@@ -538,24 +554,117 @@ class Store {
   */
 
   swapConfirmSwap = async (payload) => {
-    const { fromAsset, toAsset, receiveAddress, amount } = payload.content
+    const { fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue } = payload.content
 
-    if(fromAsset.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAsset.chainID)) {
-      this._ercToNative(fromAsset, toAsset)
+    if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
+      return this._ercToNative(fromAssetValue, toAssetValue, fromAddressValue, toAddressValue)
     }
 
-    if(toAsset.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAsset.chainID)) {
-      this._nativeToERC(fromAsset, toAsset, amount)
+    if(toAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAssetValue.chainID)) {
+      return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
     }
 
-    console.log(fromAsset)
-    console.log(toAsset)
+    console.log(fromAssetValue)
+    console.log(toAssetValue)
     console.log("NO DICE")
   }
 
-  _ercToNative = async (fromAsset, toAsset) => {
+  _ercToNative = async (fromAsset, toAsset, fromAddressValue, toAddressValue) => {
     const depositAddress = toAsset.dcrmAddress
+
+    const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
+    const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
+
+    const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
+    const toCurrentBlock = await toWeb3.eth.getBlockNumber()
+
     this.emitter.emit(SWAP_RETURN_DEPOSIT_ADDRESS, depositAddress)
+
+    //need to get transfers every couple of seconds to see when they deposit?
+    //dirty...dirty
+    let dontBeLazy = true
+    while(dontBeLazy) {
+      await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, () => {
+        dontBeLazy = false
+      })
+    }
+  }
+
+
+  _getNewTransfers = async (fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, callback) => {
+    console.log('Checking again')
+    const that = this
+
+    const fromERC20Contract = new fromWeb3.eth.Contract(ERC20ABI, fromAsset.tokenMetadata.address)
+
+    fromERC20Contract.getPastEvents('Transfer', {
+      fromBlock: fromCurrentBlock,
+      toBlock: 'latest',
+      filter: { _from: fromAddressValue, _to: depositAddress }
+    })
+    .then(function(events){
+      console.log(events)
+      let event = events[events.length - 1]
+
+      console.log(fromAddressValue.toLowerCase())
+      console.log(event.returnValues._from.toLowerCase())
+
+      console.log(depositAddress.toLowerCase())
+      console.log(event.returnValues._to.toLowerCase())
+
+      if(event && event.returnValues._from.toLowerCase() === fromAddressValue.toLowerCase() &&
+        event.returnValues._to.toLowerCase() === depositAddress.toLowerCase()) {
+
+        console.log("FOUND OUR FROM TX")
+        console.log(event.event)
+        console.log(event.transactionHash)
+        console.log(event.returnValues._from)
+        console.log(event.returnValues._to)
+        console.log(event.returnValues._value)
+
+        that.emitter.emit(SWAP_DEPOSIT_TRANSACTION, event)
+      }
+    })
+    .catch((ex) => {
+      console.log(ex)
+    })
+
+    const toERC20Contract = new toWeb3.eth.Contract(ERC20ABI, toAsset.tokenMetadata.address)
+    toERC20Contract.getPastEvents('Transfer', {
+      fromBlock: toCurrentBlock,
+      toBlock: 'latest',
+      filter: { _from: '0x0000000000000000000000000000000000000000', _to: toAddressValue }
+    })
+    .then(function(events){
+      console.log(events)
+      let event = events[events.length - 1]
+
+      if(event && event.returnValues._to.toLowerCase() === toAddressValue.toLowerCase() &&
+        event.returnValues._from.toLowerCase() === '0x0000000000000000000000000000000000000000'.toLowerCase()) {
+
+        console.log("FOUND OUR FROM TX")
+        console.log(event.event)
+        console.log(event.transactionHash)
+        console.log(event.returnValues._from)
+        console.log(event.returnValues._to)
+        console.log(event.returnValues._value)
+
+        that.emitter.emit(SWAP_TRANSFER_TRANSACTION, event)
+
+        callback()
+      }
+    })
+    .catch((ex) => {
+      console.log(ex)
+    })
+
+    await this.sleep(30000)
+  }
+
+  sleep = (ms) => {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
   }
 
   _nativeToERC = async (fromAsset, toAsset, amount) => {

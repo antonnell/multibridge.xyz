@@ -59,7 +59,10 @@
 
 @media screen and (max-width: 1200px) {
   .headerContainer {
-    display: none;
+    padding: 12px
+  }
+  .accountButton {
+    margin-left: 12px  !important;
   }
 }
 
