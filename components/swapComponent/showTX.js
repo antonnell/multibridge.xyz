@@ -63,6 +63,9 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         <div className={ classes.txInfoContainer }>
           <Typography>{ asset.chainDescription } Transaction Hash</Typography>
           <Typography className={ `${classes.addressField} ${ !isDark && classes.whiteBackground }` }>{ tx ? formatAddress(tx.transactionHash, 'long') : 'waiting for tx ...' }</Typography>
+          { (!tx || !tx.transactionHash) && (
+            <Typography variant='subtitle1'>Estimated Time of Deposit Arrival is 10-30 min</Typography>
+          )}
           { tx && tx.transactionHash && (
             <div className={ classes.flexy }>
               <Button onClick={ (event) => { onCopy(event, tx.transactionHash) } }>

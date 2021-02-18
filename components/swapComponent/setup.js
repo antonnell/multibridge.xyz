@@ -176,6 +176,10 @@ function Setup({ theme, handleNext, setSwapState }) {
       } else {
         setToAddressValue('')
       }
+
+
+
+      calculateReceiveAmount(fromAmountValue, value, targetOption[0])
     } else {
       setToAssetValue(value)
 
@@ -184,13 +188,17 @@ function Setup({ theme, handleNext, setSwapState }) {
       } else {
         setToAddressValue('')
       }
+
+
+
+      calculateReceiveAmount(fromAmountValue, fromAssetValue, value)
     }
   }
 
   const fromAmountChanged = (event) => {
     setFromAmountValue(event.target.value)
 
-    calculateReceiveAmount(event.target.value)
+    calculateReceiveAmount(event.target.value, fromAssetValue, toAssetValue)
   }
 
   const toAmountChanged = (event) => {
@@ -204,16 +212,17 @@ function Setup({ theme, handleNext, setSwapState }) {
     setToAddressValue(event.target.value)
   }
 
-  const calculateReceiveAmount = (amount) => {
+  const calculateReceiveAmount = (amount, from, to) => {
     let receive = 0
     let fee = 0
     if(amount && amount !== '' && !isNaN(amount)) {
-      fee = BigNumber(amount).times(fromAssetValue.swapFeeRate).toNumber()
-      if(fee > fromAssetValue.maximumSwapFee) {
-        fee = fromAssetValue.maximumSwapFee
-      } else if (fee < fromAssetValue.minimumSwapFee) {
-        fee = fromAssetValue.minimumSwapFee
+      fee = BigNumber(amount).times(from.swapFeeRate).toNumber()
+      if(fee > from.maximumSwapFee) {
+        fee = from.maximumSwapFee
+      } else if (fee < from.minimumSwapFee) {
+        fee = from.minimumSwapFee
       }
+
       receive = BigNumber(amount).minus(fee).toNumber()
       if(receive < 0) {
         receive = 0
