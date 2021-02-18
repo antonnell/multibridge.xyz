@@ -28,29 +28,29 @@ import {
 import BigNumber from 'bignumber.js'
 
 
-function Setup({ theme, handleNext, setSwapState }) {
+function Setup({ theme, handleNext, setSwapState, swapState }) {
   const storeSwapAssets = stores.swapStore.getStore('swapAssets')
   const storeAccount = stores.accountStore.getStore('account')
 
   const [ account, setAccount ] = useState(storeAccount)
   const [ metaMaskChainID, setMetaMaskChainID ] = useState(stores.accountStore.getStore('chainID'))
-  const [ chain, setChain ] = useState(useState(stores.accountStore.getStore('selectedChainID')))
+  const [ chain, setChain ] = useState(stores.accountStore.getStore('selectedChainID'))
 
   const [ loading, setLoading ] = useState(false)
 
-  const [ fromAmountValue, setFromAmountValue ] = useState('')
+  const [ fromAmountValue, setFromAmountValue ] = useState(swapState ? swapState.fromAmountValue : '')
   const [ fromAmountError, setFromAmountError ] = useState(false)
-  const [ fromAddressValue, setFromAddressValue ] = useState('')
+  const [ fromAddressValue, setFromAddressValue ] = useState(swapState ? swapState.fromAddressValue : '')
   const [ fromAddressError, setFromAddressError ] = useState(false)
-  const [ fromAssetValue, setFromAssetValue ] = useState(null)
+  const [ fromAssetValue, setFromAssetValue ] = useState(swapState ? swapState.fromAssetValue : null)
   const [ fromAssetError, setFromAssetError ] = useState(false)
-  const [ fromAssetOptions, setFromAssetOptions ] = useState([])
+  const [ fromAssetOptions, setFromAssetOptions ] = useState(storeSwapAssets)
 
-  const [ toAmountValue, setToAmountValue ] = useState('')
+  const [ toAmountValue, setToAmountValue ] = useState(swapState ? swapState.toAmountValue : '')
   const [ toAmountError, setToAmountError ] = useState(false)
-  const [ toAddressValue, setToAddressValue ] = useState('')
+  const [ toAddressValue, setToAddressValue ] = useState(swapState ? swapState.toAddressValue : '')
   const [ toAddressError, setToAddressError ] = useState(false)
-  const [ toAssetValue, setToAssetValue ] = useState(null)
+  const [ toAssetValue, setToAssetValue ] = useState(swapState ? swapState.toAssetValue : null)
   const [ toAssetError, setToAssetError ] = useState(false)
   const [ toAssetOptions, setToAssetOptions ] = useState([])
 
@@ -285,6 +285,7 @@ function Setup({ theme, handleNext, setSwapState }) {
 
   const renderMassiveInput = (type, amountValue, amountError, amountChanged, addressValue, addressError, addressChanged, assetValue, assetError, assetOptions, onAssetSelect) => {
     const isDark = theme.palette.type === 'dark'
+
     return (
       <div className={ classes.textField}>
         <div className={ classes.inputTitleContainer }>
@@ -300,7 +301,7 @@ function Setup({ theme, handleNext, setSwapState }) {
             </Typography>
           </div>
         </div>
-        <div className={ `${classes.massiveInputContainer} ${ !isDark && classes.whiteBackground }` }>
+        <div className={ `${classes.massiveInputContainer} ${ !isDark && classes.whiteBackground } ${ (amountError || assetError) && classes.error }` }>
           <div className={ classes.massiveInputAssetSelect }>
             <AssetSelect type={type} value={ assetValue } assetOptions={ assetOptions } onSelect={ onAssetSelect } />
           </div>
@@ -436,6 +437,10 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
         <div className={ classes.assetSelectIconName }>
           <Typography variant='h5'>{ asset ? asset.tokenMetadata.symbol : '' }</Typography>
           <Typography variant='subtitle1' color='textSecondary'>{ asset ? asset.tokenMetadata.description : '' }</Typography>
+        </div>
+        <div className={ classes.assetSelectBalance}>
+          <Typography variant='h5'>{ asset && asset.tokenMetadata.balance && formatCurrency(asset.tokenMetadata.balance) }</Typography>
+          <Typography variant='subtitle1' color='textSecondary'>{ asset && asset.tokenMetadata.balance &&  'Balance' }</Typography>
         </div>
       </MenuItem>
     )

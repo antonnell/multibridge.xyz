@@ -23,7 +23,8 @@ import {
   SWAP_RETURN_SWAP_PERFORMED,
   SWAP_SHOW_TX_STATUS,
   SWAP_DEPOSIT_TRANSACTION,
-  SWAP_TRANSFER_TRANSACTION
+  SWAP_TRANSFER_TRANSACTION,
+  CLEARN_LISTENERS
 } from './constants';
 
 import stores from './'
@@ -101,7 +102,8 @@ class Store {
 
     this.store = {
       swapChains: [],
-      swapAssets: []
+      swapAssets: [],
+      listener: false
     }
 
     dispatcher.register(
@@ -122,6 +124,9 @@ class Store {
           case SWAP_CONFIRM_SWAP:
             this.swapConfirmSwap(payload)
             break;
+          case CLEARN_LISTENERS:
+            this.clearListener()
+            break;
           default: {
           }
         }
@@ -138,6 +143,10 @@ class Store {
     console.log(this.store)
     return this.emitter.emit(STORE_UPDATED);
   };
+
+  clearListener = () => {
+    this.setStore({ listener: false })
+  }
 
   configureNew = async (payload) => {
     const anyswapServerResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/serverInfo/chainid`);
@@ -586,12 +595,12 @@ class Store {
 
     this.emitter.emit(SWAP_RETURN_DEPOSIT_ADDRESS, depositAddress)
 
-    //need to get transfers every couple of seconds to see when they deposit?
-    //dirty...dirty
-    let dontBeLazy = true
-    while(dontBeLazy) {
+      this.setStore({ listener: true })
+      const that = this
+
+      while(this.getStore('listener') === true) {
       await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, '0x0000000000000000000000000000000000000000', () => {
-        dontBeLazy = false
+        this.setStore({ listener: false })
       })
     }
   }
@@ -710,10 +719,12 @@ class Store {
       const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
       const toCurrentBlock = await toWeb3.eth.getBlockNumber()
 
-      let dontBeLazy = true
-      while(dontBeLazy) {
+      this.setStore({ listener: true })
+      const that = this
+
+      while(this.getStore('listener') === true) {
         await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, '0x0000000000000000000000000000000000000000', fromCurrentBlock, toCurrentBlock, account.address, account.address, fromAsset.dcrmAddress, () => {
-          dontBeLazy = false
+          that.setStore({ listener: false })
         })
       }
     })

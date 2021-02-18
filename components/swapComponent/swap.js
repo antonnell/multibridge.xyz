@@ -16,6 +16,7 @@ import {
   SWAP_SHOW_TX_STATUS,
   SWAP_DEPOSIT_TRANSACTION,
   SWAP_TRANSFER_TRANSACTION,
+  CLEARN_LISTENERS,
 } from '../../stores/constants'
 
 function Swap({ theme }) {
@@ -91,6 +92,7 @@ function Swap({ theme }) {
     }
 
     setCurrentScreen(newScreen)
+    stores.dispatcher.dispatch({ type: CLEARN_LISTENERS })
   }
 
   const setSetupSwapState = (state) => {
@@ -98,7 +100,7 @@ function Swap({ theme }) {
   }
 
   const renderSetup = () => {
-    return <Setup handleNext={ handleNext } setSwapState={ setSetupSwapState } />
+    return <Setup handleNext={ handleNext } setSwapState={ setSetupSwapState } swapState={ swapState } />
   }
 
   const renderConfirm = () => {
