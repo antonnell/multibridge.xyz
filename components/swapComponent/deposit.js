@@ -99,7 +99,16 @@ function Deposit({ theme, swapState, handleBack, handleNext, depositAddress }) {
           </div>
         </div>
         <div className={ classes.waiting }>
-          Waiting for deposit ...
+          <Button
+            fullWidth
+            disableElevation
+            variant='contained'
+            color='primary'
+            size='large'
+            disabled={ true }
+            >
+              <Typography variant='h5'>{ 'Waiting for deposit TX' }</Typography>
+          </Button>
         </div>
       </div>
     </div>

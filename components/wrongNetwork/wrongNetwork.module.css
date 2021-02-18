@@ -51,6 +51,7 @@
   flex-direction: column;
   justify-content: space-evenly;
   width: 100%;
+  max-width: 340px;
 }
 
 .value {

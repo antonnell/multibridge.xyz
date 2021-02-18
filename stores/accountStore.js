@@ -34,6 +34,7 @@ class Store {
         1: {
           name: 'Eth Mainnet',
           rpcURL: 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31',
+          rpcURLdisplay: 'https://ethmainnet.anyswap.exchange',
           chainID: '1',
           explorer: 'https://etherscan.io',
           symbol: 'ETH',
@@ -42,6 +43,7 @@ class Store {
         56: {
           name: 'BNB Mainnet',
           rpcURL: 'https://bsc-dataseed1.binance.org',
+          rpcURLdisplay: 'https://bsc-dataseed1.binance.org',
           chainID: '56',
           explorer: 'https://bscscan.com',
           symbol: 'BNB',
@@ -50,6 +52,7 @@ class Store {
         128: {
           name: 'HT Mainnet',
           rpcURL: 'https://http-mainnet.hecochain.com',
+          rpcURLdisplay: 'https://http-mainnet.hecochain.com',
           chainID: '128',
           explorer: 'https://scan.hecochain.com',
           symbol: 'HT',
@@ -58,6 +61,7 @@ class Store {
         250: {
           name: 'FTM Mainnet',
           rpcURL: 'https://rpcapi.fantom.network',
+          rpcURLdisplay: 'https://rpcapi.fantom.network',
           chainID: '250',
           explorer: 'https://ftmscan.com',
           symbol: 'FTM',
@@ -66,6 +70,7 @@ class Store {
         32659: {
           name: 'FSN Mainnet',
           rpcURL: 'https://mainnet.anyswap.exchange',
+          rpcURLdisplay: 'https://mainnet.anyswap.exchange',
           chainID: '32659',
           explorer: 'https://fsnex.com',
           symbol: 'FSN',

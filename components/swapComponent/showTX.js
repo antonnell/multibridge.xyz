@@ -63,14 +63,17 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         <div className={ classes.txInfoContainer }>
           <Typography>{ asset.chainDescription } Transaction Hash</Typography>
           <Typography className={ `${classes.addressField} ${ !isDark && classes.whiteBackground }` }>{ tx ? formatAddress(tx.transactionHash, 'long') : 'waiting for tx ...' }</Typography>
-          <div className={ classes.flexy }>
-            <Button onClick={ (event) => { onCopy(event, tx.transactionHash) } }>
-              <FileCopyIcon className={ classes.assetSelectIcon } /> Copy
-            </Button>
-            <Button onClick={ (event) => { onViewTX(event, tx.transactionHash, asset) } }>
-              <LaunchIcon className={ classes.assetSelectIcon } /> View
-            </Button>
-          </div>
+          { tx && tx.transactionHash && (
+            <div className={ classes.flexy }>
+              <Button onClick={ (event) => { onCopy(event, tx.transactionHash) } }>
+                <FileCopyIcon className={ classes.assetSelectIcon } /> Copy
+              </Button>
+              <Button onClick={ (event) => { onViewTX(event, tx.transactionHash, asset) } }>
+                <LaunchIcon className={ classes.assetSelectIcon } /> View
+              </Button>
+            </div>
+            )
+          }
         </div>
       </div>
     )

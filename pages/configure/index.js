@@ -8,8 +8,7 @@ function Configure({ theme }) {
 
   return (
     <div className={ classes.configureContainer }>
-      <Typography variant='h3'>YEARN</Typography>
-      <Typography variant='h4'>finance</Typography>
+      <img src='/favicon.png' width={ 100 } height={ 100 } />
       <div className={ theme.palette.type === 'light' ? classes['dot-pulse'] : classes['dot-pulse-dark'] }></div>
     </div>
   )

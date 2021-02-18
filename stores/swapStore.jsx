@@ -148,7 +148,7 @@ class Store {
     const assets = anyswapServerArray.map((chainDetails) => {
 
       const chainKey = chainDetails[0]
-      if(chainKey == 4 || chainKey == 46688) {
+      if(chainKey == 4 || chainKey == 46688 || chainKey == 1) {
         return null
       }
       const chainVal = chainDetails[1]
@@ -157,6 +157,11 @@ class Store {
 
       const anyswapInfoFormatted = chainValArray.map((details) => {
         const key = details[0]
+
+        if(['ltc', 'btc', 'any'].includes(key)) {
+          return null
+        }
+
         const val = details[1]
 
         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
@@ -207,7 +212,7 @@ class Store {
             }
           }
         ]
-      }).flat()
+      }).filter((a) => { return a !== null }).flat()
 
       return anyswapInfoFormatted
     }).filter((a) => { return a !== null }).flat()
@@ -591,9 +596,20 @@ class Store {
     }
   }
 
-
   _getNewTransfers = async (fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, burnAddress, callback) => {
     console.log('Checking again')
+    console.log('--------------------------------------------------')
+    console.log('Searching for TX on: ', fromAsset.chainID)
+    console.log('Searching for TX asset: ', fromAsset.tokenMetadata.address)
+    console.log('Searching for TX from: ', fromAddressValue)
+    console.log('Searching for TX to: ', depositAddress)
+    console.log('--------------------')
+    console.log('Searching for TX on: ', toAsset.chainID)
+    console.log('Searching for TX asset: ', toAsset.tokenMetadata.address)
+    console.log('Searching for TX from: ', burnAddress)
+    console.log('Searching for TX to: ', toAddressValue)
+    console.log('--------------------------------------------------')
+
     const that = this
 
     const fromERC20Contract = new fromWeb3.eth.Contract(ERC20ABI, fromAsset.tokenMetadata.address)
@@ -651,7 +667,7 @@ class Store {
       console.log(ex)
     })
 
-    await this.sleep(10000)
+    await this.sleep(15000)
   }
 
   sleep = (ms) => {
@@ -696,7 +712,7 @@ class Store {
 
       let dontBeLazy = true
       while(dontBeLazy) {
-        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, '0x0000000000000000000000000000000000000000', fromCurrentBlock, toCurrentBlock, account.address, account.address, toAsset.dcrmAddress, () => {
+        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, '0x0000000000000000000000000000000000000000', fromCurrentBlock, toCurrentBlock, account.address, account.address, fromAsset.dcrmAddress, () => {
           dontBeLazy = false
         })
       }
