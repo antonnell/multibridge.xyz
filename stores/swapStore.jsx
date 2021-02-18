@@ -148,6 +148,9 @@ class Store {
     const assets = anyswapServerArray.map((chainDetails) => {
 
       const chainKey = chainDetails[0]
+      if(chainKey == 4 || chainKey == 46688) {
+        return null
+      }
       const chainVal = chainDetails[1]
 
       const chainValArray = Object.keys(chainVal).map((key) => [key, chainVal[key]]);
@@ -207,7 +210,7 @@ class Store {
       }).flat()
 
       return anyswapInfoFormatted
-    }).flat()
+    }).filter((a) => { return a !== null }).flat()
 
     const uniqueAssets = [];
     const map = new Map();
@@ -356,16 +359,19 @@ class Store {
       return false
     }
 
-    const web3 = await stores.accountStore.getWeb3Provider()
     const swapAssets = this.getStore('swapAssets')
 
     // get address from contract thing
     async.map(swapAssets, async (asset, callback) => {
       try {
-        if(asset.chainID != chainID) {
+
+        if(['BTC', 'LTC', 'BLOCK', 'ANY'].includes(asset.chainID)) {
           callback(null, asset)
           return
         }
+
+        let web3 = null
+        web3 = await stores.accountStore.getReadOnlyWeb3(asset.chainID)
 
         let erc20Address = asset.tokenMetadata.address
 
@@ -563,10 +569,6 @@ class Store {
     if(toAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAssetValue.chainID)) {
       return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
     }
-
-    console.log(fromAssetValue)
-    console.log(toAssetValue)
-    console.log("NO DICE")
   }
 
   _ercToNative = async (fromAsset, toAsset, fromAddressValue, toAddressValue) => {
@@ -606,16 +608,9 @@ class Store {
       console.log(events)
       let event = events[events.length - 1]
 
-      console.log(fromAddressValue.toLowerCase())
-      console.log(event.returnValues._from.toLowerCase())
-
-      console.log(depositAddress.toLowerCase())
-      console.log(event.returnValues._to.toLowerCase())
-
       if(event && event.returnValues._from.toLowerCase() === fromAddressValue.toLowerCase() &&
         event.returnValues._to.toLowerCase() === depositAddress.toLowerCase()) {
 
-        console.log("FOUND OUR FROM TX")
         console.log(event.event)
         console.log(event.transactionHash)
         console.log(event.returnValues._from)
@@ -642,7 +637,6 @@ class Store {
       if(event && event.returnValues._to.toLowerCase() === toAddressValue.toLowerCase() &&
         event.returnValues._from.toLowerCase() === '0x0000000000000000000000000000000000000000'.toLowerCase()) {
 
-        console.log("FOUND OUR FROM TX")
         console.log(event.event)
         console.log(event.transactionHash)
         console.log(event.returnValues._from)

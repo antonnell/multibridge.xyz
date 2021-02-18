@@ -18,22 +18,25 @@ import classes from './swap.module.css'
 import stores from '../../stores'
 import {
   SWAP_UPDATED,
-  ERROR
+  ERROR,
+  CONNECT_WALLET,
+  ACCOUNT_CHANGED,
 } from '../../stores/constants'
 import BigNumber from 'bignumber.js'
 
 
 function Setup({ theme, handleNext, setSwapState }) {
-  const storeAccount = stores.accountStore.getStore('account')
   const storeSwapAssets = stores.swapStore.getStore('swapAssets')
+  const storeAccount = stores.accountStore.getStore('account')
 
+  const [ account, setAccount ] = useState(storeAccount)
   const [ loading, setLoading ] = useState(false)
 
   const [ fromAmountValue, setFromAmountValue ] = useState('')
   const [ fromAmountError, setFromAmountError ] = useState(false)
   const [ fromAddressValue, setFromAddressValue ] = useState('')
   const [ fromAddressError, setFromAddressError ] = useState(false)
-  const [ fromAssetValue, setFromAssetValue ] = useState('')
+  const [ fromAssetValue, setFromAssetValue ] = useState(null)
   const [ fromAssetError, setFromAssetError ] = useState(false)
   const [ fromAssetOptions, setFromAssetOptions ] = useState([])
 
@@ -41,19 +44,25 @@ function Setup({ theme, handleNext, setSwapState }) {
   const [ toAmountError, setToAmountError ] = useState(false)
   const [ toAddressValue, setToAddressValue ] = useState('')
   const [ toAddressError, setToAddressError ] = useState(false)
-  const [ toAssetValue, setToAssetValue ] = useState('')
+  const [ toAssetValue, setToAssetValue ] = useState(null)
   const [ toAssetError, setToAssetError ] = useState(false)
   const [ toAssetOptions, setToAssetOptions ] = useState([])
+
+  useEffect(function() {
+    setAccount(storeAccount)
+  }, [storeAccount])
 
   useEffect(function() {
     if(storeSwapAssets && storeSwapAssets.length > 0) {
       let index = 0
 
       setFromAssetOptions(storeSwapAssets)
-      setFromAssetValue(storeSwapAssets[index])
+      if(!fromAssetValue) {
+        setFromAssetValue(storeSwapAssets[index])
+      }
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(storeSwapAssets[index].chainID)) {
-        setFromAddressValue(storeAccount.address)
+        setFromAddressValue(account ? account.address : '')
       }
 
       const targetOption = storeSwapAssets.filter((asset) => {
@@ -61,14 +70,15 @@ function Setup({ theme, handleNext, setSwapState }) {
       })
 
       setToAssetOptions(targetOption)
-      setToAssetValue(targetOption[0])
+      if(!toAssetValue) {
+        setToAssetValue(targetOption[0])
+      }
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
-        setToAddressValue(storeAccount.address)
+        setToAddressValue(account ? account.address : '')
       }
     }
   }, [storeSwapAssets])
-
 
   useEffect(function() {
     const swapUpdated = () => {
@@ -76,10 +86,12 @@ function Setup({ theme, handleNext, setSwapState }) {
       let index = 0
 
       setFromAssetOptions(storeSwapAssets)
-      setFromAssetValue(storeSwapAssets[index])
+      if(!fromAssetValue) {
+        setFromAssetValue(storeSwapAssets[index])
+      }
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(storeSwapAssets[index].chainID)) {
-        setFromAddressValue(storeAccount.address)
+        setFromAddressValue(account ? account.address : '')
       }
 
       const targetOption = storeSwapAssets.filter((asset) => {
@@ -87,10 +99,12 @@ function Setup({ theme, handleNext, setSwapState }) {
       })
 
       setToAssetOptions(targetOption)
-      setToAssetValue(targetOption[0])
+      if(!toAssetValue) {
+        setToAssetValue(targetOption[0])
+      }
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
-        setToAddressValue(storeAccount.address)
+        setToAddressValue(account ? account.address : '')
       }
     }
 
@@ -98,21 +112,31 @@ function Setup({ theme, handleNext, setSwapState }) {
       setLoading(false)
     }
 
+    const accountChanged = () => {
+      setAccount(stores.accountStore.getStore('account'))
+    }
+
     stores.emitter.on(SWAP_UPDATED, swapUpdated)
     stores.emitter.on(ERROR, errorReturned)
+    stores.emitter.on(ACCOUNT_CHANGED, accountChanged)
 
     return () => {
       stores.emitter.removeListener(SWAP_UPDATED, swapUpdated)
       stores.emitter.removeListener(ERROR, errorReturned)
+      stores.emitter.removeListener(ACCOUNT_CHANGED, accountChanged)
     }
   },[]);
+
+  const handleConnectWallet = () => {
+    stores.emitter.emit(CONNECT_WALLET)
+  }
 
   const onAssetSelect = (type, value) => {
     if(type === 'From') {
       setFromAssetValue(value)
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(value.chainID)) {
-        setFromAddressValue(storeAccount.address)
+        setFromAddressValue(account ? account.address : '')
       } else {
         setFromAddressValue('')
       }
@@ -126,7 +150,7 @@ function Setup({ theme, handleNext, setSwapState }) {
       setToAssetValue(targetOption[0])
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
-        setToAddressValue(storeAccount.address)
+        setToAddressValue(account ? account.address : '')
       } else {
         setToAddressValue('')
       }
@@ -134,7 +158,7 @@ function Setup({ theme, handleNext, setSwapState }) {
       setToAssetValue(value)
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(value.chainID)) {
-        setToAddressValue(storeAccount.address)
+        setToAddressValue(account ? account.address : '')
       } else {
         setToAddressValue('')
       }
@@ -269,7 +293,7 @@ function Setup({ theme, handleNext, setSwapState }) {
               error={ addressError }
               value={ addressValue }
               onChange={ addressChanged }
-              disabled={ !['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(assetValue.chainID) }
+              disabled={ !['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(assetValue ? assetValue.chainID : '') }
               InputProps={{
                 className: classes.addressInput
               }}
@@ -284,19 +308,37 @@ function Setup({ theme, handleNext, setSwapState }) {
     <div className={ classes.swapInputs }>
       { renderMassiveInput('From', fromAmountValue, fromAmountError, fromAmountChanged, fromAddressValue, fromAddressError, fromAddressChanged, fromAssetValue, fromAssetError, fromAssetOptions, onAssetSelect) }
       { renderMassiveInput('To', toAmountValue, toAmountError, toAmountChanged, toAddressValue, toAddressError, toAddressChanged, toAssetValue, toAssetError, toAssetOptions, onAssetSelect) }
-      <Button
-        className={ classes.actionButton }
-        size='large'
-        fullWidth
-        disableElevation
-        variant='contained'
-        color='primary'
-        onClick={ onNext }
-        disabled={ loading }
-        >
-        { loading && <CircularProgress size={20} /> }
-        { !loading && <Typography variant='h5'>{ 'Next' }</Typography>}
-      </Button>
+      {
+        (!account || !account.address) && (
+          <Button
+            size='large'
+            fullWidth
+            disableElevation
+            variant='contained'
+            color='primary'
+            onClick={ handleConnectWallet }
+            >
+            <Typography variant='h5'>Connect Wallet</Typography>
+          </Button>
+        )
+      }
+      {
+        (account && account.address) && (
+          <Button
+            className={ classes.actionButton }
+            size='large'
+            fullWidth
+            disableElevation
+            variant='contained'
+            color='primary'
+            onClick={ onNext }
+            disabled={ loading }
+            >
+            { loading && <CircularProgress size={20} /> }
+            { !loading && <Typography variant='h5'>{ 'Next' }</Typography>}
+          </Button>
+        )
+      }
     </div>
   )
 }
