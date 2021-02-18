@@ -136,7 +136,7 @@ function Header(props) {
   }
 
   const onNetworkClicked = () => {
-    setChangeNetworkOpen(true)
+    // setChangeNetworkOpen(true)
   }
 
   const closeChangeNetwork = () => {
