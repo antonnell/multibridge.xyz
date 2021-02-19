@@ -16,9 +16,9 @@
   width: 6px;
   height: 6px;
   border-radius: 5px;
-  background-color: #fff;
-  color: #fff;
-  box-shadow: 9999px 0 0 -5px #fff;
+  background-color: #2F80ED;
+  color: #2F80ED;
+  box-shadow: 9999px 0 0 -5px #2F80ED;
   animation: dotPulseDark 1.5s infinite linear;
   animation-delay: .25s;
 }
@@ -31,18 +31,18 @@
   width: 6px;
   height: 6px;
   border-radius: 5px;
-  background-color: #fff;
-  color: #fff;
+  background-color: #2F80ED;
+  color: #2F80ED;
 }
 
 .dot-pulse-dark::before {
-  box-shadow: 9984px 0 0 -5px #fff;
+  box-shadow: 9984px 0 0 -5px #2F80ED;
   animation: dotPulseDarkBefore 1.5s infinite linear;
   animation-delay: 0s;
 }
 
 .dot-pulse-dark::after {
-  box-shadow: 10014px 0 0 -5px #fff;
+  box-shadow: 10014px 0 0 -5px #2F80ED;
   animation: dotPulseDarkAfter 1.5s infinite linear;
   animation-delay: .5s;
 }
@@ -50,40 +50,40 @@
 
 @keyframes dotPulseDarkBefore {
   0% {
-    box-shadow: 9984px 0 0 -5px #fff;
+    box-shadow: 9984px 0 0 -5px #2F80ED;
   }
   30% {
-    box-shadow: 9984px 0 0 2px #fff;
+    box-shadow: 9984px 0 0 2px #2F80ED;
   }
   60%,
   100% {
-    box-shadow: 9984px 0 0 -5px #fff;
+    box-shadow: 9984px 0 0 -5px #2F80ED;
   }
 }
 
 @keyframes dotPulseDark {
   0% {
-    box-shadow: 9999px 0 0 -5px #fff;
+    box-shadow: 9999px 0 0 -5px #2F80ED;
   }
   30% {
-    box-shadow: 9999px 0 0 2px #fff;
+    box-shadow: 9999px 0 0 2px #2F80ED;
   }
   60%,
   100% {
-    box-shadow: 9999px 0 0 -5px #fff;
+    box-shadow: 9999px 0 0 -5px #2F80ED;
   }
 }
 
 @keyframes dotPulseDarkAfter {
   0% {
-    box-shadow: 10014px 0 0 -5px #fff;
+    box-shadow: 10014px 0 0 -5px #2F80ED;
   }
   30% {
-    box-shadow: 10014px 0 0 2px #fff;
+    box-shadow: 10014px 0 0 2px #2F80ED;
   }
   60%,
   100% {
-    box-shadow: 10014px 0 0 -5px #fff;
+    box-shadow: 10014px 0 0 -5px #2F80ED;
   }
 }
 
@@ -94,9 +94,9 @@
   width: 6px;
   height: 6px;
   border-radius: 5px;
-  background-color: #212529;
-  color: #212529;
-  box-shadow: 9999px 0 0 -5px #212529;
+  background-color: #2F80ED;
+  color: #2F80ED;
+  box-shadow: 9999px 0 0 -5px #2F80ED;
   animation: dotPulse 1.5s infinite linear;
   animation-delay: .25s;
 }
@@ -109,57 +109,57 @@
   width: 6px;
   height: 6px;
   border-radius: 5px;
-  background-color: #212529;
-  color: #212529;
+  background-color: #2F80ED;
+  color: #2F80ED;
 }
 
 .dot-pulse::before {
-  box-shadow: 9984px 0 0 -5px #212529;
+  box-shadow: 9984px 0 0 -5px #2F80ED;
   animation: dotPulseBefore 1.5s infinite linear;
   animation-delay: 0s;
 }
 
 .dot-pulse::after {
-  box-shadow: 10014px 0 0 -5px #212529;
+  box-shadow: 10014px 0 0 -5px #2F80ED;
   animation: dotPulseAfter 1.5s infinite linear;
   animation-delay: .5s;
 }
 
 @keyframes dotPulseBefore {
   0% {
-    box-shadow: 9984px 0 0 -5px #212529;
+    box-shadow: 9984px 0 0 -5px #2F80ED;
   }
   30% {
-    box-shadow: 9984px 0 0 2px #212529;
+    box-shadow: 9984px 0 0 2px #2F80ED;
   }
   60%,
   100% {
-    box-shadow: 9984px 0 0 -5px #212529;
+    box-shadow: 9984px 0 0 -5px #2F80ED;
   }
 }
 
 @keyframes dotPulse {
   0% {
-    box-shadow: 9999px 0 0 -5px #212529;
+    box-shadow: 9999px 0 0 -5px #2F80ED;
   }
   30% {
-    box-shadow: 9999px 0 0 2px #212529;
+    box-shadow: 9999px 0 0 2px #2F80ED;
   }
   60%,
   100% {
-    box-shadow: 9999px 0 0 -5px #212529;
+    box-shadow: 9999px 0 0 -5px #2F80ED;
   }
 }
 
 @keyframes dotPulseAfter {
   0% {
-    box-shadow: 10014px 0 0 -5px #212529;
+    box-shadow: 10014px 0 0 -5px #2F80ED;
   }
   30% {
-    box-shadow: 10014px 0 0 2px #212529;
+    box-shadow: 10014px 0 0 2px #2F80ED;
   }
   60%,
   100% {
-    box-shadow: 10014px 0 0 -5px #212529;
+    box-shadow: 10014px 0 0 -5px #2F80ED;
   }
 }

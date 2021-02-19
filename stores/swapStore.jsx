@@ -576,7 +576,7 @@ class Store {
     const { fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue } = payload.content
 
     if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
-      return this._ercToNative(fromAssetValue, toAssetValue, fromAddressValue, toAddressValue)
+      return this._ercToNative(fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue)
     }
 
     if(toAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAssetValue.chainID)) {
@@ -584,25 +584,45 @@ class Store {
     }
   }
 
-  _ercToNative = async (fromAsset, toAsset, fromAddressValue, toAddressValue) => {
+  _ercToNative = async (fromAsset, toAsset, fromAddressValue, toAddressValue, amount) => {
     const depositAddress = toAsset.dcrmAddress
 
-    const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
-    const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
+    const web3 = await stores.accountStore.getWeb3Provider()
+    if(!web3) {
+      return false
+    }
 
-    const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
-    const toCurrentBlock = await toWeb3.eth.getBlockNumber()
+    const account = await stores.accountStore.getStore('account')
+    if(!account) {
+      return false
+    }
 
-    this.emitter.emit(SWAP_RETURN_DEPOSIT_ADDRESS, depositAddress)
+    const tokenContract = new web3.eth.Contract(ERC20ABI, fromAsset.tokenMetadata.address)
+    const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
+    const gasPrice = await stores.accountStore.getGasPrice()
+
+    this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, async (err, res) => {
+      if(err) {
+        return this.emitter.emit(ERROR, err);
+      }
+
+      this.emitter.emit(SWAP_SHOW_TX_STATUS, res)
+
+      const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
+      const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
+
+      const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
+      const toCurrentBlock = await toWeb3.eth.getBlockNumber()
 
       this.setStore({ listener: true })
       const that = this
 
       while(this.getStore('listener') === true) {
-      await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, '0x0000000000000000000000000000000000000000', () => {
-        this.setStore({ listener: false })
-      })
-    }
+        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, '0x0000000000000000000000000000000000000000', () => {
+          this.setStore({ listener: false })
+        })
+      }
+    })
   }
 
   _getNewTransfers = async (fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, burnAddress, callback) => {
@@ -699,12 +719,6 @@ class Store {
     const tokenContract = new web3.eth.Contract(ERC20SWAPASSETABI, fromAsset.contractAddress)
     const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
-
-    console.log(tokenContract)
-    console.log('Swapout')
-    console.log(amountToSend, account.address)
-    console.log(account)
-    console.log(gasPrice)
 
     this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, async (err, res) => {
       if(err) {
