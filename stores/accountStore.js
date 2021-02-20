@@ -41,7 +41,7 @@ class Store {
           icon: 'ETH.svg'
         },
         56: {
-          name: 'BNB Mainnet',
+          name: 'BSC Mainnet',
           rpcURL: 'https://bsc-dataseed1.binance.org',
           rpcURLdisplay: 'https://bsc-dataseed1.binance.org',
           chainID: '56',

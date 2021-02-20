@@ -61,7 +61,7 @@ const CHAIN_MAP = {
     icon: 'ETH.svg'
   },
   56: {
-    name: 'BNB Mainnet',
+    name: 'BSC Mainnet',
     rpcURL: 'https://bsc-dataseed1.binance.org',
     chainID: '56',
     explorer: 'https://bscscan.com',
@@ -174,54 +174,58 @@ class Store {
         const val = details[1]
 
         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
+        if (val.SrcToken.DcrmAddress == '0xC564EE9f21Ed8A2d8E7e76c085740d5e4c5FaFbE') {
+          return [
+            {
+              id: sourceChainInfo.sourceChainID+'_'+key,
+              chainID: sourceChainInfo.sourceChainID,
+              chainDescription: sourceChainInfo.sourceChainDescription,
+              icon: sourceChainInfo.sourceChainIcon,
+              pairID: key,
+              contractAddress: val.SrcToken.ContractAddress,
+              dcrmAddress: val.SrcToken.DcrmAddress,
+              minimumSwap: val.SrcToken.MinimumSwap,
+              maximumSwap: val.SrcToken.MaximumSwap,
+              swapFeeRate: val.SrcToken.SwapFeeRate,
+              maximumSwapFee: val.SrcToken.MaximumSwapFee,
+              minimumSwapFee: val.SrcToken.MinimumSwapFee,
+              tokenMetadata: {
+                icon: `/tokens/${val.SrcToken.Symbol}.png`,
+                address: val.SrcToken.ContractAddress,
+                symbol: val.SrcToken.Symbol,
+                decimals: val.SrcToken.Decimals,
+                name: val.SrcToken.Name,
+                description: `${val.SrcToken.Symbol} on ${sourceChainInfo.sourceChainDescription}`
+              }
+            },
+            {
+              id: chainKey+'_'+key,
+              chainID: chainKey,
+              chainDescription: sourceChainInfo.destinationChainDescription,
+              icon: sourceChainInfo.destinationChainIcon,
+              pairID: key,
+              contractAddress: val.DestToken.ContractAddress,
+              dcrmAddress: val.DestToken.DcrmAddress,
+              minimumSwap: val.DestToken.MinimumSwap,
+              maximumSwap: val.DestToken.MaximumSwap,
+              swapFeeRate: val.DestToken.SwapFeeRate,
+              maximumSwapFee: val.DestToken.MaximumSwapFee,
+              minimumSwapFee: val.DestToken.MinimumSwapFee,
+              tokenMetadata: {
+                icon: `/tokens/${val.SrcToken.Symbol}.png`,
+                address: val.DestToken.ContractAddress,  // GET ADDRESS SOMEHOW, think it is contractAddress.proxyToken
+                symbol: val.DestToken.Symbol,
+                decimals: val.DestToken.Decimals,
+                name: val.DestToken.Name,
+                description: `${val.DestToken.Symbol} on ${sourceChainInfo.destinationChainDescription}`
+              }
+            }
+          ]
+        } else {
+          return null
+        }
 
-        return [
-          {
-            id: sourceChainInfo.sourceChainID+'_'+key,
-            chainID: sourceChainInfo.sourceChainID,
-            chainDescription: sourceChainInfo.sourceChainDescription,
-            icon: sourceChainInfo.sourceChainIcon,
-            pairID: key,
-            contractAddress: val.SrcToken.ContractAddress,
-            dcrmAddress: val.SrcToken.DcrmAddress,
-            minimumSwap: val.SrcToken.MinimumSwap,
-            maximumSwap: val.SrcToken.MaximumSwap,
-            swapFeeRate: val.SrcToken.SwapFeeRate,
-            maximumSwapFee: val.SrcToken.MaximumSwapFee,
-            minimumSwapFee: val.SrcToken.MinimumSwapFee,
-            tokenMetadata: {
-              icon: `/tokens/${val.SrcToken.Symbol}.png`,
-              address: val.SrcToken.ContractAddress,
-              symbol: val.SrcToken.Symbol,
-              decimals: val.SrcToken.Decimals,
-              name: val.SrcToken.Name,
-              description: `${val.SrcToken.Symbol} on ${sourceChainInfo.sourceChainDescription}`
-            }
-          },
-          {
-            id: chainKey+'_'+key,
-            chainID: chainKey,
-            chainDescription: sourceChainInfo.destinationChainDescription,
-            icon: sourceChainInfo.destinationChainIcon,
-            pairID: key,
-            contractAddress: val.DestToken.ContractAddress,
-            dcrmAddress: val.DestToken.DcrmAddress,
-            minimumSwap: val.DestToken.MinimumSwap,
-            maximumSwap: val.DestToken.MaximumSwap,
-            swapFeeRate: val.DestToken.SwapFeeRate,
-            maximumSwapFee: val.DestToken.MaximumSwapFee,
-            minimumSwapFee: val.DestToken.MinimumSwapFee,
-            tokenMetadata: {
-              icon: `/tokens/${val.SrcToken.Symbol}.png`,
-              address: val.DestToken.ContractAddress,  // GET ADDRESS SOMEHOW, think it is contractAddress.proxyToken
-              symbol: val.DestToken.Symbol,
-              decimals: val.DestToken.Decimals,
-              name: val.DestToken.Name,
-              description: `${val.DestToken.Symbol} on ${sourceChainInfo.destinationChainDescription}`
-            }
-          }
-        ]
-      }).filter((a) => { return a !== null }).flat()
+      }).filter((a) => { console.log(a); return a !== null }).flat()
 
       return anyswapInfoFormatted
     }).filter((a) => { return a !== null }).flat()
