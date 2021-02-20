@@ -11,6 +11,7 @@ import classes from './swap.module.css'
 import stores from '../../stores'
 import {
   ERROR,
+  SWAP_GET_DEPOSIT_ADDRESS,
   SWAP_CONFIRM_SWAP,
   SWAP_RETURN_DEPOSIT_ADDRESS,
   SWAP_SHOW_TX_STATUS,
@@ -63,9 +64,6 @@ function Swap({ theme }) {
   const handleNext = () => {
     switch (currentScreen) {
       case 'setup':
-        setCurrentScreen('confirm')
-        break;
-      case 'confirm':
         stores.dispatcher.dispatch({ type: SWAP_CONFIRM_SWAP, content: swapState })
         break;
       case 'showTX':
@@ -93,6 +91,12 @@ function Swap({ theme }) {
 
     setCurrentScreen(newScreen)
     stores.dispatcher.dispatch({ type: CLEARN_LISTENERS })
+  }
+
+  const getDepositAddress = () => {
+    setLoading(false)
+    setDepositInfo(stores.swapStore.getStore('depositInfo'))
+    setCurrentScreen('depositAddress')
   }
 
   const setSetupSwapState = (state) => {

@@ -519,17 +519,18 @@ class Store {
   }
 
   getDepositAddress = async (payload) => {
-    const { receiveAccount, chainID, coinType } = payload.content
+    const { toAddressValue } = payload.content
+    const { chainID, pairID } = payload.content.toAssetValue
 
     try {
-      const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${receiveAccount}/${chainID}/${coinType}`);
+      const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${toAddressValue}/${chainID}/${pairID}`);
       const registerAccouontJson = await registerAccountResult.json()
 
-      if(registerAccouontJson.msg && registerAccouontJson.msg === 'Success') {
+      /*if(registerAccouontJson.msg && registerAccouontJson.msg === 'Success') {
 
-        registerAccouontJson.info.receiveAccount = receiveAccount
+        registerAccouontJson.info.receiveAccount = toAddressValue
         registerAccouontJson.info.chainID = chainID
-        registerAccouontJson.info.coinType = coinType
+        registerAccouontJson.info.coinType = pairID
 
         this.setStore({ depositInfo: registerAccouontJson.info })
 
@@ -537,7 +538,7 @@ class Store {
 
       } else {
         this.emitter.emit(ERROR, registerAccouontJson.msg)
-      }
+      }*/
 
     } catch(ex) {
       console.log(ex)
@@ -578,6 +579,16 @@ class Store {
 
   swapConfirmSwap = async (payload) => {
     const { fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue } = payload.content
+    const { chainID, pairID } = payload.content.toAssetValue
+
+    try {
+      const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${toAddressValue}/${chainID}/${pairID}`);
+      const registerAccouontJson = await registerAccountResult.json()
+
+    } catch(ex) {
+      console.log(ex)
+      this.emitter.emit(ERROR, ex)
+    }
 
     if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
       return this._ercToNative(fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue)

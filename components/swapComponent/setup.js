@@ -368,7 +368,7 @@ function Setup({ theme, handleNext, setSwapState, swapState }) {
             disabled={ loading }
             >
             { loading && <CircularProgress size={20} /> }
-            { !loading && <Typography variant='h5'>{ 'Next' }</Typography>}
+            { !loading && <Typography variant='h5'>{ 'Transfer' }</Typography>}
           </Button>
         )
       }
