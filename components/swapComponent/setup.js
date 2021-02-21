@@ -6,7 +6,8 @@ import {
   Button,
   MenuItem,
   IconButton,
-  Dialog
+  Dialog,
+  CircularProgress
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import { withTheme } from '@material-ui/core/styles';
@@ -28,7 +29,7 @@ import {
 import BigNumber from 'bignumber.js'
 
 
-function Setup({ theme, handleNext, setSwapState, swapState }) {
+function Setup({ theme, handleNext, swapState }) {
   const storeSwapAssets = stores.swapStore.getStore('swapAssets')
   const storeAccount = stores.accountStore.getStore('account')
 
@@ -271,18 +272,23 @@ function Setup({ theme, handleNext, setSwapState, swapState }) {
     }
 
     if(!error) {
-      setSwapState({
+      setLoading(true)
+      handleNext({
         fromAmountValue: fromAmountValue,
         fromAssetValue: fromAssetValue,
         fromAddressValue: fromAddressValue,
         toAmountValue: toAmountValue,
         toAssetValue: toAssetValue,
         toAddressValue: toAddressValue,
-      })
-      handleNext() // probably need to pass values to main container
+      }) // probably need to pass values to main container
     }
   }
 
+  const setBalance100 = () => {
+    setFromAmountValue(fromAssetValue.tokenMetadata.balance)
+
+    calculateReceiveAmount(fromAssetValue.tokenMetadata.balance, fromAssetValue, toAssetValue)
+  }
   const renderMassiveInput = (type, amountValue, amountError, amountChanged, addressValue, addressError, addressChanged, assetValue, assetError, assetOptions, onAssetSelect) => {
     const isDark = theme.palette.type === 'dark'
 
@@ -293,7 +299,11 @@ function Setup({ theme, handleNext, setSwapState, swapState }) {
             <Typography variant='h5' noWrap className={ classes.inputTitleWithIcon }>{ type }</Typography>
           </div>
           <div className={ classes.inputBalance }>
-            <Typography variant='h5' noWrap >
+            <Typography variant='h5' noWrap onClick={ () => {
+              if(type === 'From') {
+                setBalance100()
+              }
+            }}>
               { (assetValue && assetValue.tokenMetadata.balance) ?
                 formatCurrency(assetValue.tokenMetadata.balance) + ' ' + assetValue.tokenMetadata.symbol :
                 ''

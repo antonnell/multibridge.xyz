@@ -18,6 +18,7 @@ import {
   SWAP_DEPOSIT_TRANSACTION,
   SWAP_TRANSFER_TRANSACTION,
   CLEARN_LISTENERS,
+  SWAP_STATUS_TRANSACTIONS
 } from '../../stores/constants'
 
 function Swap({ theme }) {
@@ -27,6 +28,7 @@ function Swap({ theme }) {
   const [ depositAddress, setDepositAddress ] = useState(null)
   const [ depositTX, setDepositTX ] = useState(null)
   const [ transferTX, setTransferTx ] = useState(null)
+  const [ transferStatus, setTransferStatus ] = useState(null)
 
   useEffect(function() {
     const errorReturned = () => {
@@ -47,24 +49,32 @@ function Swap({ theme }) {
       setCurrentScreen('showTX')
     }
 
+    const transactionStatusReturned = (status) => {
+      setTransferStatus(status.info)
+      setCurrentScreen('showTX')
+    }
+
     stores.emitter.on(ERROR, errorReturned)
     stores.emitter.on(SWAP_RETURN_DEPOSIT_ADDRESS, depositAddressReturned)
     stores.emitter.on(SWAP_DEPOSIT_TRANSACTION, depositTransactionReturned)
     stores.emitter.on(SWAP_TRANSFER_TRANSACTION, transferTransactionReturned)
+    stores.emitter.on(SWAP_STATUS_TRANSACTIONS, transactionStatusReturned)
 
     return () => {
       stores.emitter.removeListener(ERROR, errorReturned)
       stores.emitter.removeListener(SWAP_RETURN_DEPOSIT_ADDRESS, depositAddressReturned)
       stores.emitter.removeListener(SWAP_DEPOSIT_TRANSACTION, depositTransactionReturned)
       stores.emitter.removeListener(SWAP_TRANSFER_TRANSACTION, transferTransactionReturned)
+      stores.emitter.removeListener(SWAP_STATUS_TRANSACTIONS, transactionStatusReturned)
 
     }
   },[]);
 
-  const handleNext = () => {
+  const handleNext = (setupSwapState) => {
     switch (currentScreen) {
       case 'setup':
-        stores.dispatcher.dispatch({ type: SWAP_CONFIRM_SWAP, content: swapState })
+        setSwapState(setupSwapState)
+        stores.dispatcher.dispatch({ type: SWAP_CONFIRM_SWAP, content: setupSwapState })
         break;
       case 'showTX':
         setCurrentScreen('setup')
@@ -99,12 +109,8 @@ function Swap({ theme }) {
     setCurrentScreen('depositAddress')
   }
 
-  const setSetupSwapState = (state) => {
-    setSwapState(state)
-  }
-
   const renderSetup = () => {
-    return <Setup handleNext={ handleNext } setSwapState={ setSetupSwapState } swapState={ swapState } />
+    return <Setup handleNext={ handleNext } swapState={ swapState } />
   }
 
   const renderConfirm = () => {
@@ -116,7 +122,7 @@ function Swap({ theme }) {
   }
 
   const renderShowTX = () => {
-    return <ShowTX handleBack={ handleBack } handleNext={ handleNext } swapState={ swapState } depositAddress={ depositAddress } depositTX={ depositTX } transferTX={ transferTX } />
+    return <ShowTX handleBack={ handleBack } handleNext={ handleNext } swapState={ swapState } depositAddress={ depositAddress } depositTX={ depositTX } transferTX={ transferTX } transferStatus={ transferStatus } />
   }
 
   return (

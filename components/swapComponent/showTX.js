@@ -19,7 +19,7 @@ import stores from '../../stores'
 
 import classes from './swap.module.css'
 
-function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depositTX, transferTX }) {
+function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depositTX, transferTX, transferStatus }) {
 
   const [ loading, setLoading ] = useState(false)
 
@@ -41,6 +41,22 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
   }
 
   const isDark = theme.palette.type === 'dark'
+  const getStatus = (status) => {
+    let statusType = 'pending'
+    if ([0, 5].includes(status)) {
+      statusType = 'confirming'
+    } else if ([8, 9].includes(status)) {
+      statusType = 'success' // fusionsuccess
+    } else if ([10].includes(status)) {
+      statusType = 'success' // outnetsuccess
+    } else if ([1, 2, 3, 4, 6, 11].includes(status)) {
+      statusType = 'failure'
+    } else if ([20].includes(status)) {
+      statusType = 'timeout'
+    } else {
+      statusType = 'pending'
+    }
+  }
 
   const renderTX = (asset, tx) => {
     return (
@@ -62,16 +78,16 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         </div>
         <div className={ classes.txInfoContainer }>
           <Typography>{ asset.chainDescription } Transaction Hash</Typography>
-          <Typography className={ `${classes.addressField} ${ !isDark && classes.whiteBackground }` }>{ tx ? formatAddress(tx.transactionHash, 'long') : 'waiting for tx ...' }</Typography>
-          { (!tx || !tx.transactionHash) && (
+          <Typography className={ `${classes.addressField} ${ !isDark && classes.whiteBackground }` }>{ tx ? formatAddress(tx, 'long') : 'waiting for tx ...' }</Typography>
+          { !(tx && tx !== '') && (
             <Typography variant='subtitle1'>Estimated Time of Deposit Arrival is 10-30 min</Typography>
           )}
-          { tx && tx.transactionHash && (
+          { tx && tx !== '' && (
             <div className={ classes.flexy }>
-              <Button onClick={ (event) => { onCopy(event, tx.transactionHash) } }>
+              <Button onClick={ (event) => { onCopy(event, tx) } }>
                 <FileCopyIcon className={ classes.assetSelectIcon } /> Copy
               </Button>
-              <Button onClick={ (event) => { onViewTX(event, tx.transactionHash, asset) } }>
+              <Button onClick={ (event) => { onViewTX(event, tx, asset) } }>
                 <LaunchIcon className={ classes.assetSelectIcon } /> View
               </Button>
             </div>
@@ -99,8 +115,8 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         </div>
       </div>
       <div className={ classes.swapDepositInfo }>
-        { renderTX(swapState.fromAssetValue, depositTX) }
-        { renderTX(swapState.toAssetValue, transferTX) }
+        { renderTX(swapState.fromAssetValue, transferStatus.txid) }
+        { renderTX(swapState.toAssetValue, transferStatus.swaptx) }
       </div>
       <div className={ classes.actionButton }>
         <Button
@@ -110,10 +126,10 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
           color='primary'
           size='large'
           onClick={ onNext }
-          disabled={ !(depositTX && transferTX) }
+          disabled={ !(transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') }
           >
-          { !(depositTX && transferTX) && <Typography variant='h5'>{ 'Waiting for transactions to process' }</Typography> }
-          { (depositTX && transferTX) && <Typography variant='h5'>{ 'Done' }</Typography> }
+          { !(transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') && <Typography variant='h5'>{ 'Waiting for transactions to process' }</Typography> }
+          { (transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') && <Typography variant='h5'>{ 'Done' }</Typography> }
         </Button>
       </div>
     </div>

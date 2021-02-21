@@ -24,7 +24,8 @@ import {
   SWAP_SHOW_TX_STATUS,
   SWAP_DEPOSIT_TRANSACTION,
   SWAP_TRANSFER_TRANSACTION,
-  CLEARN_LISTENERS
+  CLEARN_LISTENERS,
+  SWAP_STATUS_TRANSACTIONS
 } from './constants';
 
 import stores from './'
@@ -181,7 +182,7 @@ class Store {
               chainID: sourceChainInfo.sourceChainID,
               chainDescription: sourceChainInfo.sourceChainDescription,
               icon: sourceChainInfo.sourceChainIcon,
-              pairID: key,
+              pairID: val.PairID,
               contractAddress: val.SrcToken.ContractAddress,
               dcrmAddress: val.SrcToken.DcrmAddress,
               minimumSwap: val.SrcToken.MinimumSwap,
@@ -203,7 +204,7 @@ class Store {
               chainID: chainKey,
               chainDescription: sourceChainInfo.destinationChainDescription,
               icon: sourceChainInfo.destinationChainIcon,
-              pairID: key,
+              pairID: val.PairID,
               contractAddress: val.DestToken.ContractAddress,
               dcrmAddress: val.DestToken.DcrmAddress,
               minimumSwap: val.DestToken.MinimumSwap,
@@ -252,18 +253,18 @@ class Store {
 
           const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
 
-          if(key === asset.pairID && chainKey === asset.chainID && asset.tokenMetadata.symbol === val.DestToken.Symbol) {
+          if(val.PairID === asset.pairID && chainKey === asset.chainID && asset.tokenMetadata.symbol === val.DestToken.Symbol) {
             return {
               id: sourceChainInfo.sourceChainID+'_'+key,
               chainID: sourceChainInfo.sourceChainID,
-              pairID: key,
+              pairID: val.PairID,
               symbol: val.SrcToken.Symbol
             }
-          } else if (key === asset.pairID && sourceChainInfo.sourceChainID === asset.chainID && asset.tokenMetadata.symbol === val.SrcToken.Symbol) {
+          } else if (val.PairID === asset.pairID && sourceChainInfo.sourceChainID === asset.chainID && asset.tokenMetadata.symbol === val.SrcToken.Symbol) {
             return {
               id: chainKey+'_'+key,
               chainID: chainKey,
-              pairID: key,
+              pairID: val.PairID,
               symbol: val.DestToken.Symbol
             }
           } else {
@@ -393,7 +394,7 @@ class Store {
 
         let erc20Address = asset.tokenMetadata.address
 
-        if(asset.chainID === '1' && asset.pairID === 'fantom') {
+        if(asset.chainID === '1' && asset.pairID === 'Fantom') {
           const proxyContract = new web3.eth.Contract(PROXYSWAPASSETABI, erc20Address)
           erc20Address = await proxyContract.methods.proxyToken().call()
         }
@@ -519,8 +520,24 @@ class Store {
   }
 
   getDepositAddress = async (payload) => {
-    const { toAddressValue } = payload.content
-    const { chainID, pairID } = payload.content.toAssetValue
+    const { toAddressValue, toAssetValue, fromAssetValue } = payload.content
+
+    let chainID = null
+    let pairID = null
+
+    if(toAssetValue.chainID == '1') {
+      chainID = fromAssetValue.chainID
+      pairID = fromAssetValue.pairID
+    } else {
+      chainID = toAssetValue.chainID
+      pairID = toAssetValue.pairID
+    }
+
+    console.log(fromAssetValue.chainID)
+    console.log(toAssetValue.chainID)
+
+    console.log(chainID)
+    console.log(pairID)
 
     try {
       const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${toAddressValue}/${chainID}/${pairID}`);
@@ -546,40 +563,25 @@ class Store {
     }
   }
 
-
-  /*
-    if ERC20 -> Native Chain(56, 128, 250, 32659)
-      return DCRM address
-      Show Deposit address screen
-
-    if Native Chain(56, 128, 250, 32659) -> ERC20
-      Call SwapOut on nativeChain side
-      Show TXStatus screen
-
-    if BTC -> Ethereum
-      Generate Deposit Address
-      return deposit address
-      Show Deposit address screen
-
-    if Ethereum -> BTC
-      Call SwapOut on Eth
-      Show TXStatus screen
-
-    if FTM -> FTMERC20
-      Return DCRM address
-      Show Deposit address screen
-
-    if FTMERC20 -> FTM
-      Check approval for contractAddress to use delegateToken
-      if fine, call swapOut on contractAddress
-      Show TXStatus screen
-      if not, call approval, then do tX. Probably need an intermediary screen, or extra field on TX status screen
-
-  */
-
   swapConfirmSwap = async (payload) => {
     const { fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue } = payload.content
-    const { chainID, pairID } = payload.content.toAssetValue
+
+    let chainID = null
+    let pairID = null
+
+    if(toAssetValue.chainID == '1') {
+      chainID = fromAssetValue.chainID
+      pairID = fromAssetValue.pairID
+    } else {
+      chainID = toAssetValue.chainID
+      pairID = toAssetValue.pairID
+    }
+
+    console.log(fromAssetValue.chainID)
+    console.log(toAssetValue.chainID)
+
+    console.log(chainID)
+    console.log(pairID)
 
     try {
       const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${toAddressValue}/${chainID}/${pairID}`);
@@ -616,12 +618,12 @@ class Store {
     const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
 
-    this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, async (err, res) => {
+    this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, async (err, txHash) => {
       if(err) {
         return this.emitter.emit(ERROR, err);
       }
 
-      this.emitter.emit(SWAP_SHOW_TX_STATUS, res)
+      this.emitter.emit(SWAP_SHOW_TX_STATUS, txHash)
 
       const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
       const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
@@ -633,83 +635,114 @@ class Store {
       const that = this
 
       while(this.getStore('listener') === true) {
-        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, '0x0000000000000000000000000000000000000000', () => {
+        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, '0x0000000000000000000000000000000000000000', txHash,  () => {
           this.setStore({ listener: false })
         })
       }
     })
   }
 
-  _getNewTransfers = async (fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, burnAddress, callback) => {
-    console.log('Checking again')
-    console.log('--------------------------------------------------')
-    console.log('Searching for TX on: ', fromAsset.chainID)
-    console.log('Searching for TX asset: ', fromAsset.tokenMetadata.address)
-    console.log('Searching for TX from: ', fromAddressValue)
-    console.log('Searching for TX to: ', depositAddress)
-    console.log('--------------------')
-    console.log('Searching for TX on: ', toAsset.chainID)
-    console.log('Searching for TX asset: ', toAsset.tokenMetadata.address)
-    console.log('Searching for TX from: ', burnAddress)
-    console.log('Searching for TX to: ', toAddressValue)
-    console.log('--------------------------------------------------')
+  _getNewTransfers = async (fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, burnAddress, fromTXHash, callback) => {
+    // call bridge API to get the status TX (returns the 2 TXs we need to listen to)
+    // might need to change direction/chainID for swaps to and swaps back. need to test
+    try {
+      console.log('Checking again')
 
-    const that = this
+      let chainID = null
+      let pairID = null
 
-    const fromERC20Contract = new fromWeb3.eth.Contract(ERC20ABI, fromAsset.tokenMetadata.address)
-
-    fromERC20Contract.getPastEvents('Transfer', {
-      fromBlock: fromCurrentBlock,
-      toBlock: 'latest',
-      filter: { _from: fromAddressValue, _to: depositAddress }
-    })
-    .then(function(events){
-      console.log(events)
-      let event = events[events.length - 1]
-
-      if(event && event.returnValues._from.toLowerCase() === fromAddressValue.toLowerCase() &&
-        event.returnValues._to.toLowerCase() === depositAddress.toLowerCase()) {
-
-        console.log(event.event)
-        console.log(event.transactionHash)
-        console.log(event.returnValues._from)
-        console.log(event.returnValues._to)
-        console.log(event.returnValues._value)
-
-        that.emitter.emit(SWAP_DEPOSIT_TRANSACTION, event)
+      if(toAsset.chainID == '1') {
+        chainID = fromAsset.chainID
+        pairID = fromAsset.pairID
+      } else {
+        chainID = toAsset.chainID
+        pairID = toAsset.pairID
       }
-    })
-    .catch((ex) => {
-      console.log(ex)
-    })
 
-    const toERC20Contract = new toWeb3.eth.Contract(ERC20ABI, toAsset.tokenMetadata.address)
-    toERC20Contract.getPastEvents('Transfer', {
-      fromBlock: toCurrentBlock,
-      toBlock: 'latest',
-      filter: { _from: burnAddress, _to: toAddressValue }
-    })
-    .then(function(events){
-      console.log(events)
-      let event = events[events.length - 1]
+      let direction = toAsset.chainID === 1 ? 0 : 1 // I think?
 
-      if(event && event.returnValues._to.toLowerCase() === toAddressValue.toLowerCase() &&
-        event.returnValues._from.toLowerCase() === burnAddress.toLowerCase()) {
+      const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getHashStatus/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
+      const statusJson = await statusResult.json()
 
-        console.log(event.event)
-        console.log(event.transactionHash)
-        console.log(event.returnValues._from)
-        console.log(event.returnValues._to)
-        console.log(event.returnValues._value)
+      this.emitter.emit(SWAP_STATUS_TRANSACTIONS, statusJson)
 
-        that.emitter.emit(SWAP_TRANSFER_TRANSACTION, event)
-
+      if(statusJson && statusJson.info && statusJson.info.txid && statusJson.info.txid !== '' && statusJson.info.swaptx && statusJson.info.swaptx !== '') {
+        //once we have the transfer we can stop listening
         callback()
       }
-    })
-    .catch((ex) => {
+    } catch(ex) {
       console.log(ex)
-    })
+    }
+
+    //
+    // console.log('--------------------------------------------------')
+    // console.log('Searching for TX on: ', fromAsset.chainID)
+    // console.log('Searching for TX asset: ', fromAsset.tokenMetadata.address)
+    // console.log('Searching for TX from: ', fromAddressValue)
+    // console.log('Searching for TX to: ', depositAddress)
+    // console.log('--------------------')
+    // console.log('Searching for TX on: ', toAsset.chainID)
+    // console.log('Searching for TX asset: ', toAsset.tokenMetadata.address)
+    // console.log('Searching for TX from: ', burnAddress)
+    // console.log('Searching for TX to: ', toAddressValue)
+    // console.log('--------------------------------------------------')
+    //
+    // const that = this
+    //
+    // const fromERC20Contract = new fromWeb3.eth.Contract(ERC20ABI, fromAsset.tokenMetadata.address)
+    //
+    // fromERC20Contract.getPastEvents('Transfer', {
+    //   fromBlock: fromCurrentBlock,
+    //   toBlock: 'latest',
+    //   filter: { _from: fromAddressValue, _to: depositAddress }
+    // })
+    // .then(function(events){
+    //   console.log(events)
+    //   let event = events[events.length - 1]
+    //
+    //   if(event && event.returnValues._from.toLowerCase() === fromAddressValue.toLowerCase() &&
+    //     event.returnValues._to.toLowerCase() === depositAddress.toLowerCase()) {
+    //
+    //     console.log(event.event)
+    //     console.log(event.transactionHash)
+    //     console.log(event.returnValues._from)
+    //     console.log(event.returnValues._to)
+    //     console.log(event.returnValues._value)
+    //
+    //     that.emitter.emit(SWAP_DEPOSIT_TRANSACTION, event)
+    //   }
+    // })
+    // .catch((ex) => {
+    //   console.log(ex)
+    // })
+    //
+    // const toERC20Contract = new toWeb3.eth.Contract(ERC20ABI, toAsset.tokenMetadata.address)
+    // toERC20Contract.getPastEvents('Transfer', {
+    //   fromBlock: toCurrentBlock,
+    //   toBlock: 'latest',
+    //   filter: { _from: burnAddress, _to: toAddressValue }
+    // })
+    // .then(function(events){
+    //   console.log(events)
+    //   let event = events[events.length - 1]
+    //
+    //   if(event && event.returnValues._to.toLowerCase() === toAddressValue.toLowerCase() &&
+    //     event.returnValues._from.toLowerCase() === burnAddress.toLowerCase()) {
+    //
+    //     console.log(event.event)
+    //     console.log(event.transactionHash)
+    //     console.log(event.returnValues._from)
+    //     console.log(event.returnValues._to)
+    //     console.log(event.returnValues._value)
+    //
+    //     that.emitter.emit(SWAP_TRANSFER_TRANSACTION, event)
+    //
+    //     callback()
+    //   }
+    // })
+    // .catch((ex) => {
+    //   console.log(ex)
+    // })
 
     await this.sleep(15000)
   }
@@ -735,12 +768,12 @@ class Store {
     const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
 
-    this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, async (err, res) => {
+    this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, async (err, txHash) => {
       if(err) {
         return this.emitter.emit(ERROR, err);
       }
 
-      this.emitter.emit(SWAP_SHOW_TX_STATUS, res)
+      this.emitter.emit(SWAP_SHOW_TX_STATUS, txHash)
 
       const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
       const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
@@ -752,7 +785,7 @@ class Store {
       const that = this
 
       while(this.getStore('listener') === true) {
-        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, '0x0000000000000000000000000000000000000000', fromCurrentBlock, toCurrentBlock, account.address, account.address, fromAsset.dcrmAddress, () => {
+        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, '0x0000000000000000000000000000000000000000', fromCurrentBlock, toCurrentBlock, account.address, account.address, fromAsset.dcrmAddress, txHash, () => {
           that.setStore({ listener: false })
         })
       }
