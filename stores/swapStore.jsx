@@ -709,7 +709,7 @@ class Store {
       let statusJson = null
 
       if(toAsset.chainID == '1') {
-        const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/reswap/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
+        const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getWithdrawHashStatus/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
         statusJson = await statusResult.json()
       } else {
         const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getHashStatus/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
