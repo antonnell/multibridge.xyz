@@ -264,6 +264,10 @@
   align-items: flex-end;
 }
 
+.confirmationsText {
+  padding-bottom: 12px;
+}
+
 @media screen and (max-width: 576px) {
   .swapContainer {
     padding: 12px;

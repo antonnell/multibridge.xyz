@@ -58,7 +58,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
     }
   }
 
-  const renderTX = (asset, tx) => {
+  const renderTX = (asset, tx, confirmations) => {
     return (
       <div className={ classes.txContainer }>
         <div className={ classes.displayDualIconContainerConfirm }>
@@ -79,6 +79,9 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         <div className={ classes.txInfoContainer }>
           <Typography>{ asset.chainDescription } Transaction Hash</Typography>
           <Typography className={ `${classes.addressField} ${ !isDark && classes.whiteBackground }` }>{ tx ? formatAddress(tx, 'long') : 'waiting for tx ...' }</Typography>
+          { (tx && tx !== '' && confirmations && confirmations > 0) && (
+            <Typography variant='subtitle1' className={ classes.confirmationsText } align='right'>{ confirmations >= 10 ? '>10' : confirmations } { confirmations > 1 ? 'confirmations' : 'confirmation'}</Typography>
+          )}
           { !(tx && tx !== '') && (
             <Typography variant='subtitle1'>Estimated Time of Deposit Arrival is 10-30 min</Typography>
           )}
@@ -115,8 +118,8 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         </div>
       </div>
       <div className={ classes.swapDepositInfo }>
-        { renderTX(swapState.fromAssetValue, transferStatus ? transferStatus.txid : null) }
-        { renderTX(swapState.toAssetValue, transferStatus ? transferStatus.swaptx : null) }
+        { renderTX(swapState.fromAssetValue, transferStatus ? transferStatus.txid : null, -1) }
+        { renderTX(swapState.toAssetValue, transferStatus ? transferStatus.swaptx : null, transferStatus ? transferStatus.confirmations : null) }
       </div>
       <div className={ classes.actionButton }>
         <Button

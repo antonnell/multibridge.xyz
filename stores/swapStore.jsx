@@ -721,7 +721,10 @@ class Store {
 
       if(statusJson && statusJson.info && statusJson.info.txid && statusJson.info.txid !== '' && statusJson.info.swaptx && statusJson.info.swaptx !== '') {
         //once we have the transfer we can stop listening
-        callback()
+
+        if(statusJson.info.confirmations >= 10) {
+          callback()
+        }
       }
     } catch(ex) {
       console.log(ex)
@@ -797,7 +800,7 @@ class Store {
     //   console.log(ex)
     // })
 
-    await this.sleep(15000)
+    await this.sleep(10000)
   }
 
   sleep = (ms) => {
