@@ -449,8 +449,8 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
           <Typography variant='subtitle1' color='textSecondary'>{ asset ? asset.tokenMetadata.description : '' }</Typography>
         </div>
         <div className={ classes.assetSelectBalance}>
-          <Typography variant='h5'>{ asset && asset.tokenMetadata.balance && formatCurrency(asset.tokenMetadata.balance) }</Typography>
-          <Typography variant='subtitle1' color='textSecondary'>{ asset && asset.tokenMetadata.balance &&  'Balance' }</Typography>
+          <Typography variant='h5'>{ (asset && asset.tokenMetadata.balance) ? formatCurrency(asset.tokenMetadata.balance) : '0.00' }</Typography>
+          <Typography variant='subtitle1' color='textSecondary'>{ 'Balance' }</Typography>
         </div>
       </MenuItem>
     )

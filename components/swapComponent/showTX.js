@@ -115,8 +115,8 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         </div>
       </div>
       <div className={ classes.swapDepositInfo }>
-        { renderTX(swapState.fromAssetValue, transferStatus.txid) }
-        { renderTX(swapState.toAssetValue, transferStatus.swaptx) }
+        { renderTX(swapState.fromAssetValue, transferStatus ? transferStatus.txid : null) }
+        { renderTX(swapState.toAssetValue, transferStatus ? transferStatus.swaptx : null) }
       </div>
       <div className={ classes.actionButton }>
         <Button
@@ -126,10 +126,10 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
           color='primary'
           size='large'
           onClick={ onNext }
-          disabled={ !(transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') }
+          disabled={ !(transferStatus && transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') }
           >
-          { !(transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') && <Typography variant='h5'>{ 'Waiting for transactions to process' }</Typography> }
-          { (transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') && <Typography variant='h5'>{ 'Done' }</Typography> }
+          { !(transferStatus && transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') && <Typography variant='h5'>{ 'Waiting for transactions to process' }</Typography> }
+          { (transferStatus && transferStatus.txid && transferStatus.txid !== '' && transferStatus.swaptx && transferStatus.swaptx !== '') && <Typography variant='h5'>{ 'Done' }</Typography> }
         </Button>
       </div>
     </div>

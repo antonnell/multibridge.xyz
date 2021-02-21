@@ -104,7 +104,8 @@ class Store {
     this.store = {
       swapChains: [],
       swapAssets: [],
-      listener: false
+      listener: false,
+      totalLocked: 0
     }
 
     dispatcher.register(
@@ -226,7 +227,7 @@ class Store {
           return null
         }
 
-      }).filter((a) => { console.log(a); return a !== null }).flat()
+      }).filter((a) => { return a !== null }).flat()
 
       return anyswapInfoFormatted
     }).filter((a) => { return a !== null }).flat()
@@ -373,12 +374,32 @@ class Store {
 
   getSwapBalancesNew = async () => {
     const account = await stores.accountStore.getStore('account')
-    const chainID = await stores.accountStore.getStore('chainID')
     if(!account) {
       return false
     }
 
     const swapAssets = this.getStore('swapAssets')
+
+    const coingeckoCoins = await CoinGeckoClient.coins.list()
+
+
+    console.log(swapAssets)
+    console.log(coingeckoCoins)
+
+    const mappedAssetSymbols = swapAssets.map((asset) => {
+      return asset.tokenMetadata.symbol.toLowerCase()
+    })
+
+    const filteredCoingeckoCoins = coingeckoCoins.data.filter((coin) => {
+      return mappedAssetSymbols.includes(coin.symbol.toLowerCase())
+    })
+
+    const priceData = await CoinGeckoClient.simple.price({
+      ids: filteredCoingeckoCoins.map(coin => coin.id),
+      vs_currencies: ['usd'],
+    });
+
+    console.log(priceData)
 
     // get address from contract thing
     async.map(swapAssets, async (asset, callback) => {
@@ -406,8 +427,28 @@ class Store {
           const balanceOf = await erc20Contract.methods.balanceOf(account.address).call()
 
           const balance = BigNumber(balanceOf).div(10**decimals).toNumber()
-
           asset.tokenMetadata.balance = balance
+
+          if(asset.chainID == 1) {
+            // GET USD Price
+            let theCoinArr = filteredCoingeckoCoins.filter((coinData) => {
+              return coinData.symbol.toLowerCase() === asset.tokenMetadata.symbol.toLowerCase()
+            })
+            let usdPrice = 1
+
+            if(theCoinArr.length >  0) {
+              let thePriceData = priceData.data[theCoinArr[0].id]
+              if(thePriceData) {
+                usdPrice = thePriceData.usd
+              }
+            }
+
+            //USD Price * balance of DCRM contract
+            const dcrmBalance = await erc20Contract.methods.balanceOf(asset.dcrmAddress).call()
+            asset.balance = BigNumber(dcrmBalance).div(10**decimals).toNumber()
+            asset.usdPrice = usdPrice
+            asset.usdBalance = BigNumber(dcrmBalance).div(10**decimals).times(usdPrice).toNumber()
+          }
         }
 
         callback(null, asset)
@@ -422,7 +463,12 @@ class Store {
         return this.emitter.emit(ERROR, err)
       }
 
+      const totalLocked = swapAssetsMapped.reduce((a, b) => {
+        return BigNumber(a).plus(b.usdBalance ? b.usdBalance : 0).toNumber()
+      }, 0)
+
       this.setStore({ swapAssets: swapAssetsMapped })
+      this.setStore({ totalLocked: totalLocked })
 
       this.emitter.emit(SWAP_UPDATED)
       this.emitter.emit(SWAP_BALANCES_RETURNED)
@@ -647,6 +693,7 @@ class Store {
     // might need to change direction/chainID for swaps to and swaps back. need to test
     try {
       console.log('Checking again')
+      let direction = 1 // I think?
 
       let chainID = null
       let pairID = null
@@ -659,11 +706,17 @@ class Store {
         pairID = toAsset.pairID
       }
 
-      let direction = toAsset.chainID === 1 ? 0 : 1 // I think?
+      let statusJson = null
 
-      const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getHashStatus/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
-      const statusJson = await statusResult.json()
+      if(toAsset.chainID == '1') {
+        const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/reswap/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
+        statusJson = await statusResult.json()
+      } else {
+        const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getHashStatus/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
+        statusJson = await statusResult.json()
+      }
 
+      console.log(statusJson)
       this.emitter.emit(SWAP_STATUS_TRANSACTIONS, statusJson)
 
       if(statusJson && statusJson.info && statusJson.info.txid && statusJson.info.txid !== '' && statusJson.info.swaptx && statusJson.info.swaptx !== '') {

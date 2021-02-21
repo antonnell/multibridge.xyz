@@ -6,10 +6,36 @@ import { withTheme } from '@material-ui/core/styles';
 
 import classes from './footer.module.css'
 
+import stores from '../../stores'
+import {
+  SWAP_UPDATED,
+} from '../../stores/constants'
+
+import { formatCurrency } from '../../utils'
+
 function Header(props) {
+
+  const [ totalLocked, setTotalLocked ] = useState(0)
+
+  useEffect(function() {
+    const swapUpdated = () => {
+      console.log(stores.swapStore.getStore('totalLocked'))
+      const storeTotalLocked = stores.swapStore.getStore('totalLocked')
+
+      setTotalLocked(storeTotalLocked)
+    }
+
+    stores.emitter.on(SWAP_UPDATED, swapUpdated)
+    return () => {
+      stores.emitter.removeListener(SWAP_UPDATED, swapUpdated)
+    }
+  },[]);
 
   return (
     <div className={ classes.footerContainer }>
+      <div className={ classes.link }>
+        <Typography variant='h5' className={ classes.auditText } color='textPrimary'>$ { formatCurrency(totalLocked) } Locked</Typography>
+      </div>
       <a className={ classes.link } href='https://www.fusion.org/products/dcrm' target='_blank' rel="noreferrer">
         <Typography variant='h5' className={ classes.auditText } color='textPrimary'><img className={ classes.icon } src='/blockchains/FSN.svg' alt='' height={ 20 } width={ 20 } style={{marginRight: 12 }}/> Powered by DCRM</Typography>
       </a>
