@@ -1,0 +1,22 @@
+.footerContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 48px 24px 48px;
+}
+
+.link {
+  text-decoration: none;
+  padding-bottom: 6px;
+  padding-top: 6px;
+}
+
+.auditText {
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  filter: grayscale(100%)
+}

@@ -2,6 +2,7 @@ import Head from 'next/head'
 import classes from './layout.module.css'
 import Link from 'next/link'
 import Header from '../header'
+import Footer from '../footer'
 import Navigation from '../navigation'
 import SnackbarController from '../snackbar'
 
@@ -36,8 +37,9 @@ export default function Layout({ children, configure, backClicked, changeTheme }
         {!configure && (
           <Header backClicked={backClicked} changeTheme={ changeTheme } />
         )}
+        <main className={ classes.main }>{children}</main>
+        <Footer />
         <SnackbarController />
-        <main>{children}</main>
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Paper } from '@material-ui/core';
+import { Paper, Typography } from '@material-ui/core';
 
 import Setup from './setup'
 import Confirm from './confirm'
