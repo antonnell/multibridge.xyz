@@ -7,6 +7,7 @@
   width: 240px;
   padding: 24px 12px;
   border-radius: 0px !important;
+  border-right: 1px solid rgba(128, 128, 128, 0.2);
 }
 
 .navigationHeading {
@@ -37,7 +38,7 @@
   width: 100%;
   border-radius: 10px;
   cursor: pointer;
-  background: radial-gradient(circle, rgba(63,94,251,0.7) 0%, rgba(47,128,237,0.7) 48%) rgba(63,94,251,0.7) 100%;
+  background: rgba(17,101,230,0.16);
 }
 
 .navigationOption {
@@ -52,7 +53,7 @@
 }
 
 .navigationOption:hover {
-  background: rgba(25, 101, 233, 0.3);
+  background: rgba(17,101,230,0.16);
 }
 
 .navigationOptionIcon {
@@ -62,28 +63,20 @@
   font-size: 30px !important;
 }
 
-.navigationOptionIcon_invest {
+.navigationOptionIconWhite {
   margin-right: 12px;
   height: 30px;
   width: 30px;
-  background-image: url('/navigation/yearn-icon.png');
-  background-size: 100%;
+  font-size: 30px !important;
+  color: #FFF;
 }
 
-.navigationOptionIcon_lending {
+.navigationOptionIconBlue {
   margin-right: 12px;
   height: 30px;
   width: 30px;
-  background-image: url('/navigation/cream-icon.svg');
-  background-size: 100%;
-}
-
-.navigationOptionIcon_insure {
-  margin-right: 12px;
-  height: 30px;
-  width: 30px;
-  background-image: url('/navigation/cover-icon.png');
-  background-size: 100%;
+  font-size: 30px !important;
+  color: #1165E6;
 }
 
 
@@ -178,6 +171,14 @@
 
 .backButtonContainer {
   display: none;
+}
+
+.colorWhite {
+  color: #FFF;
+}
+
+.colorBlue {
+  color: #1165E6;
 }
 
 

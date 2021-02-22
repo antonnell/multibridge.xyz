@@ -1,0 +1,8 @@
+.swapContainer {
+  height: 100%;
+  padding: 48px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}

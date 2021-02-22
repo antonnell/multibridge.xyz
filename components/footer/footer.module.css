@@ -20,3 +20,8 @@
 .icon {
   filter: grayscale(100%)
 }
+
+.policyIcon {
+  font-size: 15px;
+  margin-right: 12px;
+}

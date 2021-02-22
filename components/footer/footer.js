@@ -4,11 +4,14 @@ import { Typography, Switch, Button } from '@material-ui/core'
 import { withStyles } from '@material-ui/core/styles';
 import { withTheme } from '@material-ui/core/styles';
 
+import PolicyIcon from '@material-ui/icons/Policy';
+
 import classes from './footer.module.css'
 
 import stores from '../../stores'
 import {
-  SWAP_UPDATED,
+  GET_BRIDGE_INFO,
+  BRIDGE_INFO_RETURNED
 } from '../../stores/constants'
 
 import { formatCurrency } from '../../utils'
@@ -19,15 +22,15 @@ function Header(props) {
 
   useEffect(function() {
     const swapUpdated = () => {
-      console.log(stores.swapStore.getStore('totalLocked'))
       const storeTotalLocked = stores.swapStore.getStore('totalLocked')
-
       setTotalLocked(storeTotalLocked)
     }
 
-    stores.emitter.on(SWAP_UPDATED, swapUpdated)
+    stores.emitter.on(BRIDGE_INFO_RETURNED, swapUpdated)
+    stores.dispatcher.dispatch({ type: GET_BRIDGE_INFO })
+
     return () => {
-      stores.emitter.removeListener(SWAP_UPDATED, swapUpdated)
+      stores.emitter.removeListener(BRIDGE_INFO_RETURNED, swapUpdated)
     }
   },[]);
 
@@ -36,8 +39,8 @@ function Header(props) {
       <div className={ classes.link }>
         <Typography variant='h5' className={ classes.auditText } color='textPrimary'>$ { formatCurrency(totalLocked) } Locked</Typography>
       </div>
-      <a className={ classes.link } href='https://github.com/anyswap/Anyswap-Audit/blob/master/SlowMist/AnySwap%20CrossChain-Bridge%20Security%20Audit%20Report.pdf' target='_blank' rel="noreferrer">
-        <Typography variant='h5' className={ classes.auditText } color='textPrimary'><img src='/slowmist.png' alt='' height={ 20 } width={ 20 } style={{marginRight: 12 }}/> Security Audit</Typography>
+        <a className={ classes.link } href='https://github.com/anyswap/Anyswap-Audit/blob/master/SlowMist/AnySwap%20CrossChain-Bridge%20Security%20Audit%20Report.pdf' target='_blank' rel="noreferrer">
+        <Typography variant='h5' className={ classes.auditText } color='textPrimary'><PolicyIcon className={ classes.policyIcon } /> Security Audit</Typography>
       </a>
     </div>
   )

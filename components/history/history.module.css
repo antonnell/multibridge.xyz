@@ -1,0 +1,8 @@
+.historyContainer {
+  max-width: 485px;
+  width: 100%;
+  padding: 24px;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+}

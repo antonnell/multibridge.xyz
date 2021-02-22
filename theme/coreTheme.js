@@ -44,7 +44,6 @@ const coreTheme = {
     },
     h3: {    // yearn title text YEARN
       fontFamily: [
-        'Druk Wide Bold',
         'Inter',
         'Arial',
         '-apple-system',
@@ -55,7 +54,7 @@ const coreTheme = {
         'sans-serif',
       ],
       fontSize: '1.5rem',
-      fontWeight: 700,
+      fontWeight: 800,
       lineHeight: 1.167,
       ['@media (max-width:576px)']: { // eslint-disable-line no-useless-computed-key
         fontSize: '1.2rem'
