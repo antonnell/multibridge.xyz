@@ -1,13 +1,13 @@
 import Head from 'next/head'
-import Layout from '../../components/layout/layout.js'
+import Layout from '../../../components/layout/layout.js'
 import {
   Typography,
   Paper,
 } from '@material-ui/core'
 import classes from './stats.module.css'
-import StatsComponent from '../../components/stats'
+import StatsComponent from '../../../components/stats'
 
-function Stats({ changeTheme }) {
+function Assets({ changeTheme }) {
 
   return (
     <Layout changeTheme={ changeTheme }>
@@ -21,7 +21,7 @@ function Stats({ changeTheme }) {
   )
 }
 
-export default Stats
+export default Assets
 
 /*
 

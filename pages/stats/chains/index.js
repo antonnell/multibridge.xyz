@@ -1,13 +1,13 @@
 import Head from 'next/head'
-import Layout from '../../components/layout/layout.js'
+import Layout from '../../../components/layout/layout.js'
 import {
   Typography,
   Paper,
-} from '@material-ui/core'
+} from '@material-ui/core' 
 import classes from './stats.module.css'
-import StatsComponent from '../../components/stats'
+import ChainsComponent from '../../../components/statsChains'
 
-function Stats({ changeTheme }) {
+function Chains({ changeTheme }) {
 
   return (
     <Layout changeTheme={ changeTheme }>
@@ -15,13 +15,13 @@ function Stats({ changeTheme }) {
         <title>Swaps</title>
       </Head>
       <div className={ classes.swapContainer }>
-        <StatsComponent />
+        <ChainsComponent />
       </div>
     </Layout>
   )
 }
 
-export default Stats
+export default Chains
 
 /*
 

@@ -16,6 +16,7 @@ import SwapCallsIcon from '@material-ui/icons/SwapCalls';
 import ListIcon from '@material-ui/icons/List';
 
 import Unlock from '../unlock'
+import Footer from '../footer'
 
 import stores from '../../stores'
 import { formatAddress } from '../../utils'
@@ -141,6 +142,8 @@ function Navigation(props) {
       <div className={ classes.navigationContent }>
         { renderNavs() }
       </div>
+
+      <Footer />
 
       { menuOpen && <Paper elevation={ 0  } className={ classes.navigationContentMobile }>
         <div className={ classes.menuIcon }>

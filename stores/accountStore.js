@@ -30,6 +30,48 @@ class Store {
     this.emitter = emitter
 
     this.store = {
+      chains: [
+        {
+          name: 'Ethereum Mainnet',
+          symbol: 'ETH',
+          icon: 'ETH.svg',
+        },
+        {
+          name: 'Binance Smart Chain Mainnet',
+          symbol: 'BNB',
+          icon: 'BNB.svg',
+        },
+        {
+          name: 'Huobi Mainnet',
+          symbol: 'HT',
+          icon: 'HT.svg',
+        },
+        {
+          name: 'Fantom Mainnet',
+          symbol: 'FTM',
+          icon: 'FTM.png',
+        },
+        {
+          name: 'Fusion Mainnet',
+          symbol: 'FSN',
+          icon: 'FSN.svg',
+        },
+        {
+          name: 'Ethereum Mainnet',
+          symbol: 'ETH',
+          icon: 'ETH.svg',
+        },
+        {
+          name: 'Bitcoin Mainnet',
+          symbol: 'BTC',
+          icon: 'BTC.png',
+        },
+        {
+          name: 'Litecoin Mainnet',
+          symbol: 'LTC',
+          icon: 'LTC.png',
+        },
+      ],
       chainIDMapping: {
         1: {
           name: 'Eth Mainnet',

@@ -1,0 +1,4 @@
+.statsDashboard {
+  display: flex;
+  flex-wrap: wrap;
+}

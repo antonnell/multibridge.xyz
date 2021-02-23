@@ -16,21 +16,21 @@ import {
 
 import { formatCurrency } from '../../utils'
 
-function Header(props) {
+function Footer(props) {
 
   const [ totalLocked, setTotalLocked ] = useState(0)
 
   useEffect(function() {
-    const swapUpdated = () => {
+    const bridgeInfoReturned = () => {
       const storeTotalLocked = stores.swapStore.getStore('totalLocked')
       setTotalLocked(storeTotalLocked)
     }
 
-    stores.emitter.on(BRIDGE_INFO_RETURNED, swapUpdated)
+    stores.emitter.on(BRIDGE_INFO_RETURNED, bridgeInfoReturned)
     stores.dispatcher.dispatch({ type: GET_BRIDGE_INFO })
 
     return () => {
-      stores.emitter.removeListener(BRIDGE_INFO_RETURNED, swapUpdated)
+      stores.emitter.removeListener(BRIDGE_INFO_RETURNED, bridgeInfoReturned)
     }
   },[]);
 
@@ -46,4 +46,4 @@ function Header(props) {
   )
 }
 
-export default withTheme(Header)
+export default withTheme(Footer)

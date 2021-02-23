@@ -8,6 +8,15 @@ export const colors = {
 };
 
 const coreTheme = {
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 1024,
+      lg: 1600,
+      xl: 1920,
+    },
+  },
   shape: {
     borderRadius: '10px'
   },
@@ -31,7 +40,7 @@ const coreTheme = {
       lineHeight: 1.167,
       letterSpacing: '2px',
       ['@media (max-width:576px)']: { // eslint-disable-line no-useless-computed-key
-        fontSize: '1.6rem'
+        fontSize: '1.5rem'
       }
     },
     h2: {   // Navigation tabs / section headers

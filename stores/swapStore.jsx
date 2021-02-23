@@ -863,6 +863,7 @@ class Store {
 
       const bridgeArray = Object.keys(bridgeInfoJson.bridgeList).map((key) => [key, bridgeInfoJson.bridgeList[key]]);
       const bridgeChainsArray = Object.keys(bridgeInfoJson.baseUSD).map((key) => [key, bridgeInfoJson.baseUSD[key]]);
+      const nodesArray = Object.keys(nodeListJson.info).map((key) => [key, nodeListJson.info[key]]);
 
       const totalLocked = bridgeArray.reduce((a, b) => {
         const balance = BigNumber(b[1].balance).div(10**b[1].decimals).toNumber()
@@ -879,8 +880,8 @@ class Store {
       this.setStore({
         totalLocked: totalLocked,
         bridgedAssets: bridgeArray.length,
-        bridgeBlockchains: bridgeChainsArray.length,
-        nodes: nodeListJson.length
+        bridgeBlockchains: BigNumber(bridgeChainsArray.length).plus(2).toNumber(), // plus 2 for btc/ltc
+        nodes: nodesArray.length
       })
 
       this.emitter.emit(BRIDGE_INFO_RETURNED, bridgeInfoJson)

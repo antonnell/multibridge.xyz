@@ -2,7 +2,6 @@ import Head from 'next/head'
 import classes from './layout.module.css'
 import Link from 'next/link'
 import Header from '../header'
-import Footer from '../footer'
 import Navigation from '../navigation'
 import SnackbarController from '../snackbar'
 
@@ -33,12 +32,14 @@ export default function Layout({ children, configure, backClicked, changeTheme }
         <meta name="og:title" content="Multichain" />
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
+      {!configure && (
+        <Navigation backClicked={backClicked} changeTheme={ changeTheme } />
+      )}
       <div className={ classes.content }>
         {!configure && (
           <Header backClicked={backClicked} changeTheme={ changeTheme } />
         )}
         <main className={ classes.main }>{children}</main>
-        <Footer />
         <SnackbarController />
       </div>
     </div>
