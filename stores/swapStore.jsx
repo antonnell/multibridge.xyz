@@ -201,6 +201,7 @@ class Store {
               swapFeeRate: val.SrcToken.SwapFeeRate,
               maximumSwapFee: val.SrcToken.MaximumSwapFee,
               minimumSwapFee: val.SrcToken.MinimumSwapFee,
+              bigValueThreshold: val.SrcToken.BigValueThreshold,
               tokenMetadata: {
                 icon: `/tokens/${val.SrcToken.Symbol}.png`,
                 address: val.SrcToken.ContractAddress,
@@ -223,6 +224,7 @@ class Store {
               swapFeeRate: val.DestToken.SwapFeeRate,
               maximumSwapFee: val.DestToken.MaximumSwapFee,
               minimumSwapFee: val.DestToken.MinimumSwapFee,
+              bigValueThreshold: val.DestToken.BigValueThreshold,
               tokenMetadata: {
                 icon: `/tokens/${val.SrcToken.Symbol}.png`,
                 address: val.DestToken.ContractAddress,  // GET ADDRESS SOMEHOW, think it is contractAddress.proxyToken

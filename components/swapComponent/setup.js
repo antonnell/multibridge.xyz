@@ -13,7 +13,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import { withTheme } from '@material-ui/core/styles';
 
-import { formatCurrency, formatAddress, formatCurrencyWithSymbol } from '../../utils'
+import { formatCurrency, formatAddress, formatCurrencyWithSymbol, formatCurrencySmall } from '../../utils'
 
 import classes from './swap.module.css'
 
@@ -430,6 +430,31 @@ function Setup({ theme, handleNext, swapState }) {
           </Button>
         )
       }
+      <div className={ classes.swapInfo }>
+        <div className={ classes.swapInfoRow }>
+          <Typography color='textSecondary'>Max Swap Amount </Typography>
+          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.maximumSwap : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+        </div>
+        <div className={ classes.swapInfoRow }>
+          <Typography color='textSecondary'>Min Swap Amount</Typography>
+          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.minimumSwap : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+        </div>
+        <div className={ classes.swapInfoRow }>
+          <Typography color='textSecondary'>Swap Fee</Typography>
+          <Typography>{ formatCurrencySmall(fromAssetValue ? (fromAssetValue.swapFeeRate*100) : 0) }%</Typography>
+        </div>
+        <div className={ classes.swapInfoRow }>
+          <Typography color='textSecondary'>Max Fee Amount</Typography>
+          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.maximumSwapFee : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+        </div>
+        <div className={ classes.swapInfoRow }>
+          <Typography color='textSecondary'>Min Fee Amount</Typography>
+          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.minimumSwapFee : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+        </div>
+        <div className={ classes.swapInfoRow }>
+          <Typography color='textSecondary' className={ classes.flexy }>Deposits <Typography color={ 'textPrimary' } className={ classes.inlineText }>> {formatCurrencySmall(fromAssetValue ? fromAssetValue.bigValueThreshold : 0)} {(fromAssetValue && fromAssetValue.tokenMetadata) ? fromAssetValue.tokenMetadata.symbol : ''} </Typography> could take up to <Typography color='textPrimary' className={ classes.inlineText }> 12 hours</Typography></Typography>
+        </div>
+      </div>
     </div>
   )
 }
