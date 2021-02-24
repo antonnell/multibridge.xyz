@@ -271,6 +271,19 @@
   padding-bottom: 12px;
 }
 
+.swapIconContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swapIcon {
+  cursor: pointer;
+  padding: 12px;
+  font-size: 60px !important;
+}
+
 @media screen and (max-width: 576px) {
   .swapContainer {
     padding: 12px;

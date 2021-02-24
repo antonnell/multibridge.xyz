@@ -10,6 +10,7 @@ import {
   CircularProgress
 } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
+import SwapVertIcon from '@material-ui/icons/SwapVert';
 import { withTheme } from '@material-ui/core/styles';
 
 import { formatCurrency, formatAddress, formatCurrencyWithSymbol } from '../../utils'
@@ -289,6 +290,35 @@ function Setup({ theme, handleNext, swapState }) {
 
     calculateReceiveAmount(fromAssetValue.tokenMetadata.balance, fromAssetValue, toAssetValue)
   }
+
+  const swapAssets = () => {
+
+    setFromAssetValue(toAssetValue)
+    stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: toAssetValue.chainID } } })
+
+    if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(toAssetValue.chainID)) {
+      setFromAddressValue(account ? account.address : '')
+    } else {
+      setFromAddressValue('')
+    }
+
+
+    const targetOption = fromAssetOptions.filter((asset) => {
+      return toAssetValue.targets.map((as) => { return as.id }).includes(asset.id)
+    })
+
+    setToAssetOptions(targetOption)
+    setToAssetValue(fromAssetValue)
+
+    if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
+      setToAddressValue(account ? account.address : '')
+    } else {
+      setToAddressValue('')
+    }
+
+    calculateReceiveAmount(fromAmountValue, toAssetValue, fromAssetValue)
+  }
+
   const renderMassiveInput = (type, amountValue, amountError, amountChanged, addressValue, addressError, addressChanged, assetValue, assetError, assetOptions, onAssetSelect) => {
     const isDark = theme.palette.type === 'dark'
 
@@ -349,6 +379,9 @@ function Setup({ theme, handleNext, swapState }) {
   return (
     <div className={ classes.swapInputs }>
       { renderMassiveInput('From', fromAmountValue, fromAmountError, fromAmountChanged, fromAddressValue, fromAddressError, fromAddressChanged, fromAssetValue, fromAssetError, fromAssetOptions, onAssetSelect) }
+      <div className={ classes.swapIconContainer }>
+        <SwapVertIcon className={ classes.swapIcon } onClick={ swapAssets }/>
+      </div>
       { renderMassiveInput('To', toAmountValue, toAmountError, toAmountChanged, toAddressValue, toAddressError, toAddressChanged, toAssetValue, toAssetError, toAssetOptions, onAssetSelect) }
       {
         (!account || !account.address) && (
