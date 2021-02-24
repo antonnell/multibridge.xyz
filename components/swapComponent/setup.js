@@ -246,6 +246,23 @@ function Setup({ theme, handleNext, swapState }) {
     if(!fromAmountValue || fromAmountValue === '' || isNaN(fromAmountValue)) {
       setFromAmountError(true)
       error = true
+    } else {
+      if(!fromAssetValue.tokenMetadata.balance || isNaN(fromAssetValue.tokenMetadata.balance) || BigNumber(fromAssetValue.tokenMetadata.balance).lte(0))  {
+        setFromAmountError(true)
+        error = true
+      } else if(BigNumber(fromAmountValue).lt(0)) {
+        setFromAmountError(true)
+        error = true
+      } else if(fromAssetValue && BigNumber(fromAmountValue).lt(fromAssetValue.minimumSwap)) {
+        setFromAmountError(true)
+        error = true
+      } else if (fromAssetValue && BigNumber(fromAmountValue).gt(fromAssetValue.maximumSwap)) {
+        setFromAmountError(true)
+        error = true
+      } else if (fromAssetValue && BigNumber(fromAmountValue).gt(fromAssetValue.tokenMetadata.balance)) {
+        setFromAmountError(true)
+        error = true
+      }
     }
 
     if(!fromAssetValue || fromAssetValue === null) {
