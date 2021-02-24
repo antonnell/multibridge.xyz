@@ -27,7 +27,9 @@ import {
   CLEARN_LISTENERS,
   SWAP_STATUS_TRANSACTIONS,
   GET_BRIDGE_INFO,
-  BRIDGE_INFO_RETURNED
+  BRIDGE_INFO_RETURNED,
+  GET_SWAP_HISTORY,
+  SWAP_HISTORY_RETURNED
 } from './constants';
 
 import stores from './'
@@ -133,6 +135,9 @@ class Store {
             break;
           case GET_BRIDGE_INFO:
             this.getBridgeInfo()
+            break;
+          case GET_SWAP_HISTORY:
+            this.getSwapHistroy()
             break;
           default: {
           }
@@ -468,12 +473,7 @@ class Store {
         return this.emitter.emit(ERROR, err)
       }
 
-      // const totalLocked = swapAssetsMapped.reduce((a, b) => {
-      //   return BigNumber(a).plus(b.usdBalance ? b.usdBalance : 0).toNumber()
-      // }, 0)
-
       this.setStore({ swapAssets: swapAssetsMapped })
-      // this.setStore({ totalLocked: totalLocked })
 
       this.emitter.emit(SWAP_UPDATED)
       this.emitter.emit(SWAP_BALANCES_RETURNED)
@@ -866,15 +866,18 @@ class Store {
       const nodesArray = Object.keys(nodeListJson.info).map((key) => [key, nodeListJson.info[key]]);
 
       const totalLocked = bridgeArray.reduce((a, b) => {
-        const balance = BigNumber(b[1].balance).div(10**b[1].decimals).toNumber()
+        try {
+          if(b[1] && b[1].balance && b[1].decimals && b[1].chainId && b[1].markets && Number(b[1].markets)) {
+            const balance = BigNumber(b[1].balance).div(10**b[1].decimals).toNumber()
+            const baseUSD = bridgeInfoJson.baseUSD[b[1].chainId].market
 
-        let baseUSD = 0
-        if(b[1].chainId && b[1].markets) {
-          baseUSD = bridgeInfoJson.baseUSD[b[1].chainId].market
-        } else {
+            return BigNumber(a).plus(BigNumber(balance).times(baseUSD).div(b[1].markets)).toNumber()
+          }
+
           return a
+        } catch(ex) {
+          console.log(ex)
         }
-        return BigNumber(a).plus(BigNumber(balance).times(baseUSD).div(b[1].markets)).toNumber()
       }, 0)
 
       this.setStore({
@@ -888,6 +891,79 @@ class Store {
     } catch(ex) {
       console.log(ex)
     }
+  }
+
+  getSwapHistroy = async (payload) => {
+    const account = await stores.accountStore.getStore('account')
+    if(!account) {
+      return false
+    }
+
+    try {
+      const swapHistoryIn = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/250/1/allv2?offset=0&limit=100`)
+      const swapHistoryInJson = await swapHistoryIn.json()
+
+      const swapHistoryOut = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/${account.address}/250/1/allv2?offset=0&limit=100`)
+      const swapHistoryOutJson = await swapHistoryOut.json()
+
+      let populatedSwapIn = swapHistoryInJson.info.map((swap) => {
+        swap.from = 1
+        swap.fromDescription = 'Eth Mainnet'
+        swap.fromChain = CHAIN_MAP[1]
+        swap.to = 250
+        swap.toDescription = 'FTM Mainnet'
+        swap.toChain = CHAIN_MAP[250]
+
+        let asset = this.store.swapAssets.filter((asset) => {
+          return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+        })
+
+        if(asset[0]) {
+          swap.tokenMetadata = asset[0].tokenMetadata
+        }
+
+        return swap
+      })
+
+      let populatedSwapOut = swapHistoryOutJson.info.map((swap) => {
+        swap.from = 250
+        swap.fromDescription = 'FTM Mainnet'
+        swap.fromChain = CHAIN_MAP[250]
+        swap.to = 1
+        swap.toDescription = 'Eth Mainnet'
+        swap.toChain = CHAIN_MAP[1]
+
+        let asset = this.store.swapAssets.filter((asset) => {
+          return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+        })
+
+        if(asset[0]) {
+          swap.tokenMetadata = asset[0].tokenMetadata
+        }
+
+        return swap
+      })
+
+      const fullHistory = [...populatedSwapIn, ...populatedSwapOut]
+
+      const history = fullHistory.sort((a, b) => {
+        if(a.txtime > b.txtime) {
+          return -1
+        } else if (a.txtime < b.txtime) {
+          return 1
+        } else {
+          return 0
+        }
+      })
+
+      this.setStore({ swapHistory: history })
+
+      this.emitter.emit(SWAP_HISTORY_RETURNED, history)
+    } catch(ex) {
+      console.log(ex)
+      this.emitter.emit(ERROR, ex)
+    }
+
   }
 }
 

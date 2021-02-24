@@ -25,3 +25,9 @@
   font-size: 15px;
   margin-right: 12px;
 }
+
+@media screen and (max-width: 1200px) {
+  .footerContainer{
+    display: none;
+  }
+}

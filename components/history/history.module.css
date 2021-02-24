@@ -1,8 +1,27 @@
 .historyContainer {
-  max-width: 485px;
   width: 100%;
-  padding: 24px;
-  min-height: 600px;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
+}
+
+.inline {
+  display: flex;
+}
+
+.textSpaced {
+  line-height: 1.5;
+}
+
+@media screen and (max-width: 1200px) {
+  .historyContainer{
+
+  }
+}
+
+
+@media screen and (max-width: 1200px) {
+  .historyContainer{
+
+  }
 }

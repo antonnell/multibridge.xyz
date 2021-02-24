@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
+import Skeleton from '@material-ui/lab/Skeleton';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -19,6 +20,16 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
+
+import PublishIcon from '@material-ui/icons/Publish';
+import GetAppIcon from '@material-ui/icons/GetApp';
+
+import BigNumber from 'bignumber.js'
+
+
+import { formatCurrency, formatAddress } from '../../utils'
+
+import * as moment from 'moment'
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -47,15 +58,15 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-  { id: 'asset', numeric: false, disablePadding: false, label: 'Asset' },
-  { id: 'amount', numeric: true, disablePadding: false, label: 'Amount' },
+  { id: 'pairid', numeric: false, disablePadding: false, label: 'Sent' },
   { id: 'from', numeric: false, disablePadding: false, label: 'From' },
   { id: 'to', numeric: false, disablePadding: false, label: 'To' },
+  { id: 'swaptime', numeric: false, disablePadding: false, label: 'Time' },
   { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
 ];
 
 function EnhancedTableHead(props) {
-  const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+  const { classes, order, orderBy, rowCount, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -67,7 +78,7 @@ function EnhancedTableHead(props) {
           <TableCell
             key={headCell.id}
             align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'default'}
+            padding={ 'default' }
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
@@ -91,9 +102,7 @@ function EnhancedTableHead(props) {
 
 EnhancedTableHead.propTypes = {
   classes: PropTypes.object.isRequired,
-  numSelected: PropTypes.number.isRequired,
   onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
   orderBy: PropTypes.string.isRequired,
   rowCount: PropTypes.number.isRequired,
@@ -119,36 +128,10 @@ const useToolbarStyles = makeStyles((theme) => ({
   },
 }));
 
-const EnhancedTableToolbar = (props) => {
-  const classes = useToolbarStyles();
-  const { numSelected } = props;
-
-  return (
-    <Toolbar
-      className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0,
-      })}
-    >
-      {numSelected > 0 ? (
-        <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-          {numSelected} selected
-        </Typography>
-      ) : (
-        <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-          Swap History
-        </Typography>
-      )}
-    </Toolbar>
-  );
-};
-
-EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-};
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
+    padding: '0px 24px'
   },
   paper: {
     width: '100%',
@@ -168,13 +151,48 @@ const useStyles = makeStyles((theme) => ({
     top: 20,
     width: 1,
   },
+  inline: {
+    display: 'flex'
+  },
+  icon: {
+    marginRight: '12px'
+  },
+  textSpaced: {
+    lineHeight: '1.5'
+  },
+  cell: {
+    padding: '24px'
+  },
+  cellAddress: {
+    padding: '24px',
+    cursor: 'pointer'
+  },
+  aligntRight: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end'
+  },
+  skelly: {
+    marginBottom: '12px',
+    marginTop: '12px'
+  },
+  skelly1: {
+    marginBottom: '12px',
+    marginTop: '24px'
+  },
+  skelly2: {
+    margin: '12px 6px'
+  },
+  tableBottomSkelly: {
+    display: 'flex',
+    justifyContent: 'flex-end'
+  }
 }));
 
 export default function EnhancedTable({ swapHistory }) {
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
@@ -182,35 +200,6 @@ export default function EnhancedTable({ swapHistory }) {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
-  };
-
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = swapHistory.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -222,13 +211,53 @@ export default function EnhancedTable({ swapHistory }) {
     setPage(0);
   };
 
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const getStatus = (status) => {
+    let statusType = 'Pending'
+    if ([0, 5].includes(status)) {
+      statusType = 'Confirming'
+    } else if ([8, 9].includes(status)) {
+      statusType = 'Success' // fusionsuccess
+    } else if ([10].includes(status)) {
+      statusType = 'Success' // outnetsuccess
+    } else if ([1, 2, 3, 4, 6, 11].includes(status)) {
+      statusType = 'Failure'
+    } else if ([20].includes(status)) {
+      statusType = 'Timeout'
+    } else {
+      statusType = 'Pending'
+    }
+    return statusType
+  }
 
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, swapHistory.length - page * rowsPerPage);
+  if(!swapHistory) {
+    return(<div className={classes.root}>
+      <Skeleton variant="rect" width={1100} height={40} className={ classes.skelly1} />
+      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
+      <div className={ classes.tableBottomSkelly }>
+        <Skeleton variant="rect" width={100} height={30} className={ classes.skelly2} />
+        <Skeleton variant="rect" width={40} height={30} className={ classes.skelly2} />
+        <Skeleton variant="rect" width={60} height={30} className={ classes.skelly2} />
+        <Skeleton variant="rect" width={100} height={30} className={ classes.skelly2} />
+      </div>
+    </div>)
+  }
+
+  const addressClicked = (row, direction) => {
+    if(direction === 'from') {
+      window.open(`${row.fromChain.explorer}/tx/${row.txid}`, '_blank')
+    } else {
+      window.open(`${row.toChain.explorer}/tx/${row.swaptx}`, '_blank')
+    }
+  }
+
+  const emptyRows = rowsPerPage - Math.min(rowsPerPage, swapHistory.length - (page * rowsPerPage));
 
   return (
     <div className={classes.root}>
-      <EnhancedTableToolbar numSelected={selected.length} />
       <TableContainer>
         <Table
           className={classes.table}
@@ -238,43 +267,62 @@ export default function EnhancedTable({ swapHistory }) {
         >
           <EnhancedTableHead
             classes={classes}
-            numSelected={selected.length}
             order={order}
             orderBy={orderBy}
-            onSelectAllClick={handleSelectAllClick}
             onRequestSort={handleRequestSort}
             rowCount={swapHistory.length}
           />
           <TableBody>
             {stableSort(swapHistory, getComparator(order, orderBy))
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .slice(page * rowsPerPage, (page * rowsPerPage) + rowsPerPage)
               .map((row, index) => {
-                const isItemSelected = isSelected(row.name);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.name)}
-                    role="checkbox"
-                    aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.name}
-                    selected={isItemSelected}
+                    key={row.txid}
                   >
-                    <TableCell component="th" id={labelId} scope="row" padding="none">
-                      {row.name}
+                    <TableCell className={ classes.cell }>
+                      <div className={ classes.inline }>
+                        <img src={`${row.tokenMetadata.icon}`} width={ 40 } height={ 40 } className={ classes.icon } />
+                        <div className={ classes.aligntRight}>
+                          <Typography variant='h5' className={ classes.textSpaced }>Sent: { formatCurrency(BigNumber(row.value).div(10**(row.tokenMetadata ? row.tokenMetadata.decimals : 18)).toNumber()) } { row.tokenMetadata ? row.tokenMetadata.symbol : '' }</Typography>
+                          <Typography variant='subtitle1' className={ classes.textSpaced }>Received: { formatCurrency(BigNumber(row.swapvalue).div(10**(row.tokenMetadata ? row.tokenMetadata.decimals : 18)).toNumber()) } { row.tokenMetadata ? row.tokenMetadata.symbol : '' }</Typography>
+                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell align="right">{row.calories}</TableCell>
-                    <TableCell align="right">{row.fat}</TableCell>
-                    <TableCell align="right">{row.carbs}</TableCell>
-                    <TableCell align="right">{row.protein}</TableCell>
+                    <TableCell className={ classes.cellAddress } onClick={ () => { addressClicked(row, 'from') } }>
+                      <div className={ classes.inline }>
+                        <img src={`/blockchains/${row.fromChain.icon}`} width={ 40 } height={ 40 } className={ classes.icon } />
+                        <div>
+                          <Typography variant='h5' className={ classes.textSpaced }>{ row.fromDescription }</Typography>
+                          <Typography variant='subtitle1' className={ classes.textSpaced }>{ formatAddress(row.txid, 'medium') }</Typography>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className={ classes.cellAddress } onClick={ () => { addressClicked(row, 'to') } }>
+                      <div className={ classes.inline }>
+                        <img src={`/blockchains/${row.toChain.icon}`} width={ 40 } height={ 40 } className={ classes.icon } />
+                        <div>
+                          <Typography variant='h5' className={ classes.textSpaced }>{ row.toDescription }</Typography>
+                          <Typography variant='subtitle1' className={ classes.textSpaced }>{ formatAddress(row.swaptx, 'medium') }</Typography>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className={ classes.cell }>
+                      <Typography variant='h5'>{ moment(row.txtime*1000).fromNow() }</Typography>
+                    </TableCell>
+                    <TableCell className={ classes.cell }>
+                      <Typography variant='h5'>{ getStatus(row.status) }</Typography>
+                    </TableCell>
                   </TableRow>
                 );
               })}
             {emptyRows > 0 && (
               <TableRow style={{ height: (53) * emptyRows }}>
-                <TableCell colSpan={6} />
+                <TableCell colSpan={6} className={ classes.cell } />
               </TableRow>
             )}
           </TableBody>
