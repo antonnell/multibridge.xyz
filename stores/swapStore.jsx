@@ -869,7 +869,7 @@ class Store {
         const balance = BigNumber(b[1].balance).div(10**b[1].decimals).toNumber()
 
         let baseUSD = 0
-        if(b[1].chainId && b[1].markets) {
+        if(b[1].chainId && b[1].markets && Number(b[1].markets)) {
           baseUSD = bridgeInfoJson.baseUSD[b[1].chainId].market
         } else {
           return a
