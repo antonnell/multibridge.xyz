@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Header from '../header'
 import Navigation from '../navigation'
 import SnackbarController from '../snackbar'
-import Disclaimer from '../disclaimer'
 
 export const siteTitle = 'Multichain.xyz'
 
@@ -39,9 +38,6 @@ export default function Layout({ children, configure, backClicked, changeTheme }
       <div className={ classes.content }>
         {!configure && (
           <Header backClicked={backClicked} changeTheme={ changeTheme } />
-        )}
-        {!configure && (
-          <Disclaimer />
         )}
         <main className={ classes.main }>{children}</main>
         <SnackbarController />

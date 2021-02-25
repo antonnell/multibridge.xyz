@@ -30,7 +30,7 @@ import {
 import BigNumber from 'bignumber.js'
 
 
-function Setup({ theme, handleNext, swapState }) {
+function Setup({ theme, handleNext, swapState, setSwapState }) {
   const storeSwapAssets = stores.swapStore.getStore('swapAssets')
   const storeAccount = stores.accountStore.getStore('account')
 
@@ -118,6 +118,15 @@ function Setup({ theme, handleNext, swapState }) {
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
         setToAddressValue(account ? account.address : '')
       }
+
+      setSwapState({
+        fromAmountValue: fromAmountValue,
+        fromAssetValue: storeSwapAssets[index],
+        fromAddressValue: account ? account.address : '',
+        toAmountValue: toAmountValue,
+        toAssetValue: targetOption[0],
+        toAddressValue: account ? account.address : '',
+      })
     }
 
     const errorReturned = () => {
@@ -232,6 +241,15 @@ function Setup({ theme, handleNext, swapState }) {
     }
 
     setToAmountValue(receive)
+
+    setSwapState({
+      fromAmountValue: amount,
+      fromAssetValue: from,
+      fromAddressValue: fromAddressValue,
+      toAmountValue: receive,
+      toAssetValue: to,
+      toAddressValue: toAddressValue,
+    })
   }
 
   const onNext = () => {
@@ -447,31 +465,6 @@ function Setup({ theme, handleNext, swapState }) {
           </Button>
         )
       }
-      <div className={ classes.swapInfo }>
-        <div className={ classes.swapInfoRow }>
-          <Typography color='textSecondary'>Max Swap Amount </Typography>
-          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.maximumSwap : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-        </div>
-        <div className={ classes.swapInfoRow }>
-          <Typography color='textSecondary'>Min Swap Amount</Typography>
-          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.minimumSwap : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-        </div>
-        <div className={ classes.swapInfoRow }>
-          <Typography color='textSecondary'>Swap Fee</Typography>
-          <Typography>{ formatCurrencySmall(fromAssetValue ? (fromAssetValue.swapFeeRate*100) : 0) }%</Typography>
-        </div>
-        <div className={ classes.swapInfoRow }>
-          <Typography color='textSecondary'>Max Fee Amount</Typography>
-          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.maximumSwapFee : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-        </div>
-        <div className={ classes.swapInfoRow }>
-          <Typography color='textSecondary'>Min Fee Amount</Typography>
-          <Typography>{ formatCurrencySmall(fromAssetValue ? fromAssetValue.minimumSwapFee : 0) } { fromAssetValue ? fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-        </div>
-        <div className={ classes.swapInfoRow }>
-          <Typography color='textSecondary' className={ classes.flexy }>Deposits <Typography color={ 'textPrimary' } className={ classes.inlineText }>> {formatCurrencySmall(fromAssetValue ? fromAssetValue.bigValueThreshold : 0)} {(fromAssetValue && fromAssetValue.tokenMetadata) ? fromAssetValue.tokenMetadata.symbol : ''} </Typography> could take up to <Typography color='textPrimary' className={ classes.inlineText }> 12 hours</Typography></Typography>
-        </div>
-      </div>
     </div>
   )
 }
