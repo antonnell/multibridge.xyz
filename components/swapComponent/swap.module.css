@@ -233,6 +233,11 @@
 
 }
 
+.flexy2 {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .flexy {
   display: flex;
   justify-content: flex-start;

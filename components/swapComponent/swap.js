@@ -77,6 +77,7 @@ function Swap({ theme }) {
         stores.dispatcher.dispatch({ type: SWAP_CONFIRM_SWAP, content: setupSwapState })
         break;
       case 'showTX':
+        stores.dispatcher.dispatch({ type: CLEARN_LISTENERS })
         setCurrentScreen('setup')
         break;
       default:
@@ -99,8 +100,8 @@ function Swap({ theme }) {
       default:
     }
 
-    setCurrentScreen(newScreen)
     stores.dispatcher.dispatch({ type: CLEARN_LISTENERS })
+    setCurrentScreen(newScreen)
   }
 
   const getDepositAddress = () => {

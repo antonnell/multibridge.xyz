@@ -169,7 +169,7 @@ class Store {
     const assets = anyswapServerArray.map((chainDetails) => {
 
       const chainKey = chainDetails[0]
-      if(chainKey == 4 || chainKey == 46688 || chainKey == 1) {
+      if(chainKey == 4 || chainKey == 46688) {
         return null
       }
       const chainVal = chainDetails[1]
@@ -179,14 +179,15 @@ class Store {
       const anyswapInfoFormatted = chainValArray.map((details) => {
         const key = details[0]
 
-        if(['ltc', 'btc', 'any'].includes(key)) {
+        if(['ltc', 'btc', 'any', 'block', 'sfi', 'frax'].includes(key)) {
           return null
         }
 
         const val = details[1]
 
         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
-        if (val.SrcToken.DcrmAddress == '0xC564EE9f21Ed8A2d8E7e76c085740d5e4c5FaFbE') {
+
+        if (val.SrcToken.DcrmAddress == '0xC564EE9f21Ed8A2d8E7e76c085740d5e4c5FaFbE' || key === 'fantom') {
           return [
             {
               id: sourceChainInfo.sourceChainID+'_'+key,
@@ -203,12 +204,12 @@ class Store {
               minimumSwapFee: val.SrcToken.MinimumSwapFee,
               bigValueThreshold: val.SrcToken.BigValueThreshold,
               tokenMetadata: {
-                icon: `/tokens/${val.SrcToken.Symbol}.png`,
+                icon: `/tokens/${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)}.png`,
                 address: val.SrcToken.ContractAddress,
-                symbol: val.SrcToken.Symbol,
+                symbol: val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol,
                 decimals: val.SrcToken.Decimals,
-                name: val.SrcToken.Name,
-                description: `${val.SrcToken.Symbol} on ${sourceChainInfo.sourceChainDescription}`
+                name: val.PairID === 'fantom' ? 'Fantom' : val.SrcToken.Name,
+                description: `${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)} on ${sourceChainInfo.sourceChainDescription}`
               }
             },
             {
@@ -226,12 +227,12 @@ class Store {
               minimumSwapFee: val.DestToken.MinimumSwapFee,
               bigValueThreshold: val.DestToken.BigValueThreshold,
               tokenMetadata: {
-                icon: `/tokens/${val.SrcToken.Symbol}.png`,
-                address: val.DestToken.ContractAddress,  // GET ADDRESS SOMEHOW, think it is contractAddress.proxyToken
-                symbol: val.DestToken.Symbol,
+                icon: `/tokens/${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)}.png`,
+                address: val.DestToken.IsDelegateContract ? val.DestToken.DelegateToken : val.DestToken.ContractAddress,
+                symbol: val.PairID === 'fantom' ? 'FTM' : val.DestToken.Symbol,
                 decimals: val.DestToken.Decimals,
-                name: val.DestToken.Name,
-                description: `${val.DestToken.Symbol} on ${sourceChainInfo.destinationChainDescription}`
+                name: val.PairID === 'fantom' ? 'Fantom' : val.DestToken.Name,
+                description: `${(val.PairID === 'fantom' ? 'FTM' : val.DestToken.Symbol)} on ${sourceChainInfo.destinationChainDescription}`
               }
             }
           ]
@@ -266,19 +267,19 @@ class Store {
 
           const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
 
-          if(val.PairID === asset.pairID && chainKey === asset.chainID && asset.tokenMetadata.symbol === val.DestToken.Symbol) {
+          if(val.PairID === asset.pairID && chainKey === asset.chainID && (asset.tokenMetadata.symbol === val.DestToken.Symbol || (asset.tokenMetadata.symbol === 'FTM' && val.DestToken.Symbol === ''))) {
             return {
               id: sourceChainInfo.sourceChainID+'_'+key,
               chainID: sourceChainInfo.sourceChainID,
               pairID: val.PairID,
-              symbol: val.SrcToken.Symbol
+              symbol: asset.tokenMetadata.symbol === 'FTM' ? 'FTM' : val.SrcToken.Symbol
             }
-          } else if (val.PairID === asset.pairID && sourceChainInfo.sourceChainID === asset.chainID && asset.tokenMetadata.symbol === val.SrcToken.Symbol) {
+          } else if (val.PairID === asset.pairID && sourceChainInfo.sourceChainID === asset.chainID && (asset.tokenMetadata.symbol === val.SrcToken.Symbol || (asset.tokenMetadata.symbol === 'FTM' && val.SrcToken.Symbol === ''))) {
             return {
               id: chainKey+'_'+key,
               chainID: chainKey,
               pairID: val.PairID,
-              symbol: val.DestToken.Symbol
+              symbol: asset.tokenMetadata.symbol === 'FTM' ? 'FTM' : val.DestToken.Symbol
             }
           } else {
             return null
@@ -394,10 +395,6 @@ class Store {
 
     const coingeckoCoins = await CoinGeckoClient.coins.list()
 
-
-    console.log(swapAssets)
-    console.log(coingeckoCoins)
-
     const mappedAssetSymbols = swapAssets.map((asset) => {
       return asset.tokenMetadata.symbol.toLowerCase()
     })
@@ -410,8 +407,6 @@ class Store {
       ids: filteredCoingeckoCoins.map(coin => coin.id),
       vs_currencies: ['usd'],
     });
-
-    console.log(priceData)
 
     // get address from contract thing
     async.map(swapAssets, async (asset, callback) => {
@@ -427,12 +422,12 @@ class Store {
 
         let erc20Address = asset.tokenMetadata.address
 
-        if(asset.chainID === '1' && asset.pairID === 'Fantom') {
-          const proxyContract = new web3.eth.Contract(PROXYSWAPASSETABI, erc20Address)
-          erc20Address = await proxyContract.methods.proxyToken().call()
-        }
+        if(asset.chainID === '250' && asset.pairID === 'fantom') {
+          const balanceOf = await web3.eth.getBalance(account.address)
 
-        if(erc20Address) {
+          const balance = BigNumber(balanceOf).div(10**18).toNumber()
+          asset.tokenMetadata.balance = balance
+        } else if(erc20Address) {
           const erc20Contract = new web3.eth.Contract(ERC20ABI, erc20Address)
 
           const decimals = await erc20Contract.methods.decimals().call()
@@ -440,27 +435,6 @@ class Store {
 
           const balance = BigNumber(balanceOf).div(10**decimals).toNumber()
           asset.tokenMetadata.balance = balance
-
-        //   if(asset.chainID == 1) {
-        //     // GET USD Price
-        //     let theCoinArr = filteredCoingeckoCoins.filter((coinData) => {
-        //       return coinData.symbol.toLowerCase() === asset.tokenMetadata.symbol.toLowerCase()
-        //     })
-        //     let usdPrice = 1
-        //
-        //     if(theCoinArr.length >  0) {
-        //       let thePriceData = priceData.data[theCoinArr[0].id]
-        //       if(thePriceData) {
-        //         usdPrice = thePriceData.usd
-        //       }
-        //     }
-        //
-        //     //USD Price * balance of DCRM contract
-        //     const dcrmBalance = await erc20Contract.methods.balanceOf(asset.dcrmAddress).call()
-        //     asset.balance = BigNumber(dcrmBalance).div(10**decimals).toNumber()
-        //     asset.usdPrice = usdPrice
-        //     asset.usdBalance = BigNumber(dcrmBalance).div(10**decimals).times(usdPrice).toNumber()
-        //   }
         }
 
         callback(null, asset)
@@ -579,18 +553,17 @@ class Store {
     let pairID = null
 
     if(toAssetValue.chainID == '1') {
-      chainID = fromAssetValue.chainID
-      pairID = fromAssetValue.pairID
+      if(toAssetValue.pairID === 'fantom') {
+        chainID = toAssetValue.chainID
+        pairID = toAssetValue.pairID
+      } else {
+        chainID = fromAssetValue.chainID
+        pairID = fromAssetValue.pairID
+      }
     } else {
       chainID = toAssetValue.chainID
       pairID = toAssetValue.pairID
     }
-
-    console.log(fromAssetValue.chainID)
-    console.log(toAssetValue.chainID)
-
-    console.log(chainID)
-    console.log(pairID)
 
     try {
       const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${toAddressValue}/${chainID}/${pairID}`);
@@ -623,18 +596,17 @@ class Store {
     let pairID = null
 
     if(toAssetValue.chainID == '1') {
-      chainID = fromAssetValue.chainID
-      pairID = fromAssetValue.pairID
+      if(toAssetValue.pairID === 'fantom') {
+        chainID = toAssetValue.chainID
+        pairID = toAssetValue.pairID
+      } else {
+        chainID = fromAssetValue.chainID
+        pairID = fromAssetValue.pairID
+      }
     } else {
       chainID = toAssetValue.chainID
       pairID = toAssetValue.pairID
     }
-
-    console.log(fromAssetValue.chainID)
-    console.log(toAssetValue.chainID)
-
-    console.log(chainID)
-    console.log(pairID)
 
     try {
       const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${toAddressValue}/${chainID}/${pairID}`);
@@ -645,11 +617,13 @@ class Store {
       this.emitter.emit(ERROR, ex)
     }
 
-    if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
+    if(fromAssetValue.chainID === '1' && toAssetValue.chainID === '250')  {
+      return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
+    } else if (fromAssetValue.chainID === '250' && toAssetValue.chainID === '1') {
+      return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
+    } if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
       return this._ercToNative(fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue)
-    }
-
-    if(toAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAssetValue.chainID)) {
+    } else if(toAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAssetValue.chainID)) {
       return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
     }
   }
@@ -699,7 +673,6 @@ class Store {
     // call bridge API to get the status TX (returns the 2 TXs we need to listen to)
     // might need to change direction/chainID for swaps to and swaps back. need to test
     try {
-      console.log('Checking again')
       let direction = 1 // I think?
 
       let chainID = null
@@ -715,7 +688,13 @@ class Store {
 
       let statusJson = null
 
-      if(toAsset.chainID == '1') {
+      if(toAsset.chainID === '250' && toAsset.pairID === 'fantom') {
+        const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getWithdrawHashStatus/${toAddressValue}/${fromTXHash}/1/FTM/250?pairid=fantom`);
+        statusJson = await statusResult.json()
+      } else if (toAsset.chainID === '1' && toAsset.pairID === 'fantom') {
+        const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getHashStatus/${toAddressValue}/${fromTXHash}/1/FTM/250?pairid=fantom`);
+        statusJson = await statusResult.json()
+      } else if (toAsset.chainID == '1') {
         const statusResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/getWithdrawHashStatus/${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/${direction}`);
         statusJson = await statusResult.json()
       } else {
@@ -723,8 +702,9 @@ class Store {
         statusJson = await statusResult.json()
       }
 
-      console.log(statusJson)
-      this.emitter.emit(SWAP_STATUS_TRANSACTIONS, statusJson)
+      if(this.getStore('listener') === true) {
+        this.emitter.emit(SWAP_STATUS_TRANSACTIONS, statusJson)
+      }
 
       if(statusJson && statusJson.info && statusJson.info.txid && statusJson.info.txid !== '' && statusJson.info.swaptx && statusJson.info.swaptx !== '') {
         //once we have the transfer we can stop listening
@@ -855,6 +835,50 @@ class Store {
     })
   }
 
+  _transferNativeToken = async (fromAsset, toAsset, fromAddressValue, amount) => {
+    const account = await stores.accountStore.getStore('account')
+    if(!account) {
+      return false
+    }
+
+    const web3 = await stores.accountStore.getWeb3Provider()
+    if(!web3) {
+      return false
+    }
+
+    const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
+    const gasPrice = await stores.accountStore.getGasPrice()
+
+    web3.eth.sendTransaction(
+    {
+      from: account.address,
+      to: fromAsset.dcrmAddress,
+      value: amountToSend,
+      gasPrice: web3.utils.toWei(gasPrice, 'gwei'),
+    }, async (err, txHash) => {
+      if(err) {
+        return this.emitter.emit(ERROR, err);
+      }
+
+      this.emitter.emit(SWAP_SHOW_TX_STATUS, txHash)
+
+      const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
+      const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
+
+      const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
+      const toCurrentBlock = await toWeb3.eth.getBlockNumber()
+
+      this.setStore({ listener: true })
+      const that = this
+
+      while(this.getStore('listener') === true) {
+        await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, fromAsset.dcrmAddress, fromCurrentBlock, toCurrentBlock, account.address, account.address, toAsset.dcrmAddress, txHash, () => {
+          that.setStore({ listener: false })
+        })
+      }
+    });
+  }
+
   getBridgeInfo = async () => {
     try {
       const bridgeInfoResult = await fetch(`https://netapi.anyswap.net/bridge/info`)
@@ -902,6 +926,12 @@ class Store {
     }
 
     try {
+      const swapHistoryInFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/1/250/all?offset=0&limit=100`)
+      const swapHistoryInJsonFTM = await swapHistoryInFTM.json()
+
+      const swapHistoryOutFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/${account.address}/1/250/all?offset=0&limit=100`)
+      const swapHistoryOutJsonFTM = await swapHistoryOutFTM.json()
+
       const swapHistoryIn = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/250/1/allv2?offset=0&limit=100`)
       const swapHistoryInJson = await swapHistoryIn.json()
 
@@ -946,7 +976,45 @@ class Store {
         return swap
       })
 
-      const fullHistory = [...populatedSwapIn, ...populatedSwapOut]
+      let populatedSwapInFTM = swapHistoryInJsonFTM.info.map((swap) => {
+        swap.from = 1
+        swap.fromDescription = 'Eth Mainnet'
+        swap.fromChain = CHAIN_MAP[1]
+        swap.to = 250
+        swap.toDescription = 'FTM Mainnet'
+        swap.toChain = CHAIN_MAP[250]
+
+        let asset = this.store.swapAssets.filter((asset) => {
+          return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+        })
+
+        if(asset[0]) {
+          swap.tokenMetadata = asset[0].tokenMetadata
+        }
+
+        return swap
+      })
+
+      let populatedSwapOutFTM = swapHistoryOutJsonFTM.info.map((swap) => {
+        swap.from = 250
+        swap.fromDescription = 'FTM Mainnet'
+        swap.fromChain = CHAIN_MAP[250]
+        swap.to = 1
+        swap.toDescription = 'Eth Mainnet'
+        swap.toChain = CHAIN_MAP[1]
+
+        let asset = this.store.swapAssets.filter((asset) => {
+          return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+        })
+
+        if(asset[0]) {
+          swap.tokenMetadata = asset[0].tokenMetadata
+        }
+
+        return swap
+      })
+
+      const fullHistory = [...populatedSwapIn, ...populatedSwapOut, ...populatedSwapInFTM, ...populatedSwapOutFTM]
 
       const history = fullHistory.sort((a, b) => {
         if(a.txtime > b.txtime) {

@@ -67,6 +67,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
             alt=""
             src={ asset.tokenMetadata.icon }
             height='100px'
+            onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
           />
           <img
             className={ classes.displayChainIcon }
@@ -74,6 +75,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
             src={ `/blockchains/${asset.icon}` }
             height='40px'
             width='40px'
+            onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
           />
         </div>
         <div className={ classes.txInfoContainer }>
@@ -86,7 +88,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
             <Typography variant='subtitle1'>Estimated Time of Deposit Arrival is 10-30 min</Typography>
           )}
           { tx && tx !== '' && (
-            <div className={ classes.flexy }>
+            <div className={ classes.flexy2 }>
               <Button onClick={ (event) => { onCopy(event, tx) } }>
                 <FileCopyIcon className={ classes.assetSelectIcon } /> Copy
               </Button>

@@ -73,6 +73,7 @@ function Deposit({ theme, swapState, handleBack, handleNext, depositAddress }) {
                 alt=""
                 src={ swapState.fromAssetValue.tokenMetadata.icon }
                 height='100px'
+                onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
               />
               <img
                 className={ classes.displayChainIcon }
@@ -80,6 +81,7 @@ function Deposit({ theme, swapState, handleBack, handleNext, depositAddress }) {
                 src={ `/blockchains/${swapState.fromAssetValue.icon}` }
                 height='40px'
                 width='40px'
+                onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
               />
             </div>
           </div>

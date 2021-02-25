@@ -509,6 +509,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
               alt=""
               src={ asset ? asset.tokenMetadata.icon : '' }
               height='60px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
             <img
               className={ classes.displayChainIconSmall }
@@ -516,6 +517,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
               src={ asset ? `/blockchains/${asset.icon}` : '' }
               height='30px'
               width='30px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
           </div>
         </div>
@@ -541,6 +543,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
               alt=""
               src={ value ? value.tokenMetadata.icon : '' }
               height='100px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
             <img
               className={ classes.displayChainIcon }
@@ -548,6 +551,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
               src={ value ? `/blockchains/${value.icon}` : '' }
               height='40px'
               width='40px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
           </div>
         </div>
