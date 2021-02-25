@@ -546,6 +546,39 @@ class Store {
       })
   }
 
+  _callContractWait = (web3, contract, method, params, account, gasPrice, dispatchEvent, callback) => {
+    const context = this
+    contract.methods[method](...params).send({ from: account.address, gasPrice: web3.utils.toWei(gasPrice, 'gwei') })
+      .on('transactionHash', function(hash){
+        // callback(null, hash)
+      })
+      .on('confirmation', function(confirmationNumber, receipt){
+        console.log(confirmationNumber)
+        if(dispatchEvent && confirmationNumber === 1) {
+          context.dispatcher.dispatch({ type: dispatchEvent })
+        }
+      })
+      .on('receipt', function(receipt){
+        callback(null, receipt.transactionHash)
+      })
+      .on('error', function(error) {
+        if (!error.toString().includes("-32601")) {
+          if(error.message) {
+            return callback(error.message)
+          }
+          callback(error)
+        }
+      })
+      .catch((error) => {
+        if (!error.toString().includes("-32601")) {
+          if(error.message) {
+            return callback(error.message)
+          }
+          callback(error)
+        }
+      })
+  }
+
   getDepositAddress = async (payload) => {
     const { toAddressValue, toAssetValue, fromAssetValue } = payload.content
 
@@ -618,7 +651,39 @@ class Store {
     }
 
     if(fromAssetValue.chainID === '1' && toAssetValue.chainID === '250')  {
-      return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
+      //check approval first
+      const account = await stores.accountStore.getStore('account')
+      if(!account) {
+        return false
+      }
+
+      const web3 = await stores.accountStore.getWeb3Provider()
+      if(!web3) {
+        return false
+      }
+
+      const tokenContract = new web3.eth.Contract(ERC20ABI, fromAssetValue.tokenMetadata.address)
+
+      //get approved amoutn
+      const approved = await tokenContract.methods.allowance(account.address, fromAssetValue.contractAddress).call()
+
+      console.log(approved)
+      console.log(BigNumber(approved).div(18**fromAssetValue.tokenMetadata.decimals).toNumber())
+      console.log(fromAmountValue)
+
+      console.log(BigNumber(approved).div(18**fromAssetValue.tokenMetadata.decimals).gt(fromAmountValue))
+
+      if(BigNumber(approved).div(18**fromAssetValue.tokenMetadata.decimals).gt(fromAmountValue)) {
+        return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
+      } else {
+        const gasPrice = await stores.accountStore.getGasPrice()
+        return this._callContractWait(web3, tokenContract, 'approve', [fromAssetValue.contractAddress, MAX_UINT256], account, gasPrice, null, async (err, txHash) => {
+          if(err) {
+            return this.emitter.emit(ERROR, err);
+          }
+          return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
+        })
+      }
     } else if (fromAssetValue.chainID === '250' && toAssetValue.chainID === '1') {
       return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
     } if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
