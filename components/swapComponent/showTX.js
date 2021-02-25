@@ -103,6 +103,8 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
     )
   }
 
+  console.log(transferStatus)
+
   return (
     <div className={ classes.confirmSwap }>
       <div className={ classes.header }>
@@ -120,7 +122,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
         </div>
       </div>
       <div className={ classes.swapDepositInfo }>
-        { renderTX(swapState.fromAssetValue, transferStatus ? transferStatus.txid : null, -1) }
+        { renderTX(swapState.fromAssetValue, transferStatus ? transferStatus.txid : null, transferStatus ? transferStatus.intitalConfirmations : null) }
         { renderTX(swapState.toAssetValue, transferStatus ? transferStatus.swaptx : null, transferStatus ? transferStatus.confirmations : null) }
       </div>
       <div className={ classes.actionButton }>

@@ -351,6 +351,27 @@
   margin-right: 0;
 }
 
+.skelly {
+  margin-bottom: 12px;
+  margin-top: 12px;
+}
+
+.skelly1 {
+  margin-bottom: 6px;
+  margin-top: 6px;
+}
+
+.skelly2 {
+  margin-left: 24px;
+}
+
+.inline {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 @media screen and (max-width: 1200px) {
   .swapContainer {
     padding: 12px;
