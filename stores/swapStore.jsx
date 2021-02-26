@@ -648,8 +648,8 @@ class Store {
       console.log(ex)
       this.emitter.emit(ERROR, ex)
     }
-
-    if(fromAssetValue.chainID === '1' && toAssetValue.chainID === '250')  {
+    console.log(pairID);
+    if (pairID == 'fantom')  {
       //check approval first
       const account = await stores.accountStore.getStore('account')
       if(!account) {
@@ -677,6 +677,8 @@ class Store {
           return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue)
         })
       }
+    } else if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '250') {
+      return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
     } else if (fromAssetValue.chainID === '250' && toAssetValue.chainID === '1') {
       return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
     } if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
