@@ -217,10 +217,14 @@
 .addressField {
   border-radius: 10px;
   border: 1px solid rgba(128, 128, 128, 0.5);
-  padding: 12px;
+  padding: 6px 12px;
   width: 100%;
-  text-align: center;
   margin: 12px 0px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  cursor: pointer;
 }
 
 .swapDepositInfo {
@@ -310,7 +314,6 @@
   flex-direction: column;
   border-radius: 10px;
   padding: 12px;
-  margin-top: 24px;
   width: 100%;
 }
 
@@ -332,7 +335,6 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  width: 100%;
   padding: 12px 0px;
 }
 
@@ -370,6 +372,53 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.swapStatusContainer {
+  padding: 24px 24px 12px 24px;
+  width: 500px;
+  border-radius: 10px;
+}
+
+.info {
+  border-left: 5px solid #2F80ED;
+}
+
+.success {
+  border-left: 5px solid #4caf50;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.swapHeader {
+  flex: 1;
+}
+
+.closeIcon {
+  position: absolute !important;
+  right: 12px;
+  top: 12px;
+}
+
+.limitsFlex {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 0px;
+  width: fit-content;
+}
+
+.infoIcon {
+  margin-right: 12px;
+}
+
+.tooltipNoMaxWidth {
+  max-width: none;
 }
 
 @media screen and (max-width: 1200px) {

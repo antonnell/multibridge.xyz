@@ -7,8 +7,7 @@ import Confirm from './confirm'
 import Deposit from './deposit'
 import ShowTX from './showTX'
 import Disclaimer from '../disclaimer'
-
-import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
+import TransactionController from './swapTransactionController'
 
 import classes from './swap.module.css'
 
@@ -30,7 +29,7 @@ import { formatCurrencySmall } from '../../utils'
 
 function Swap({ theme }) {
 
-  const [ currentScreen, setCurrentScreen ] = useState('setup') //setup, confirm, depositAddress, showTX
+  const [ currentScreen, setCurrentScreen ] = useState('setup') //setup, showTX
   const [ swapState, setSwapState ] = useState(null)
   const [ depositAddress, setDepositAddress ] = useState(null)
   const [ depositTX, setDepositTX ] = useState(null)
@@ -48,17 +47,17 @@ function Swap({ theme }) {
 
     const depositTransactionReturned = (event) => {
       setDepositTX(event)
-      setCurrentScreen('showTX')
+      // setCurrentScreen('showTX')
     }
 
     const transferTransactionReturned = (event) => {
       setTransferTx(event)
-      setCurrentScreen('showTX')
+      // setCurrentScreen('showTX')
     }
 
     const transactionStatusReturned = (status) => {
       setTransferStatus(status.info)
-      setCurrentScreen('showTX')
+      // setCurrentScreen('showTX')
     }
 
     stores.emitter.on(ERROR, errorReturned)
@@ -145,99 +144,8 @@ function Swap({ theme }) {
         { currentScreen === 'depositAddress' && renderDepositAddress() }
         { currentScreen === 'showTX' && renderShowTX() }
       </Paper>
-      <div className={ classes.swapInfoContainer }>
-        <Disclaimer />
 
-
-        { !swapState && (
-            <div className={classes.root}>
-              <div className={ classes.inline }>
-                <Skeleton variant="rect" width={300} height={60} className={ classes.skelly} />
-                <Skeleton variant="circle" width={60} height={60} className={ classes.skelly2} />
-                <Skeleton variant="circle" width={60} height={60} className={ classes.skelly2} />
-              </div>
-              <Skeleton variant="rect" width={480} height={40} className={ classes.skelly1} />
-              <Skeleton variant="rect" width={480} height={40} className={ classes.skelly1} />
-              <Skeleton variant="rect" width={480} height={40} className={ classes.skelly1} />
-              <Skeleton variant="rect" width={480} height={40} className={ classes.skelly1} />
-              <Skeleton variant="rect" width={480} height={40} className={ classes.skelly1} />
-              <Skeleton variant="rect" width={480} height={40} className={ classes.skelly1} />
-            </div>
-          )
-        }
-        { swapState && (
-          <div className={ classes.swapInfo }>
-            <div className={ classes.swapDirectionHead }>
-              <Typography variant='h1'>{ (swapState && swapState.fromAssetValue) ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-              <div className={ classes.swapDirection }>
-                <div className={ classes.assetSelectMenuItem }>
-                  <div className={ `${classes.displayDualIconContainerSmall} ${classes.marginRightNone}` }>
-                    <img
-                      className={ classes.displayAssetIconSmall }
-                      alt=""
-                      src={ (swapState && swapState.fromAssetValue) ? swapState.fromAssetValue.tokenMetadata.icon : '' }
-                      height='60px'
-                      onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
-                    />
-                    <img
-                      className={ classes.displayChainIconSmall }
-                      alt=""
-                      src={ (swapState && swapState.fromAssetValue) ? `/blockchains/${swapState.fromAssetValue.icon}` : '' }
-                      height='30px'
-                      width='30px'
-                      onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
-                    />
-                  </div>
-                </div>
-                <ArrowRightAltIcon className={ classes.rightArrow } />
-                <div className={ classes.assetSelectMenuItem }>
-                  <div className={ `${classes.displayDualIconContainerSmall} ${classes.marginRightNone}` }>
-                    <img
-                      className={ classes.displayAssetIconSmall }
-                      alt=""
-                      src={ (swapState && swapState.toAssetValue) ? swapState.toAssetValue.tokenMetadata.icon : '' }
-                      height='60px'
-                      onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
-                    />
-                    <img
-                      className={ classes.displayChainIconSmall }
-                      alt=""
-                      src={ (swapState && swapState.toAssetValue) ? `/blockchains/${swapState.toAssetValue.icon}` : '' }
-                      height='30px'
-                      width='30px'
-                      onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className={ classes.swapInfoRow }>
-              <Typography color='textSecondary'>Max Swap Amount </Typography>
-              <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.maximumSwap : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-            </div>
-            <div className={ classes.swapInfoRow }>
-              <Typography color='textSecondary'>Min Swap Amount</Typography>
-              <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.minimumSwap : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-            </div>
-            <div className={ classes.swapInfoRow }>
-              <Typography color='textSecondary'>Swap Fee</Typography>
-              <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? (swapState.fromAssetValue.swapFeeRate*100) : 0) }%</Typography>
-            </div>
-            <div className={ classes.swapInfoRow }>
-              <Typography color='textSecondary'>Max Fee Amount</Typography>
-              <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.maximumSwapFee : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-            </div>
-            <div className={ classes.swapInfoRow }>
-              <Typography color='textSecondary'>Min Fee Amount</Typography>
-              <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.minimumSwapFee : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
-            </div>
-            <div className={ classes.swapInfoRow }>
-              <Typography color='textSecondary' className={ classes.flexy }>Deposits <Typography color={ 'textPrimary' } className={ classes.inlineText }>> {formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.bigValueThreshold : 0)} {(swapState && swapState.fromAssetValue && swapState.fromAssetValue.tokenMetadata) ? swapState && swapState.fromAssetValue.tokenMetadata.symbol : ''} </Typography> could take up to <Typography color='textPrimary' className={ classes.inlineText }> 12 hours</Typography></Typography>
-            </div>
-          </div>
-          )
-        }
-      </div>
+      <TransactionController />
     </div>
   )
 

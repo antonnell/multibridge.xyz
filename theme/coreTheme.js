@@ -124,6 +124,11 @@ const coreTheme = {
     }
   },
   overrides: {
+    MuiTooltip: {
+      tooltip: {
+        maxWidth: 'none',
+      }
+    },
     MuiButton: {
       root: {
         minWidth: '50px'
