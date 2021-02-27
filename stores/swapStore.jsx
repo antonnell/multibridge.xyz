@@ -641,7 +641,7 @@ class Store {
           context.dispatcher.dispatch({ type: dispatchEvent })
         }
         if(confirmationNumber === 15) {
-          context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.toAddressValue, receipt.transactionHash)
+          context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.fromAddressValue, receipt.transactionHash)
           //create API call listener until totx returns
         }
       })
@@ -855,7 +855,7 @@ class Store {
     const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
 
-    this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount }, async (err, txHash) => {
+    this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount, toAddressValue }, async (err, txHash) => {
       if(err) {
         return this.emitter.emit(ERROR, err);
       }
