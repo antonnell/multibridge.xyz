@@ -159,7 +159,7 @@ class Transaction extends Component {
             </div>
             { !!(swap && swap.from && swap.from.confirmationNumber && swap.from.confirmationNumber >= 15) &&
               <div className={ `${classes.addressField}` }>
-                { !!(swap && (!swap.to || !swap.to.confirmationNumber || swap.to.confirmationNumber === 0)) &&
+                { !!(swap && (!swap.to || !(swap.to.transactionHash || swap.to.hash))) &&
                   (
                     <React.Fragment>
                       <CircularProgress size={ 20 } />
