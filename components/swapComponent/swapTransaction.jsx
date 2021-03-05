@@ -126,12 +126,12 @@ class Transaction extends Component {
                   </React.Fragment>
                 )
               }
-              { !!(swap && swap.from && swap.from.confirmationNumber && swap.from.confirmationNumber > 0 && swap.from.confirmationNumber < 15) &&
+              { !!(swap && swap.from && swap.from.confirmationNumber && swap.from.confirmationNumber > 0 && swap.from.confirmationNumber < 3) &&
                 (
                   <React.Fragment>
                     <CircularProgress size={ 20 } />
                     <Tooltip title="View transaction">
-                      <Typography onClick={ (event) => { this.onViewTX(event, swap.from.transactionHash, swap.fromAsset) } }>Waiting for {15-swap.from.confirmationNumber} more block confirmations</Typography>
+                      <Typography onClick={ (event) => { this.onViewTX(event, swap.from.transactionHash, swap.fromAsset) } }>Waiting for {3-swap.from.confirmationNumber} more block confirmations</Typography>
                     </Tooltip>
                     <Tooltip title="Copy transaction hash">
                       <IconButton size="small"  onClick={ (event) => { this.onCopy(event, swap.from.transactionHash) }}>
@@ -141,7 +141,7 @@ class Transaction extends Component {
                   </React.Fragment>
                 )
               }
-              { !!(swap && swap.from && swap.from.confirmationNumber && swap.from.confirmationNumber >= 15) &&
+              { !!(swap && swap.from && swap.from.confirmationNumber && swap.from.confirmationNumber >= 3) &&
                 (
                   <React.Fragment>
                     <CheckCircleOutlineIcon color='primary' />
@@ -157,7 +157,7 @@ class Transaction extends Component {
                 )
               }
             </div>
-            { !!(swap && swap.from && swap.from.confirmationNumber && swap.from.confirmationNumber >= 15) &&
+            { !!((swap && swap.from && swap.from.confirmationNumber && swap.from.confirmationNumber >= 3) || (swap && swap.to && (swap.to.transactionHash || swap.to.hash))) &&
               <div className={ `${classes.addressField}` }>
                 { !!(swap && (!swap.to || !(swap.to.transactionHash || swap.to.hash))) &&
                   (
