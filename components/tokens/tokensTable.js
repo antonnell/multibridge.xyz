@@ -396,7 +396,7 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
                       <Typography variant='h5' className={ classes.textSpacedCursor } onClick={ () => { addressClicked(row.mpc.url) } }>{ row.mpc.address === 'Native' ? 'Native' : formatAddress(row.mpc.address) }</Typography>
                     </TableCell>
                     <TableCell className={ classes.cell }>
-                      <Typography variant='h5' className={ row.status === 'Queued' ? classes.textSpacedQueued : classes.textSpacedLive }>{ row.status }</Typography>
+                      <Typography variant='h5' className={ row.status === 'Queued' || row.status === 'Pending' ? classes.textSpacedQueued : classes.textSpacedLive }>{ row.status }</Typography>
                     </TableCell>
                   </TableRow>
                 );
