@@ -638,7 +638,9 @@ class Store {
         if(dispatchEvent && confirmationNumber === 1) {
           context.dispatcher.dispatch({ type: dispatchEvent })
         }
-        context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.fromAddressValue, receipt.transactionHash)
+        if(confirmationNumber === 1) {
+          context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.fromAddressValue, receipt.transactionHash)
+        }
       })
       .on('receipt', function(receipt) {
         context.emitter.emit(TX_RECEIPT, receipt)
@@ -1009,8 +1011,9 @@ class Store {
     })
     .on('confirmation', function(confirmationNumber, receipt){
       stores.emitter.emit(TX_CONFIRMED, receipt, confirmationNumber)
-      context.callStatusAPIRepeat(fromAsset, toAsset, fromAddressValue, receipt.transactionHash)
-      
+      if(confirmationNumber === 1) {
+        context.callStatusAPIRepeat(fromAsset, toAsset, fromAddressValue, receipt.transactionHash)
+      }
     })
     .on('receipt', function(receipt) {
       stores.emitter.emit(TX_RECEIPT, receipt)
