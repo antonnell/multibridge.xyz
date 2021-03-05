@@ -1,0 +1,28 @@
+.historyContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 260px);
+}
+
+.inline {
+  display: flex;
+  align-items: center;
+}
+
+.textSpaced {
+  line-height: 1.5;
+}
+
+.filters {
+  padding: 24px;
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+} 
+
+@media screen and (max-width: 1200px) {
+  .historyContainer{
+    max-width: calc(100vw);
+  }
+}

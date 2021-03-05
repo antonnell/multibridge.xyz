@@ -33,7 +33,9 @@ import {
   TX_UPDATED,
   TX_HASH,
   TX_RECEIPT,
-  TX_CONFIRMED
+  TX_CONFIRMED,
+  GET_SWAP_TOKENS,
+  SWAP_TOKENS_RETURNED
 } from './constants';
 
 import stores from './'
@@ -51,14 +53,6 @@ const fetch = require('node-fetch');
 
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
-
-const ID_MAP = {
-  fsn: 'fsn',
-  btc: 'bitcoin',
-  ltc: 'litecoin',
-  any: 'anyswap',
-  block: 'blocknet'
-}
 
 const CHAIN_MAP = {
   1: {
@@ -114,7 +108,8 @@ class Store {
       swapAssets: [],
       listener: false,
       totalLocked: 0,
-      transactions: []
+      transactions: [],
+      swapTokens: []
     }
 
     dispatcher.register(
@@ -143,6 +138,9 @@ class Store {
             break;
           case GET_SWAP_HISTORY:
             this.getSwapHistroy()
+            break;
+          case GET_SWAP_TOKENS:
+            this.getSwapTokens()
             break;
           default: {
           }
@@ -1190,6 +1188,103 @@ class Store {
       this.emitter.emit(ERROR, ex)
     }
 
+  }
+
+  getSwapTokens = async (payload) => {
+    try {
+      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/285ca435c19ca9e76e51813f94698be48e7915bd/anyswap`)
+      const swapTokens = await swapTokensResult.text()
+
+      const lines = swapTokens.replace(/\r/g, "").split(/\n/)
+
+      let type = 'unknown'
+
+      const dirtyParse = lines.map((line) => {
+        try {
+          const first2Chars = line.substring(0, 2)
+
+          // ignore title
+          if(first2Chars === '# ') {
+            return null
+          }
+          // set type to subtitle and then return to the next line
+          if(first2Chars === '##') {
+            type = line.substring(5)
+            return null
+          }
+          //remove empty lines
+          if(line.trim() === '') {
+            return null
+          }
+
+          if(line.startsWith('Name | Symbol')) {
+            // table header line, ignroe
+            return null
+          }
+
+          if(line.startsWith('--- | --- ')) {
+            // table header line formatting, ignroe
+            return null
+          }
+
+          let lineObj = line.split('|')
+          lineObj = lineObj.map((obj) => {
+            return obj.trim()
+          })
+          const obj = {
+            name: lineObj[0],
+            symbol: lineObj[1],
+            decimals: lineObj[2],
+            srcChainID: lineObj[3],
+            destChainID: lineObj[4],
+            srcContract: {
+              address: this._parseDetails(lineObj[5]).address,
+              url: this._parseDetails(lineObj[5]).url
+            },
+            destContract: {
+              address: this._parseDetails(lineObj[6]).address,
+              url: this._parseDetails(lineObj[6]).url
+            },
+            mpc: {
+              address: this._parseDetails(lineObj[7]).address,
+              url: this._parseDetails(lineObj[7]).url
+            },
+            logo: {
+              address: this._parseDetails(lineObj[8]).address,
+              url: this._parseDetails(lineObj[8]).url
+            },
+            status: lineObj[9],
+            chain: type
+          }
+
+          return obj
+        } catch(ex) {
+          console.log(ex)
+          console.log(lineObj)
+          return null
+        }
+      }).filter((token) => {
+        return token !== null
+      })
+
+      this.setStore({ swapTokens: dirtyParse })
+
+      this.emitter.emit(SWAP_TOKENS_RETURNED, history)
+
+    } catch(ex) {
+      console.log(ex)
+      this.emitter.emit(ERROR, ex)
+    }
+  }
+
+  _parseDetails = (str) => {
+    const address = str.substring(str.indexOf('[')+1, str.indexOf(']'))
+    const url = str.substring(str.indexOf('(')+1, str.indexOf(')'))
+
+    return {
+      address: address,
+      url: url
+    }
   }
 }
 

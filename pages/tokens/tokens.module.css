@@ -1,0 +1,20 @@
+.historyContainer {
+  height: 100%;
+  padding: 48px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
+
+@media screen and (max-width: 1200px) {
+  .historyContainer {
+    padding: 12px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .historyContainer {
+    padding: 0px;
+  }
+}
