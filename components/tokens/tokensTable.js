@@ -20,7 +20,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
-
 import PublishIcon from '@material-ui/icons/Publish';
 import GetAppIcon from '@material-ui/icons/GetApp';
 
@@ -290,6 +289,48 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
   }
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, swapTokens.length - (page * rowsPerPage));
+
+
+  const toHex = (num) => {
+    return '0x'+num.toString(16)
+  }
+
+  const addToNetwork = () => {
+
+    const params = {
+      chainId: toHex(chain.chainId), // A 0x-prefixed hexadecimal string
+      chainName: chain.name,
+      nativeCurrency: {
+        name: chain.nativeCurrency.name,
+        symbol: chain.nativeCurrency.symbol, // 2-6 characters long
+        decimals: chain.nativeCurrency.decimals,
+      },
+      rpcUrls: chain.rpc
+    }
+
+    window.web3.eth.getAccounts((error, accounts) => {
+      window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [params, accounts[0]],
+      })
+      .then((result) => {
+        console.log(result)
+      })
+      .catch((error) => {
+        stores.emitter.emit(ERROR, error.message ? error.message : error)
+        console.log(error)
+      });
+    })
+  }
+
+
+  const renderChainTooltip = () => {
+    return (
+      <div className={ classes.swapInfoContainer }>
+        Tooltip
+      </div>
+    )
+  }
 
   return (
     <div className={classes.root}>
