@@ -565,7 +565,7 @@ class Store {
           this.createTransactionListener(toWeb3, statusJson.info.swaptx, statusJson.info.txid)
         }
 
-        await this.sleep(10000)
+        await this.sleep(1000)
       }
     } catch(ex) {
       console.log(ex)
@@ -601,7 +601,7 @@ class Store {
 
           console.log('Confirmations: ', (currentBlock - transaction.blockNumber))
 
-          if(currentBlock - transaction.blockNumber >= 5) {
+          if(currentBlock - transaction.blockNumber >= 1) {
             shouldCall = false
           }
 
@@ -618,10 +618,10 @@ class Store {
 
         this.setStore({ transactions: newTransactions })
         //maybe change the sleep duration depending on what chainID it is? 13 seconds for ETH, 3 seconds for FTM
-        await this.sleep(13000)
+        await this.sleep(1000)
       } else {
         //we dont find the tx for some reason? Try again in a few seconds
-        await this.sleep(13000)
+        await this.sleep(1000)
       }
     }
   }
@@ -638,10 +638,7 @@ class Store {
         if(dispatchEvent && confirmationNumber === 1) {
           context.dispatcher.dispatch({ type: dispatchEvent })
         }
-        if(confirmationNumber === 15) {
-          context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.fromAddressValue, receipt.transactionHash)
-          //create API call listener until totx returns
-        }
+        context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.fromAddressValue, receipt.transactionHash)
       })
       .on('receipt', function(receipt) {
         context.emitter.emit(TX_RECEIPT, receipt)
@@ -937,7 +934,7 @@ class Store {
       console.log(ex)
     }
 
-    await this.sleep(13000)
+    await this.sleep(1000)
   }
 
   sleep = (ms) => {
@@ -1192,7 +1189,7 @@ class Store {
 
   getSwapTokens = async (payload) => {
     try {
-      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/285ca435c19ca9e76e51813f94698be48e7915bd/anyswap`)
+      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/9a2ae3893671199164781ab6d728e8654ccaf120/anyswap`)
       const swapTokens = await swapTokensResult.text()
 
       const lines = swapTokens.replace(/\r/g, "").split(/\n/)
