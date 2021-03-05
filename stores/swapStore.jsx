@@ -1009,10 +1009,8 @@ class Store {
     })
     .on('confirmation', function(confirmationNumber, receipt){
       stores.emitter.emit(TX_CONFIRMED, receipt, confirmationNumber)
-      if(confirmationNumber === 15) {
-        context.callStatusAPIRepeat(fromAsset, toAsset, fromAddressValue, receipt.transactionHash)
-        //create API call listener until totx returns
-      }
+      context.callStatusAPIRepeat(fromAsset, toAsset, fromAddressValue, receipt.transactionHash)
+      
     })
     .on('receipt', function(receipt) {
       stores.emitter.emit(TX_RECEIPT, receipt)
