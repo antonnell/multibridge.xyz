@@ -105,9 +105,11 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
       const storeSwapAssets = stores.swapStore.getStore('swapAssets')
       let index = 0
 
+      console.log(router.query)
+
       // get URL params to set swap assets
-      if(storeSwapAssets && storeSwapAssets.length > 0 && router && router.query.params && router.query.params.length === 3) {
-        index = storeSwapAssets.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.params[0].toLowerCase() && i.chainID == router.query.params[1]) })
+      if(storeSwapAssets && storeSwapAssets.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
+        index = storeSwapAssets.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.src) })
         if(index === -1) {
           index = 0
         }
@@ -134,8 +136,8 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
       setToAssetOptions(targetOption)
       if(!toAssetValue) {
         // get URL params to set swap assets
-        if(targetOption && targetOption.length > 0 && router && router.query.params && router.query.params.length === 3) {
-          targetIndex = targetOption.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.params[0].toLowerCase() && i.chainID == router.query.params[2]) })
+        if(targetOption && targetOption.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
+          targetIndex = targetOption.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.dest) })
           if(targetIndex === -1) {
             targetIndex = 0
           }
