@@ -190,7 +190,9 @@ class Store {
 
         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
 
-        if (val.SrcToken.DcrmAddress == '0xC564EE9f21Ed8A2d8E7e76c085740d5e4c5FaFbE' || key === 'fantom') {
+        console.log(val.SrcToken.DcrmAddress)
+
+        if (val.SrcToken.DcrmAddress == '0xC564EE9f21Ed8A2d8E7e76c085740d5e4c5FaFbE' || key === 'fantom' || val.SrcToken.DcrmAddress == '0x13B432914A996b0A48695dF9B2d701edA45FF264') {
           return [
             {
               id: sourceChainInfo.sourceChainID+'_'+key,
