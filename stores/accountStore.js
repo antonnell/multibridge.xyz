@@ -80,25 +80,28 @@ class Store {
           chainID: '1',
           explorer: 'https://etherscan.io',
           symbol: 'ETH',
-          icon: 'ETH.svg'
+          icon: 'ETH.svg',
+          decimals: 18,
         },
         56: {
-          name: 'BSC Mainnet',
+          name: 'Binance Smart Chain Mainnet',
           rpcURL: 'https://bsc-dataseed1.binance.org',
           rpcURLdisplay: 'https://bsc-dataseed1.binance.org',
           chainID: '56',
           explorer: 'https://bscscan.com',
           symbol: 'BNB',
-          icon: 'BNB.svg'
+          icon: 'BNB.svg',
+          decimals: 18,
         },
         128: {
-          name: 'HT Mainnet',
+          name: 'Huobi ECO Chain Mainnet',
           rpcURL: 'https://http-mainnet.hecochain.com',
           rpcURLdisplay: 'https://http-mainnet.hecochain.com',
           chainID: '128',
           explorer: 'https://scan.hecochain.com',
           symbol: 'HT',
-          icon: 'HT.svg'
+          icon: 'HT.svg',
+          decimals: 18,
         },
         250: {
           name: 'FTM Mainnet',
@@ -107,7 +110,8 @@ class Store {
           chainID: '250',
           explorer: 'https://ftmscan.com',
           symbol: 'FTM',
-          icon: 'FTM.png'
+          icon: 'FTM.png',
+          decimals: 18,
         },
         32659: {
           name: 'FSN Mainnet',
@@ -116,7 +120,8 @@ class Store {
           chainID: '32659',
           explorer: 'https://fsnex.com',
           symbol: 'FSN',
-          icon: 'FSN.svg'
+          icon: 'FSN.svg',
+          decimals: 18,
         }
       },
       chainID: null,

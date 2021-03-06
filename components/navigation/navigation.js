@@ -20,6 +20,12 @@ import Unlock from '../unlock'
 import Footer from '../footer'
 
 import stores from '../../stores'
+
+import {
+  ACCOUNT_CONFIGURED,
+  ACCOUNT_CHANGED
+} from '../../stores/constants'
+
 import { formatAddress } from '../../utils'
 
 import classes from './navigation.module.css'
@@ -79,12 +85,10 @@ const StyledSwitch = withStyles((theme) => ({
 function Navigation(props) {
   const router = useRouter()
 
-
-  const account = stores.accountStore.getStore('account')
-
   const [ darkMode, setDarkMode ] = useState(props.theme.palette.type === 'dark' ? true : false);
   const [ unlockOpen, setUnlockOpen ] = useState(false);
   const [ menuOpen, setMenuOpen ] = useState(false)
+  const [ account, setAccount ] = useState(null)
 
   function handleNavigate(route) {
     router.push(route)
@@ -110,6 +114,19 @@ function Navigation(props) {
   useEffect(function() {
     const localStorageDarkMode = window.localStorage.getItem('yearn.finance-dark-mode')
     setDarkMode(localStorageDarkMode ? localStorageDarkMode === 'dark' : false)
+
+    setAccount(stores.accountStore.getStore('account'))
+
+    const accountConfigure = () => {
+      setAccount(stores.accountStore.getStore('account'))
+    }
+
+    stores.emitter.on(ACCOUNT_CONFIGURED, accountConfigure)
+    stores.emitter.on(ACCOUNT_CHANGED, accountConfigure)
+    return () => {
+      stores.emitter.removeListener(ACCOUNT_CONFIGURED, accountConfigure)
+      stores.emitter.removeListener(ACCOUNT_CHANGED, accountConfigure)
+    }
   },[]);
 
 

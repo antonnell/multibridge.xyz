@@ -64,6 +64,7 @@ function Tokesns({ theme }) {
   return (
     <Paper elevation={ 0 } className={ classes.historyContainer }>
       <div className={ classes.filters }>
+        <a href='https://dard6erxu8t.typeform.com/to/C7RwF08A' target="_blank" className={ classes.link }><Typography>Can't find a token? Request to add it</Typography></a>
         <TextField
           className={ classes.searchContainer }
           variant="outlined"

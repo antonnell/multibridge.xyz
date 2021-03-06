@@ -19,7 +19,12 @@
   display: flex;
   justify-content: flex-end;
   width: 100%;
-} 
+  align-items: center;
+}
+
+.link {
+  margin-right: 12px;
+}
 
 @media screen and (max-width: 1200px) {
   .historyContainer{

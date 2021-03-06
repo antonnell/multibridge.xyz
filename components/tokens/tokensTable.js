@@ -22,9 +22,14 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import PublishIcon from '@material-ui/icons/Publish';
 import GetAppIcon from '@material-ui/icons/GetApp';
+import Button from '@material-ui/core/Button';
 
 import BigNumber from 'bignumber.js'
 
+import stores from '../../stores'
+import {
+  ERROR
+} from '../../stores/constants'
 
 import { formatCurrency, formatAddress } from '../../utils'
 
@@ -155,7 +160,24 @@ const useStyles = makeStyles((theme) => ({
     width: 1,
   },
   inline: {
-    display: 'flex'
+    display: 'flex',
+    position: 'relative',
+    alignItems: 'center',
+    '&:hover': {
+      "& $metamaskButton": {
+        display: 'block'
+      },
+      "& $metamaskButtonPlaceholder": {
+        display: 'none'
+      }
+   }
+  },
+  metamaskButton: {
+    display: 'none',
+  },
+  metamaskButtonPlaceholder: {
+    width: '40px',
+    height: '40px'
   },
   icon: {
     marginRight: '12px'
@@ -235,13 +257,22 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
   };
 
   if(!swapTokens) {
+    let width = 1000
+    if(window && window.innerWidth) {
+      if(window.innerWidth > 1200) {
+        width = window.innerWidth - 400
+      } else {
+        width = window.innerWidth - 100
+      }
+    }
+
     return(<div className={classes.root}>
-      <Skeleton variant="rect" width={1100} height={40} className={ classes.skelly1} />
-      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
-      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
-      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
-      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
-      <Skeleton variant="rect" width={1100} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={width} height={40} className={ classes.skelly1} />
+      <Skeleton variant="rect" width={width} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={width} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={width} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={width} height={70} className={ classes.skelly} />
+      <Skeleton variant="rect" width={width} height={70} className={ classes.skelly} />
       <div className={ classes.tableBottomSkelly }>
         <Skeleton variant="rect" width={100} height={30} className={ classes.skelly2} />
         <Skeleton variant="rect" width={40} height={30} className={ classes.skelly2} />
@@ -292,23 +323,55 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
 
 
   const toHex = (num) => {
-    return '0x'+num.toString(16)
+    return '0x'+parseInt(num).toString(16)
   }
 
-  const addToNetwork = () => {
-
+  const addToTokenList = async (token, srcOrDest) => {
+    const web3Provder = await stores.accountStore.getWeb3Provider()
     const params = {
-      chainId: toHex(chain.chainId), // A 0x-prefixed hexadecimal string
-      chainName: chain.name,
-      nativeCurrency: {
-        name: chain.nativeCurrency.name,
-        symbol: chain.nativeCurrency.symbol, // 2-6 characters long
-        decimals: chain.nativeCurrency.decimals,
-      },
-      rpcUrls: chain.rpc
+      type: 'ERC20',
+      options: {
+        address: srcOrDest === 'src' ? token.srcContract.address : token.destContract.address,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        image: token.logo.url,
+      }
     }
 
-    window.web3.eth.getAccounts((error, accounts) => {
+    window.ethereum.request({
+      method: 'wallet_watchAsset',
+      params: params,
+    })
+    .then((result) => {
+      console.log(result)
+    })
+    .catch((error) => {
+      stores.emitter.emit(ERROR, error.message ? error.message : error)
+      console.log(error)
+    });
+  }
+
+  const addToNetwork = async (row, type, chain) => {
+    const web3Provder = await stores.accountStore.getWeb3Provider()
+
+    const params = {
+      chainId: toHex(chain.chainID), // A 0x-prefixed hexadecimal string
+      chainName: chain.name,
+      nativeCurrency: {
+        name: chain.symbol,
+        symbol: chain.symbol, // 2-6 characters long
+        decimals: chain.decimals,
+      },
+      rpcUrls: [chain.rpcURLdisplay],
+      blockExplorerUrls: [chain.explorer]
+    }
+
+    web3Provder.eth.getAccounts((error, accounts) => {
+
+      if(!accounts || accounts.length === 0) {
+        return stores.emitter.emit(ERROR, 'Connect your account in MetaMask to add a chain')
+      }
+
       window.ethereum.request({
         method: 'wallet_addEthereumChain',
         params: [params, accounts[0]],
@@ -324,10 +387,14 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
   }
 
 
-  const renderChainTooltip = () => {
+  const renderChainTooltip = (data, type) => {
     return (
       <div className={ classes.swapInfoContainer }>
-        Tooltip
+        <Button
+          variant='outlined'
+        >
+          Add to MetaMask
+        </Button>
       </div>
     )
   }
@@ -378,22 +445,92 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
                       <div className={ classes.inline }>
                         <img src={`/blockchains/${srcChain.icon}`} width={ 30 } height={ 30 } className={ classes.icon } />
                         <Typography variant='h5' className={ classes.textSpaced } >{ srcChain.chainID ? srcChain.chainID : row.srcChainID }</Typography>
+                        { srcChain.chainID !== '1' ?
+                          <Tooltip title={`Add ${srcChain.name} to MetaMask`}>
+                            <div>
+                              <div className={ classes.metamaskButtonPlaceholder}></div>
+                              <IconButton
+                                className={ classes.metamaskButton }
+                                onClick={ () => { addToNetwork(row, 'src', srcChain) } }
+                              >
+                                <img src={`/connectors/icn-metamask.svg`} width={ 10 } height={ 10 } alt='' />
+                              </IconButton>
+                            </div>
+                          </Tooltip>
+                          :
+                          ''
+                        }
                       </div>
                     </TableCell>
                     <TableCell className={ classes.cell }>
                       <div className={ classes.inline }>
                         <img src={`/blockchains/${dstChain.icon}`} width={ 30 } height={ 30 } className={ classes.icon } />
                         <Typography variant='h5' className={ classes.textSpaced } >{ dstChain.chainID ? dstChain.chainID : row.destChainID }</Typography>
+                        { dstChain.chainID !== '1' ?
+                          <Tooltip title={`Add ${dstChain.name} to MetaMask`}>
+                            <div>
+                              <div className={ classes.metamaskButtonPlaceholder}></div>
+                              <IconButton
+                                className={ classes.metamaskButton }
+                                onClick={ () => { addToNetwork(row, 'dest', dstChain) } }
+                                >
+                                <img src={`/connectors/icn-metamask.svg`} width={ 10 } height={ 10 } alt='' />
+                              </IconButton>
+                            </div>
+                          </Tooltip>
+                          :
+                          ''
+                        }
                       </div>
                     </TableCell>
                     <TableCell className={ classes.cell }>
-                      <Typography variant='h5' className={ classes.textSpacedCursor } onClick={ () => { addressClicked(row.srcContract.url) } }>{ row.srcContract.address === 'Native' ? 'Native' : formatAddress(row.srcContract.address) }</Typography>
+                      <div className={ classes.inline }>
+                        <Tooltip title={`View in explorer`}>
+                          <Typography variant='h5' className={ classes.textSpacedCursor } onClick={ () => { addressClicked(row.srcContract.url) } }>{ row.srcContract.address === 'Native' ? 'Native' : formatAddress(row.srcContract.address) }</Typography>
+                        </Tooltip>
+                        { row.srcContract.address && row.srcContract.address != 'Native' && row.srcContract.address != '0x0' ?
+                          <Tooltip title={`Add ${row.name} on ${srcChain.name} to MetaMask`}>
+                            <div>
+                              <div className={ classes.metamaskButtonPlaceholder}></div>
+                              <IconButton
+                                className={ classes.metamaskButton }
+                                onClick={ () => { addToTokenList(row, 'src') } }
+                                >
+                                <img src={`/connectors/icn-metamask.svg`} width={ 10 } height={ 10 } alt='' />
+                              </IconButton>
+                            </div>
+                          </Tooltip>
+                          :
+                          ''
+                        }
+                      </div>
                     </TableCell>
                     <TableCell className={ classes.cell }>
-                      <Typography variant='h5' className={ classes.textSpacedCursor } onClick={ () => { addressClicked(row.destContract.url) } }>{ row.destContract.address === 'Native' ? 'Native' : formatAddress(row.destContract.address) }</Typography>
+                      <div className={ classes.inline }>
+                        <Tooltip title={`View in explorer`}>
+                          <Typography variant='h5' className={ classes.textSpacedCursor } onClick={ () => { addressClicked(row.destContract.url) } }>{ row.destContract.address === 'Native' ? 'Native' : (row.destContract.address === '0x0' ? '0x0' : formatAddress(row.destContract.address)) }</Typography>
+                        </Tooltip>
+                        { row.destContract.address && row.destContract.address != 'Native' && row.destContract.address != '0x0' ?
+                          <Tooltip title={`Add ${row.name} on ${dstChain.name} to MetaMask`}>
+                            <div>
+                              <div className={ classes.metamaskButtonPlaceholder}></div>
+                              <IconButton
+                                className={ classes.metamaskButton }
+                                onClick={ () => { addToTokenList(row, 'dest') } }
+                                >
+                                <img src={`/connectors/icn-metamask.svg`} width={ 10 } height={ 10 } alt='' />
+                              </IconButton>
+                            </div>
+                          </Tooltip>
+                          :
+                          ''
+                        }
+                      </div>
                     </TableCell>
                     <TableCell className={ classes.cell }>
-                      <Typography variant='h5' className={ classes.textSpacedCursor } onClick={ () => { addressClicked(row.mpc.url) } }>{ row.mpc.address === 'Native' ? 'Native' : formatAddress(row.mpc.address) }</Typography>
+                      <Tooltip title={`View in explorer`}>
+                        <Typography variant='h5' className={ classes.textSpacedCursor } onClick={ () => { addressClicked(row.mpc.url) } }>{ row.mpc.address === 'Native' ? 'Native' : formatAddress(row.mpc.address) }</Typography>
+                      </Tooltip>
                     </TableCell>
                     <TableCell className={ classes.cell }>
                       <Typography variant='h5' className={ row.status === 'Queued' || row.status === 'Pending' ? classes.textSpacedQueued : classes.textSpacedLive }>{ row.status }</Typography>
