@@ -168,8 +168,51 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
     stores.emitter.emit(CONNECT_WALLET)
   }
 
-  const handleConfigureNetwork = () => {
+  const toHex = (num) => {
+    return '0x'+parseInt(num).toString(16)
+  }
+
+  const handleConfigureNetwork = async () => {
+
+    if(chain == 1) {
     stores.emitter.emit(CONFIGURE_NETWORK)
+    } else {
+      const web3Provder = await stores.accountStore.getWeb3Provider()
+
+      const chainMap = stores.accountStore.getStore('chainIDMapping')
+      const theChain = chainMap[chain]
+  
+      const params = {
+        chainId: toHex(theChain.chainID), // A 0x-prefixed hexadecimal string
+        chainName: theChain.name,
+        nativeCurrency: {
+          name: theChain.symbol,
+          symbol: theChain.symbol, // 2-6 characters long
+          decimals: theChain.decimals,
+        },
+        rpcUrls: [theChain.rpcURLdisplay],
+        blockExplorerUrls: [theChain.explorer]
+      }
+
+      web3Provder.eth.getAccounts((error, accounts) => {
+
+        if(!accounts || accounts.length === 0) {
+          return stores.emitter.emit(ERROR, 'Connect your account in MetaMask to add a chain')
+        }
+
+        window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [params, accounts[0]],
+        })
+        .then((result) => {
+          stores.accountStore.setStore({ selectedChainID: chain })
+        })
+        .catch((error) => {
+          stores.emitter.emit(ERROR, error.message ? error.message : error)
+          console.log(error)
+        });
+      })
+    }
   }
 
   const onAssetSelect = (type, value) => {
