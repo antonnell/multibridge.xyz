@@ -190,11 +190,9 @@ class Store {
 
         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
 
-        console.log(val.SrcToken.DcrmAddress)
-
-        if (val.SrcToken.DcrmAddress == '0xC564EE9f21Ed8A2d8E7e76c085740d5e4c5FaFbE' || key === 'fantom' || val.SrcToken.DcrmAddress == '0x13B432914A996b0A48695dF9B2d701edA45FF264') {
+        if (val.SrcToken.DcrmAddress !== '0x65e64963b755043CA4FFC88029FfB8305615EeDD' || key === 'fantom') {
           return [
-            {
+            { 
               id: sourceChainInfo.sourceChainID+'_'+key,
               chainID: sourceChainInfo.sourceChainID,
               chainDescription: sourceChainInfo.sourceChainDescription,
@@ -1192,7 +1190,7 @@ class Store {
 
   getSwapTokens = async (payload) => {
     try {
-      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/9a2ae3893671199164781ab6d728e8654ccaf120/anyswap`)
+      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/62a54cb4b3cfb35983280de496e4b0f3c10b90d7/anyswap`)
       const swapTokens = await swapTokensResult.text()
 
       const lines = swapTokens.replace(/\r/g, "").split(/\n/)
