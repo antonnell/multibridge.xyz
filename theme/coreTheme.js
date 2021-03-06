@@ -124,6 +124,11 @@ const coreTheme = {
     }
   },
   overrides: {
+    MuiOutlinedInput: {
+      input: {
+        padding: '15.5px 14px'
+      }
+    },
     MuiTooltip: {
       tooltip: {
         maxWidth: 'none',

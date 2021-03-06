@@ -100,6 +100,11 @@
   display: flex;
   flex-direction: column;
   margin-top: 12px;
+  min-width: 390px;
+}
+
+.withBalanceToggle {
+  margin-left: 12px !important;
 }
 
 .displayAssetIcon {
@@ -419,6 +424,11 @@
 
 .tooltipNoMaxWidth {
   max-width: none;
+}
+
+.searchInline {
+  display: flex;
+  align-items: center;
 }
 
 @media screen and (max-width: 1200px) {

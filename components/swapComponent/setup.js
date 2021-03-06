@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router'
 import {
   TextField,
   Typography,
@@ -14,6 +15,10 @@ import SearchIcon from '@material-ui/icons/Search';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import InfoIcon from '@material-ui/icons/Info';
 import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
+import CheckIcon from '@material-ui/icons/Check';
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import AccountBalanceWalletIcon from '@material-ui/icons/AccountBalanceWallet';
+
 import { withTheme } from '@material-ui/core/styles';
 
 import { formatCurrency, formatAddress, formatCurrencyWithSymbol, formatCurrencySmall } from '../../utils'
@@ -34,6 +39,9 @@ import {
 import BigNumber from 'bignumber.js'
 
 function Setup({ theme, handleNext, swapState, setSwapState }) {
+
+  const router = useRouter()
+
   const storeSwapAssets = stores.swapStore.getStore('swapAssets')
   const storeAccount = stores.accountStore.getStore('account')
 
@@ -97,6 +105,14 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
       const storeSwapAssets = stores.swapStore.getStore('swapAssets')
       let index = 0
 
+      // get URL params to set swap assets
+      if(storeSwapAssets && storeSwapAssets.length > 0 && router && router.query.params && router.query.params.length === 3) {
+        index = storeSwapAssets.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.params[0].toLowerCase() && i.chainID == router.query.params[1]) })
+        if(index === -1) {
+          index = 0
+        }
+      }
+
       setFromAssetOptions(storeSwapAssets)
       if(!fromAssetValue) {
         setFromAssetValue(storeSwapAssets[index])
@@ -113,9 +129,19 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
         return storeSwapAssets[index].targets.map((as) => { return as.id }).includes(asset.id)
       })
 
+      let targetIndex = 0
+
       setToAssetOptions(targetOption)
       if(!toAssetValue) {
-        setToAssetValue(targetOption[0])
+        // get URL params to set swap assets
+        if(targetOption && targetOption.length > 0 && router && router.query.params && router.query.params.length === 3) {
+          targetIndex = targetOption.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.params[0].toLowerCase() && i.chainID == router.query.params[2]) })
+          if(targetIndex === -1) {
+            targetIndex = 0
+          }
+        }
+
+        setToAssetValue(targetOption[targetIndex])
       }
 
       if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
@@ -127,7 +153,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
         fromAssetValue: storeSwapAssets[index],
         fromAddressValue: account ? account.address : '',
         toAmountValue: toAmountValue,
-        toAssetValue: targetOption[0],
+        toAssetValue: targetOption[targetIndex],
         toAddressValue: account ? account.address : '',
       })
     }
@@ -181,7 +207,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
 
       const chainMap = stores.accountStore.getStore('chainIDMapping')
       const theChain = chainMap[chain]
-  
+
       const params = {
         chainId: toHex(theChain.chainID), // A 0x-prefixed hexadecimal string
         chainName: theChain.name,
@@ -607,6 +633,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
 
   const [ open, setOpen ] = useState(false);
   const [ search, setSearch ] = useState('')
+  const [ withBalance, setWithBalance ] = useState(type === 'From' ? true : false)
 
   const openSearch = () => {
     setOpen(true)
@@ -685,22 +712,41 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
       </div>
       <Dialog onClose={ onClose } aria-labelledby="simple-dialog-title" open={ open } >
         <div className={ classes.searchContainer }>
-          <TextField
-            autoFocus
-            variant="outlined"
-            fullWidth
-            placeholder="ETH, CRV, ..."
-            value={ search }
-            onChange={ onSearchChanged }
-            InputProps={{
-              startAdornment: <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>,
-            }}
-          />
+          <div className={ classes.searchInline }>
+            <TextField
+              autoFocus
+              variant="outlined"
+              fullWidth
+              placeholder="ETH, CRV, ..."
+              value={ search }
+              onChange={ onSearchChanged }
+              InputProps={{
+                startAdornment: <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>,
+              }}
+            />
+            <ToggleButton
+              value="check"
+              color='primary'
+              className={ classes.withBalanceToggle }
+              selected={withBalance}
+              onChange={() => {
+                setWithBalance(!withBalance);
+              }}
+            >
+              <AccountBalanceWalletIcon />
+            </ToggleButton>
+          </div>
           <div className={ classes.assetSearchResults }>
             {
               assetOptions ? assetOptions.filter((asset) => {
+                if(withBalance) {
+                  return BigNumber(asset.tokenMetadata.balance).gt(0)
+                }
+
+                return true
+              }).filter((asset) => {
                 if(search && search !== '') {
                   return asset.tokenMetadata.symbol.toLowerCase().includes(search.toLowerCase()) ||
                     asset.tokenMetadata.description.toLowerCase().includes(search.toLowerCase()) ||
