@@ -7,17 +7,29 @@ import {
 import classes from '../../../swap.module.css'
 import SwapComponent from '../../../../../components/swapComponent'
 
-function Swap({ changeTheme }) {
+function Swap(props) {
+  console.log(props)
   return (
-    <Layout changeTheme={ changeTheme }>
+    <Layout changeTheme={ props }>
       <Head>
         <title>Swaps</title>
       </Head>
       <div className={ classes.swapContainer }>
-        <SwapComponent />
+        <SwapComponent slug={ props.slug } />
       </div>
     </Layout>
   )
+}
+
+export async function getServerSideProps(ctx) {
+
+  console.log(ctx.params)
+
+  return {
+    props: {
+      slug: ctx.params
+    }
+  };
 }
 
 export default Swap
