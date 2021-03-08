@@ -27,7 +27,7 @@ import {
 
 import { formatCurrencySmall } from '../../utils'
 
-function Swap({ theme, slug }) {
+function Swap({ theme }) {
 
   const [ currentScreen, setCurrentScreen ] = useState('setup') //setup, showTX
   const [ swapState, setSwapState ] = useState(null)
@@ -121,7 +121,7 @@ function Swap({ theme, slug }) {
   }
 
   const renderSetup = () => {
-    return <Setup handleNext={ handleNext } swapState={ swapState } setSwapState={ setSetupSwapState } slug={ slug } />
+    return <Setup handleNext={ handleNext } swapState={ swapState } setSwapState={ setSetupSwapState } />
   }
 
   const renderConfirm = () => {

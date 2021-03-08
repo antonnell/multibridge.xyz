@@ -38,7 +38,7 @@ import {
 } from '../../stores/constants'
 import BigNumber from 'bignumber.js'
 
-function Setup({ theme, handleNext, swapState, setSwapState, slug }) {
+function Setup({ theme, handleNext, swapState, setSwapState }) {
 
   const router = useRouter()
 
@@ -105,11 +105,11 @@ function Setup({ theme, handleNext, swapState, setSwapState, slug }) {
       const storeSwapAssets = stores.swapStore.getStore('swapAssets')
       let index = 0
 
-      console.log(slug)
+      console.log(router.query)
 
       // get URL params to set swap assets
-      if(storeSwapAssets && storeSwapAssets.length > 0 && slug && slug.pairID && slug.src && slug.dest) {
-        index = storeSwapAssets.findIndex((i) => { return (i.pairID.toLowerCase() == slug.pairID.toLowerCase() && i.chainID == slug.src) })
+      if(storeSwapAssets && storeSwapAssets.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
+        index = storeSwapAssets.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.src) })
         if(index === -1) {
           index = 0
         }
@@ -136,8 +136,8 @@ function Setup({ theme, handleNext, swapState, setSwapState, slug }) {
       setToAssetOptions(targetOption)
       if(!toAssetValue) {
         // get URL params to set swap assets
-        if(targetOption && targetOption.length > 0 && slug && slug.pairID && slug.src && slug.dest) {
-          targetIndex = targetOption.findIndex((i) => { return (i.pairID.toLowerCase() == slug.pairID.toLowerCase() && i.chainID == slug.dest) })
+        if(targetOption && targetOption.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
+          targetIndex = targetOption.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.dest) })
           if(targetIndex === -1) {
             targetIndex = 0
           }
