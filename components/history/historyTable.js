@@ -163,6 +163,10 @@ const useStyles = makeStyles((theme) => ({
   cell: {
     padding: '24px'
   },
+  cellSuccess: {
+    padding: '24px',
+    color: '#4eaf0a',
+  },
   cellAddress: {
     padding: '24px',
     cursor: 'pointer'
@@ -286,7 +290,7 @@ export default function EnhancedTable({ swapHistory }) {
                   >
                     <TableCell className={ classes.cell }>
                       <div className={ classes.inline }>
-                        <img src={`${row.tokenMetadata.icon}`} width={ 40 } height={ 40 } className={ classes.icon } />
+                        <img src={`${row.tokenMetadata ? row.tokenMetadata.icon : '/tokens/unknown-logo.png'}`} width={ 40 } height={ 40 } className={ classes.icon } />
                         <div className={ classes.aligntRight}>
                           <Typography variant='h5' className={ classes.textSpaced }>Sent: { formatCurrency(BigNumber(row.value).div(10**(row.tokenMetadata ? row.tokenMetadata.decimals : 18)).toNumber()) } { row.tokenMetadata ? row.tokenMetadata.symbol : '' }</Typography>
                           <Typography variant='subtitle1' className={ classes.textSpaced }>Received: { formatCurrency(BigNumber(row.swapvalue).div(10**(row.tokenMetadata ? row.tokenMetadata.decimals : 18)).toNumber()) } { row.tokenMetadata ? row.tokenMetadata.symbol : '' }</Typography>
@@ -314,7 +318,7 @@ export default function EnhancedTable({ swapHistory }) {
                     <TableCell className={ classes.cell }>
                       <Typography variant='h5'>{ moment(row.txtime*1000).fromNow() }</Typography>
                     </TableCell>
-                    <TableCell className={ classes.cell }>
+                    <TableCell className={ `${getStatus(row.status) === 'Success' ? classes.cellSuccess : classes.cell }` }>
                       <Typography variant='h5'>{ getStatus(row.status) }</Typography>
                     </TableCell>
                   </TableRow>

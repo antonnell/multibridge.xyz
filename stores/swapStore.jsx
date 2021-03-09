@@ -189,8 +189,7 @@ class Store {
         const val = details[1]
 
         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
-
-        if (val.SrcToken.DcrmAddress !== '0x65e64963b755043CA4FFC88029FfB8305615EeDD' || key === 'fantom') {
+        if (val && val.SrcToken && val.SrcToken.DcrmAddress !== '0x65e64963b755043CA4FFC88029FfB8305615EeDD' || key === 'fantom') {
           return [
             {
               id: sourceChainInfo.sourceChainID+'_'+key,
@@ -1078,109 +1077,200 @@ class Store {
     }
 
     try {
-      const swapHistoryInFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/1/250/all?offset=0&limit=100`)
-      const swapHistoryInJsonFTM = await swapHistoryInFTM.json()
 
-      const swapHistoryOutFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/${account.address}/1/250/all?offset=0&limit=100`)
-      const swapHistoryOutJsonFTM = await swapHistoryOutFTM.json()
+      async.parallel([
+        async ( callback ) => {
+          const swapHistoryInFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/1/250/all?offset=0&limit=100`)
+          const swapHistoryInJsonFTM = await swapHistoryInFTM.json()
+          callback(null, swapHistoryInJsonFTM)
+        },
+        async ( callback ) => {
+          const swapHistoryOutFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/${account.address}/1/250/all?offset=0&limit=100`)
+          const swapHistoryOutJsonFTM = await swapHistoryOutFTM.json()
+          callback(null, swapHistoryOutJsonFTM)
+        },
+        async ( callback ) => {
+          const swapHistoryIn = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/250/1/all?offset=0&limit=100`)
+          const swapHistoryInJson = await swapHistoryIn.json()
+          callback(null, swapHistoryInJson)
+        },
+        async ( callback ) => {
+          const swapHistoryOut = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/${account.address}/250/1/all?offset=0&limit=100`)
+          const swapHistoryOutJson = await swapHistoryOut.json()
+          callback(null, swapHistoryOutJson)
+        },
+        async ( callback ) => {
+          const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/56/1/all?offset=0&limit=100`)
+          const swapHistoryJSON = await swapHistory.json()
+          callback(null, swapHistoryJSON)
+        },
+        async ( callback ) => {
+          const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/${account.address}/56/1/all?offset=0&limit=100`)
+          const swapHistoryJSON = await swapHistory.json()
+          callback(null, swapHistoryJSON)
+        },
+      ], (err, data) => {
+        if(err) {
+          this.emitter.emit(ERROR, err)
+          return
+        }
 
-      const swapHistoryIn = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/${account.address}/250/1/allv2?offset=0&limit=100`)
-      const swapHistoryInJson = await swapHistoryIn.json()
+        const swapHistoryInJson = data[0]
+        const swapHistoryOutJson = data[1]
+        const swapHistoryInJsonFTM = data[2]
+        const swapHistoryOutJsonFTM = data[3]
+        const swapHistoryInJsonBSC = data[4]
+        const swapHistoryOutJsonBSC = data[5]
 
-      const swapHistoryOut = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/${account.address}/250/1/allv2?offset=0&limit=100`)
-      const swapHistoryOutJson = await swapHistoryOut.json()
+        let populatedSwapIn = []
+        let populatedSwapOut = []
+        let populatedSwapInFTM = []
+        let populatedSwapOutFTM = []
+        let populatedSwapInBSC = []
+        let populatedSwapOutBSC = []
 
-      let populatedSwapIn = swapHistoryInJson.info.map((swap) => {
-        swap.from = 1
-        swap.fromDescription = 'Eth Mainnet'
-        swap.fromChain = CHAIN_MAP[1]
-        swap.to = 250
-        swap.toDescription = 'FTM Mainnet'
-        swap.toChain = CHAIN_MAP[250]
+        if(!swapHistoryInJson.error && swapHistoryInJson.info.length > 0) {
+          populatedSwapIn = swapHistoryInJson.info.map((swap) => {
+            swap.from = 1
+            swap.fromDescription = 'Eth Mainnet'
+            swap.fromChain = CHAIN_MAP[1]
+            swap.to = 250
+            swap.toDescription = 'FTM Mainnet'
+            swap.toChain = CHAIN_MAP[250]
 
-        let asset = this.store.swapAssets.filter((asset) => {
-          return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryOutJson.error && swapHistoryOutJson.info.length > 0) {
+          populatedSwapOut = swapHistoryOutJson.info.map((swap) => {
+            swap.from = 250
+            swap.fromDescription = 'FTM Mainnet'
+            swap.fromChain = CHAIN_MAP[250]
+            swap.to = 1
+            swap.toDescription = 'Eth Mainnet'
+            swap.toChain = CHAIN_MAP[1]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryInJsonFTM.error && swapHistoryInJsonFTM.info.length > 0) {
+          populatedSwapInFTM = swapHistoryInJsonFTM.info.map((swap) => {
+            swap.from = 250
+            swap.fromDescription = 'FTM Mainnet'
+            swap.fromChain = CHAIN_MAP[250]
+            swap.to = 1
+            swap.toDescription = 'Eth Mainnet'
+            swap.toChain = CHAIN_MAP[1]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryOutJsonFTM.error && swapHistoryOutJsonFTM.info.length > 0) {
+          populatedSwapOutFTM = swapHistoryOutJsonFTM.info.map((swap) => {
+            swap.from = 1
+            swap.fromDescription = 'Eth Mainnet'
+            swap.fromChain = CHAIN_MAP[1]
+            swap.to = 250
+            swap.toDescription = 'FTM Mainnet'
+            swap.toChain = CHAIN_MAP[250]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryInJsonBSC.error && swapHistoryInJsonBSC.info.length > 0) {
+          populatedSwapInBSC = swapHistoryInJsonBSC.info.map((swap) => {
+            swap.from = 56
+            swap.fromDescription = 'FTM Mainnet'
+            swap.fromChain = CHAIN_MAP[56]
+            swap.to = 1
+            swap.toDescription = 'Eth Mainnet'
+            swap.toChain = CHAIN_MAP[1]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryOutJsonBSC.error && swapHistoryOutJsonBSC.info.length > 0) {
+          populatedSwapOutBSC = swapHistoryOutJsonBSC.info.map((swap) => {
+            swap.from = 1
+            swap.fromDescription = 'Eth Mainnet'
+            swap.fromChain = CHAIN_MAP[1]
+            swap.to = 56
+            swap.toDescription = 'FTM Mainnet'
+            swap.toChain = CHAIN_MAP[56]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 56 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        const fullHistory = [...populatedSwapIn, ...populatedSwapOut, ...populatedSwapInFTM, ...populatedSwapOutFTM, ...populatedSwapInBSC, ...populatedSwapOutBSC]
+
+        const history = fullHistory.sort((a, b) => {
+          if(a.txtime > b.txtime) {
+            return -1
+          } else if (a.txtime < b.txtime) {
+            return 1
+          } else {
+            return 0
+          }
         })
 
-        if(asset[0]) {
-          swap.tokenMetadata = asset[0].tokenMetadata
-        }
+        this.setStore({ swapHistory: history })
 
-        return swap
+        this.emitter.emit(SWAP_HISTORY_RETURNED, history)
       })
-
-      let populatedSwapOut = swapHistoryOutJson.info.map((swap) => {
-        swap.from = 250
-        swap.fromDescription = 'FTM Mainnet'
-        swap.fromChain = CHAIN_MAP[250]
-        swap.to = 1
-        swap.toDescription = 'Eth Mainnet'
-        swap.toChain = CHAIN_MAP[1]
-
-        let asset = this.store.swapAssets.filter((asset) => {
-          return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
-        })
-
-        if(asset[0]) {
-          swap.tokenMetadata = asset[0].tokenMetadata
-        }
-
-        return swap
-      })
-
-      let populatedSwapInFTM = swapHistoryInJsonFTM.info.map((swap) => {
-        swap.from = 250
-        swap.fromDescription = 'FTM Mainnet'
-        swap.fromChain = CHAIN_MAP[250]
-        swap.to = 1
-        swap.toDescription = 'Eth Mainnet'
-        swap.toChain = CHAIN_MAP[1]
-
-        let asset = this.store.swapAssets.filter((asset) => {
-          return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
-        })
-
-        if(asset[0]) {
-          swap.tokenMetadata = asset[0].tokenMetadata
-        }
-
-        return swap
-      })
-
-      let populatedSwapOutFTM = swapHistoryOutJsonFTM.info.map((swap) => {
-        swap.from = 1
-        swap.fromDescription = 'Eth Mainnet'
-        swap.fromChain = CHAIN_MAP[1]
-        swap.to = 250
-        swap.toDescription = 'FTM Mainnet'
-        swap.toChain = CHAIN_MAP[250]
-
-        let asset = this.store.swapAssets.filter((asset) => {
-          return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
-        })
-
-        if(asset[0]) {
-          swap.tokenMetadata = asset[0].tokenMetadata
-        }
-
-        return swap
-      })
-
-      const fullHistory = [...populatedSwapIn, ...populatedSwapOut, ...populatedSwapInFTM, ...populatedSwapOutFTM]
-
-      const history = fullHistory.sort((a, b) => {
-        if(a.txtime > b.txtime) {
-          return -1
-        } else if (a.txtime < b.txtime) {
-          return 1
-        } else {
-          return 0
-        }
-      })
-
-      this.setStore({ swapHistory: history })
-
-      this.emitter.emit(SWAP_HISTORY_RETURNED, history)
     } catch(ex) {
       console.log(ex)
       this.emitter.emit(ERROR, ex)
@@ -1267,7 +1357,7 @@ class Store {
 
       this.setStore({ swapTokens: dirtyParse })
 
-      this.emitter.emit(SWAP_TOKENS_RETURNED, history)
+      this.emitter.emit(SWAP_TOKENS_RETURNED, dirtyParse)
 
     } catch(ex) {
       console.log(ex)
