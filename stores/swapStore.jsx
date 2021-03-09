@@ -1032,23 +1032,19 @@ class Store {
 
   getBridgeInfo = async () => {
     try {
-      const bridgeInfoResult = await fetch(`https://netapi.anyswap.net/bridge/info`)
+      const bridgeInfoResult = await fetch(`https://netapi.anyswap.net/bridge/v2/info`)
       const bridgeInfoJson = await bridgeInfoResult.json()
 
       const nodeListResult = await fetch(`https://netapi.anyswap.net/nodes/list`)
       const nodeListJson = await nodeListResult.json()
 
       const bridgeArray = Object.keys(bridgeInfoJson.bridgeList).map((key) => [key, bridgeInfoJson.bridgeList[key]]);
-      const bridgeChainsArray = Object.keys(bridgeInfoJson.baseUSD).map((key) => [key, bridgeInfoJson.baseUSD[key]]);
       const nodesArray = Object.keys(nodeListJson.info).map((key) => [key, nodeListJson.info[key]]);
 
       const totalLocked = bridgeArray.reduce((a, b) => {
         try {
-          if(b[1] && b[1].balance && b[1].decimals && b[1].chainId && b[1].markets && Number(b[1].markets)) {
-            const balance = BigNumber(b[1].balance).div(10**b[1].decimals).toNumber()
-            const baseUSD = bridgeInfoJson.baseUSD[b[1].chainId].market
-
-            return BigNumber(a).plus(BigNumber(balance).times(baseUSD).div(b[1].markets)).toNumber()
+          if(b && b[1] && b[1].tvl && b[1].tvl !== '') {
+            return BigNumber(a).plus(b[1].tvl).toNumber()
           }
 
           return a
@@ -1060,7 +1056,7 @@ class Store {
       this.setStore({
         totalLocked: totalLocked,
         bridgedAssets: bridgeArray.length,
-        bridgeBlockchains: BigNumber(bridgeChainsArray.length).plus(2).toNumber(), // plus 2 for btc/ltc
+        bridgeBlockchains: 7,
         nodes: nodesArray.length
       })
 
