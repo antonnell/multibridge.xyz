@@ -13,6 +13,7 @@ import Brightness2Icon from '@material-ui/icons/Brightness2';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import SwapCallsIcon from '@material-ui/icons/SwapCalls';
 import ListIcon from '@material-ui/icons/List';
+import ExploreIcon from '@material-ui/icons/Explore';
 
 import { useRouter } from 'next/router'
 
@@ -144,6 +145,10 @@ function Navigation(props) {
           <Typography variant='h2' className={ activePath.includes('/history') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>History</Typography>
         </div>
       }
+      <div className={ activePath.includes('/explorer') ? classes.navigationOptionActive : classes.navigationOption } onClick={ () => { handleNavigate('/explorer') }}>
+        <ExploreIcon className={ activePath.includes('/explorer') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
+        <Typography variant='h2' className={ activePath.includes('/explorer') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>Explorer</Typography>
+      </div>
       <div className={ activePath.includes('/tokens') ? classes.navigationOptionActive : classes.navigationOption } onClick={ () => { handleNavigate('/tokens') }}>
         <SwapVerticalCircleOutlinedIcon className={ activePath.includes('/tokens') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
         <Typography variant='h2' className={ activePath.includes('/tokens') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>Tokens</Typography>

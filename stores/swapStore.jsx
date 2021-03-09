@@ -35,7 +35,9 @@ import {
   TX_RECEIPT,
   TX_CONFIRMED,
   GET_SWAP_TOKENS,
-  SWAP_TOKENS_RETURNED
+  SWAP_TOKENS_RETURNED,
+  GET_EXPLORER,
+  EXPLORER_RETURNED
 } from './constants';
 
 import stores from './'
@@ -109,7 +111,8 @@ class Store {
       listener: false,
       totalLocked: 0,
       transactions: [],
-      swapTokens: []
+      swapTokens: [],
+      explorerHistory: []
     }
 
     dispatcher.register(
@@ -141,6 +144,9 @@ class Store {
             break;
           case GET_SWAP_TOKENS:
             this.getSwapTokens()
+            break;
+          case GET_EXPLORER:
+            this.getExplorer()
             break;
           default: {
           }
@@ -1369,6 +1375,208 @@ class Store {
       address: address,
       url: url
     }
+  }
+
+  getExplorer = async (payload) => {
+    try {
+      async.parallel([
+        async ( callback ) => {
+          const swapHistoryInFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/1/250/allv2?offset=0&limit=20`)
+          const swapHistoryInJsonFTM = await swapHistoryInFTM.json()
+          callback(null, swapHistoryInJsonFTM)
+        },
+        async ( callback ) => {
+          const swapHistoryOutFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/1/250/allv2?offset=0&limit=20`)
+          const swapHistoryOutJsonFTM = await swapHistoryOutFTM.json()
+          callback(null, swapHistoryOutJsonFTM)
+        },
+        async ( callback ) => {
+          const swapHistoryIn = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/250/1/allv2?offset=0&limit=20`)
+          const swapHistoryInJson = await swapHistoryIn.json()
+          callback(null, swapHistoryInJson)
+        },
+        async ( callback ) => {
+          const swapHistoryOut = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/250/1/allv2?offset=0&limit=20`)
+          const swapHistoryOutJson = await swapHistoryOut.json()
+          callback(null, swapHistoryOutJson)
+        },
+        async ( callback ) => {
+          const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/56/1/allv2?offset=0&limit=20`)
+          const swapHistoryJSON = await swapHistory.json()
+          callback(null, swapHistoryJSON)
+        },
+        async ( callback ) => {
+          const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/56/1/allv2?offset=0&limit=20`)
+          const swapHistoryJSON = await swapHistory.json()
+          callback(null, swapHistoryJSON)
+        },
+      ], (err, data) => {
+        if(err) {
+          this.emitter.emit(ERROR, err)
+          return
+        }
+
+        const swapHistoryInJson = data[0]
+        const swapHistoryOutJson = data[1]
+        const swapHistoryInJsonFTM = data[2]
+        const swapHistoryOutJsonFTM = data[3]
+        const swapHistoryInJsonBSC = data[4]
+        const swapHistoryOutJsonBSC = data[5]
+
+        let populatedSwapIn = []
+        let populatedSwapOut = []
+        let populatedSwapInFTM = []
+        let populatedSwapOutFTM = []
+        let populatedSwapInBSC = []
+        let populatedSwapOutBSC = []
+
+        if(!swapHistoryInJson.error && swapHistoryInJson.info.length > 0) {
+          populatedSwapIn = swapHistoryInJson.info.map((swap) => {
+            swap.from = 1
+            swap.fromDescription = 'Eth Mainnet'
+            swap.fromChain = CHAIN_MAP[1]
+            swap.to = 250
+            swap.toDescription = 'FTM Mainnet'
+            swap.toChain = CHAIN_MAP[250]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryOutJson.error && swapHistoryOutJson.info.length > 0) {
+          populatedSwapOut = swapHistoryOutJson.info.map((swap) => {
+            swap.from = 250
+            swap.fromDescription = 'FTM Mainnet'
+            swap.fromChain = CHAIN_MAP[250]
+            swap.to = 1
+            swap.toDescription = 'Eth Mainnet'
+            swap.toChain = CHAIN_MAP[1]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryInJsonFTM.error && swapHistoryInJsonFTM.info.length > 0) {
+          populatedSwapInFTM = swapHistoryInJsonFTM.info.map((swap) => {
+            swap.from = 250
+            swap.fromDescription = 'FTM Mainnet'
+            swap.fromChain = CHAIN_MAP[250]
+            swap.to = 1
+            swap.toDescription = 'Eth Mainnet'
+            swap.toChain = CHAIN_MAP[1]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryOutJsonFTM.error && swapHistoryOutJsonFTM.info.length > 0) {
+          populatedSwapOutFTM = swapHistoryOutJsonFTM.info.map((swap) => {
+            swap.from = 1
+            swap.fromDescription = 'Eth Mainnet'
+            swap.fromChain = CHAIN_MAP[1]
+            swap.to = 250
+            swap.toDescription = 'FTM Mainnet'
+            swap.toChain = CHAIN_MAP[250]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryInJsonBSC.error && swapHistoryInJsonBSC.info.length > 0) {
+          populatedSwapInBSC = swapHistoryInJsonBSC.info.map((swap) => {
+            swap.from = 56
+            swap.fromDescription = 'FTM Mainnet'
+            swap.fromChain = CHAIN_MAP[56]
+            swap.to = 1
+            swap.toDescription = 'Eth Mainnet'
+            swap.toChain = CHAIN_MAP[1]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        if(!swapHistoryOutJsonBSC.error && swapHistoryOutJsonBSC.info.length > 0) {
+          populatedSwapOutBSC = swapHistoryOutJsonBSC.info.map((swap) => {
+            swap.from = 1
+            swap.fromDescription = 'Eth Mainnet'
+            swap.fromChain = CHAIN_MAP[1]
+            swap.to = 56
+            swap.toDescription = 'FTM Mainnet'
+            swap.toChain = CHAIN_MAP[56]
+
+            let asset = this.store.swapAssets.filter((asset) => {
+              return asset.chainID == 56 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+            })
+
+            if(asset[0]) {
+              swap.tokenMetadata = asset[0].tokenMetadata
+            }
+
+            return swap
+          })
+        }
+
+        const fullHistory = [...populatedSwapIn, ...populatedSwapOut, ...populatedSwapInFTM, ...populatedSwapOutFTM, ...populatedSwapInBSC, ...populatedSwapOutBSC]
+
+        const history = fullHistory.sort((a, b) => {
+          if(a.txtime > b.txtime) {
+            return -1
+          } else if (a.txtime < b.txtime) {
+            return 1
+          } else {
+            return 0
+          }
+        })
+
+        this.setStore({ explorerHistory: history })
+
+        this.emitter.emit(EXPLORER_RETURNED, history)
+      })
+    } catch(ex) {
+      console.log(ex)
+      this.emitter.emit(ERROR, ex)
+    }
+
   }
 }
 
