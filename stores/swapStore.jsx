@@ -1381,34 +1381,64 @@ class Store {
     try {
       async.parallel([
         async ( callback ) => {
-          const swapHistoryInFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/1/250/allv2?offset=0&limit=20`)
-          const swapHistoryInJsonFTM = await swapHistoryInFTM.json()
-          callback(null, swapHistoryInJsonFTM)
+          try {
+            const swapHistoryInFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/1/250/all?offset=0&limit=20`)
+            const swapHistoryInJsonFTM = await swapHistoryInFTM.json()
+            callback(null, swapHistoryInJsonFTM)
+          } catch(ex) {
+            console.log(ex)
+            callback(null, [])
+          }
         },
         async ( callback ) => {
-          const swapHistoryOutFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/1/250/allv2?offset=0&limit=20`)
-          const swapHistoryOutJsonFTM = await swapHistoryOutFTM.json()
-          callback(null, swapHistoryOutJsonFTM)
+          try {
+            const swapHistoryOutFTM = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/1/250/all?offset=0&limit=20`)
+            const swapHistoryOutJsonFTM = await swapHistoryOutFTM.json()
+            callback(null, swapHistoryOutJsonFTM)
+          } catch(ex) {
+            console.log(ex)
+            callback(null, [])
+          }
         },
         async ( callback ) => {
-          const swapHistoryIn = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/250/1/allv2?offset=0&limit=20`)
-          const swapHistoryInJson = await swapHistoryIn.json()
-          callback(null, swapHistoryInJson)
+          try {
+            const swapHistoryIn = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/250/1/allv2?offset=0&limit=20`)
+            const swapHistoryInJson = await swapHistoryIn.json()
+            callback(null, swapHistoryInJson)
+          } catch(ex) {
+            console.log(ex)
+            callback(null, [])
+          }
         },
         async ( callback ) => {
-          const swapHistoryOut = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/250/1/allv2?offset=0&limit=20`)
-          const swapHistoryOutJson = await swapHistoryOut.json()
-          callback(null, swapHistoryOutJson)
+          try {
+            const swapHistoryOut = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/250/1/allv2?offset=0&limit=20`)
+            const swapHistoryOutJson = await swapHistoryOut.json()
+            callback(null, swapHistoryOutJson)
+          } catch(ex) {
+            console.log(ex)
+            callback(null, [])
+          }
         },
         async ( callback ) => {
-          const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/56/1/allv2?offset=0&limit=20`)
-          const swapHistoryJSON = await swapHistory.json()
-          callback(null, swapHistoryJSON)
+          try {
+            const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapin/history/all/56/1/allv2?offset=0&limit=20`)
+            const swapHistoryJSON = await swapHistory.json()
+            callback(null, swapHistoryJSON)
+          } catch(ex) {
+            console.log(ex)
+            callback(null, [])
+          }
         },
         async ( callback ) => {
-          const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/56/1/allv2?offset=0&limit=20`)
-          const swapHistoryJSON = await swapHistory.json()
-          callback(null, swapHistoryJSON)
+          try {
+            const swapHistory = await fetch(`https://bridgeapi.anyswap.exchange/v2/swapout/history/all/56/1/allv2?offset=0&limit=20`)
+            const swapHistoryJSON = await swapHistory.json()
+            callback(null, swapHistoryJSON)
+          } catch(ex) {
+            console.log(ex)
+            callback(null, [])
+          }
         },
       ], (err, data) => {
         if(err) {
