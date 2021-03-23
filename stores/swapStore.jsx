@@ -433,15 +433,14 @@ class Store {
         if(asset.chainID === '250' && asset.pairID === 'fantom') {
           const balanceOf = await web3.eth.getBalance(account.address)
 
-          const balance = BigNumber(balanceOf).div(10**18).toNumber()
+          const balance = BigNumber(balanceOf).div(10**18).toFixed(18, 1)
           asset.tokenMetadata.balance = balance
         } else if(erc20Address) {
           const erc20Contract = new web3.eth.Contract(ERC20ABI, erc20Address)
 
           const decimals = await erc20Contract.methods.decimals().call()
           const balanceOf = await erc20Contract.methods.balanceOf(account.address).call()
-
-          const balance = BigNumber(balanceOf).div(10**decimals).toNumber()
+          const balance = BigNumber(balanceOf).div(10**decimals).toFixed(parseInt(decimals), 1)
           asset.tokenMetadata.balance = balance
         }
 
