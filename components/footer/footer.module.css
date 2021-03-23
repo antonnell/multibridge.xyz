@@ -26,6 +26,12 @@
   margin-right: 12px;
 }
 
+.smallVersion {
+  font-size: 10px !important;
+  letter-spacing: 1px;
+  padding-top: 12px;
+}
+
 @media screen and (max-width: 1200px) {
   .footerContainer{
     display: none;
