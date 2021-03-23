@@ -1282,7 +1282,7 @@ class Store {
 
   getSwapTokens = async (payload) => {
     try {
-      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/5438fabef173e9d4eb1da3a19f8cb0ea5f951afc/anyswap`)
+      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/596f8642bfb971e2f844a089181eaf4492c114a9/anyswap`)
       const swapTokens = await swapTokensResult.text()
 
       const lines = swapTokens.replace(/\r/g, "").split(/\n/)
