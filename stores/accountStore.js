@@ -42,6 +42,16 @@ class Store {
           icon: 'BNB.svg',
         },
         {
+          name: 'xDAI Chain',
+          symbol: 'xDAI',
+          icon: 'STAKE.png',
+        },
+        {
+          name: 'Matic Mainnet',
+          symbol: 'MATIC',
+          icon: 'MATIC.png',
+        },
+        {
           name: 'Huobi Mainnet',
           symbol: 'HT',
           icon: 'HT.svg',
@@ -93,6 +103,16 @@ class Store {
           icon: 'BNB.svg',
           decimals: 18,
         },
+        100: {
+          name: 'xDAI Chain',
+          rpcURL: 'https://rpc.xdaichain.com',
+          rpcURLdisplay: 'https://rpc.xdaichain.com',
+          chainID: '100',
+          explorer: 'https://blockscout.com/xdai/mainnet/',
+          symbol: 'xDAI',
+          icon: 'STAKE.png',
+          decimals: 18,
+        },
         128: {
           name: 'Huobi ECO Chain Mainnet',
           rpcURL: 'https://http-mainnet.hecochain.com',
@@ -101,6 +121,16 @@ class Store {
           explorer: 'https://scan.hecochain.com',
           symbol: 'HT',
           icon: 'HT.svg',
+          decimals: 18,
+        },
+        137: {
+          name: 'Matic Mainnet',
+          rpcURL: 'https://rpc-mainnet.matic.network',
+          rpcURLdisplay: 'https://rpc-mainnet.matic.network',
+          chainID: '137',
+          explorer: 'https://explorer-mainnet.maticvigil.com/',
+          symbol: 'MATIC',
+          icon: 'MATIC.png',
           decimals: 18,
         },
         250: {

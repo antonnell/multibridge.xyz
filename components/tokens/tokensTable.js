@@ -235,6 +235,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function EnhancedTable({ swapTokens, chainMap }) {
+  console.log(chainMap)
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('name');
@@ -297,6 +298,21 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
           return {
             icon: 'BTC.png',
             chainID: 'BTC'
+          }
+        case 'FTM':
+          return {
+            icon: 'FTM.png',
+            chainID: 'FTM'
+          }
+        case 'MATIC':
+          return {
+            icon: 'MATIC.png',
+            chainID: 'MATIC'
+          }
+        case 'xDAI':
+          return {
+            icon: 'STAKE.png',
+            chainID: 'xDAI'
           }
         case 'BLOCK':
           return {

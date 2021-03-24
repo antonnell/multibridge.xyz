@@ -73,6 +73,14 @@ const CHAIN_MAP = {
     symbol: 'BNB',
     icon: 'BNB.svg'
   },
+  100: {
+    name: 'xDAI Chain',
+    rpcURL: 'https://rpc.xdaichain.com',
+    chainID: '100',
+    explorer: 'https://blockscout.com/xdai/mainnet/',
+    symbol: 'xDAI',
+    icon: 'STAKE.png'
+  },
   128: {
     name: 'HT Mainnet',
     rpcURL: 'https://http-mainnet.hecochain.com',
@@ -80,6 +88,14 @@ const CHAIN_MAP = {
     explorer: 'https://scan.hecochain.com',
     symbol: 'HT',
     icon: 'HT.svg'
+  },
+  137: {
+    name: 'Matic Mainnet',
+    rpcURL: 'https://rpc-mainnet.matic.network',
+    chainID: '137',
+    explorer: 'https://explorer-mainnet.maticvigil.com/',
+    symbol: 'MATIC',
+    icon: 'MATIC.png'
   },
   250: {
     name: 'FTM Mainnet',
@@ -1061,7 +1077,7 @@ class Store {
       this.setStore({
         totalLocked: totalLocked,
         bridgedAssets: bridgeArray.length,
-        bridgeBlockchains: 7,
+        bridgeBlockchains: 10,
         nodes: nodesArray.length
       })
 
@@ -1217,7 +1233,7 @@ class Store {
         if(!swapHistoryInJsonBSC.error && swapHistoryInJsonBSC.info.length > 0) {
           populatedSwapInBSC = swapHistoryInJsonBSC.info.map((swap) => {
             swap.from = 56
-            swap.fromDescription = 'FTM Mainnet'
+            swap.fromDescription = 'BSC Mainnet'
             swap.fromChain = CHAIN_MAP[56]
             swap.to = 1
             swap.toDescription = 'Eth Mainnet'
@@ -1241,7 +1257,7 @@ class Store {
             swap.fromDescription = 'Eth Mainnet'
             swap.fromChain = CHAIN_MAP[1]
             swap.to = 56
-            swap.toDescription = 'FTM Mainnet'
+            swap.toDescription = 'BSC Mainnet'
             swap.toChain = CHAIN_MAP[56]
 
             let asset = this.store.swapAssets.filter((asset) => {
@@ -1281,7 +1297,7 @@ class Store {
 
   getSwapTokens = async (payload) => {
     try {
-      const swapTokensResult = await fetch(`https://gist.githubusercontent.com/andrecronje/94757cd2b1bd054eb3992226859a7562/raw/dc4a1de95913422473c4d22f38e5d3d7c7ba6026/anyswap`)
+      const swapTokensResult = await fetch(`anyswap.gist`)
       const swapTokens = await swapTokensResult.text()
 
       const lines = swapTokens.replace(/\r/g, "").split(/\n/)
@@ -1546,7 +1562,7 @@ class Store {
         if(!swapHistoryInJsonBSC.error && swapHistoryInJsonBSC.info.length > 0) {
           populatedSwapInBSC = swapHistoryInJsonBSC.info.map((swap) => {
             swap.from = 56
-            swap.fromDescription = 'FTM Mainnet'
+            swap.fromDescription = 'BSC Mainnet'
             swap.fromChain = CHAIN_MAP[56]
             swap.to = 1
             swap.toDescription = 'Eth Mainnet'
@@ -1570,7 +1586,7 @@ class Store {
             swap.fromDescription = 'Eth Mainnet'
             swap.fromChain = CHAIN_MAP[1]
             swap.to = 56
-            swap.toDescription = 'FTM Mainnet'
+            swap.toDescription = 'BSC Mainnet'
             swap.toChain = CHAIN_MAP[56]
 
             let asset = this.store.swapAssets.filter((asset) => {
