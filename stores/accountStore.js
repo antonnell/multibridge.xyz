@@ -152,7 +152,17 @@ class Store {
           symbol: 'FSN',
           icon: 'FSN.svg',
           decimals: 18,
-        }
+        },
+        43114: {
+          name: 'Avalanche Mainnet',
+          rpcURL: 'https://api.avax.network/ext/bc/C/rpc',
+          rpcURLdisplay: 'https://api.avax.network/ext/bc/C/rpc',
+          chainID: '43114',
+          explorer: 'https://cchain.explorer.avax.network/',
+          symbol: 'AVAX',
+          icon: 'AVAX.svg',
+          decimals: 18,
+        },
       },
       chainID: null,
       account: null,
