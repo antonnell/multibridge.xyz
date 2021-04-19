@@ -22,7 +22,7 @@ export default function Layout({ children, configure, backClicked, changeTheme }
           <link
             rel="preload"
             href="/fonts/Inter/Inter-Bold.ttf"
-            as="font"
+            as="font "
             crossOrigin=""
           />
         <meta

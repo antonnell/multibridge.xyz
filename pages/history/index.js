@@ -14,7 +14,7 @@ function History({ changeTheme }) {
       <Head>
         <title>Swaps</title>
       </Head>
-      <div className={ classes.swapContainer }>
+      <div className={ classes.historyContainer }>
         <HistoryComponent />
       </div>
     </Layout>

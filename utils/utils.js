@@ -25,6 +25,31 @@ export function formatCurrency(amount, decimals=2) {
   }
 }
 
+export function formatCurrencySmall(amount) {
+  if(!isNaN(amount)) {
+
+    let decimals = 2
+    if(BigNumber(amount).gte(1000000)) {
+      decimals = 0
+    }
+    if(BigNumber(amount).lte(1)) {
+      decimals = 4
+    }
+    if(BigNumber(amount).lte(0.0005)) {
+      decimals = 6
+    }
+
+    const formatter = new Intl.NumberFormat(undefined, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+
+    return formatter.format(amount)
+  } else {
+    return 0
+  }
+}
+
 export function formatAddress(address, length='short') {
   if (address && length==='short') {
     address = address.substring(0,6)+'...'+address.substring(address.length-4,address.length)

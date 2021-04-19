@@ -5,8 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import BarChartIcon from '@material-ui/icons/BarChart';
-
-import { useRouter } from 'next/router'
+import SwapVerticalCircleOutlinedIcon from '@material-ui/icons/SwapVerticalCircleOutlined';
 import MenuIcon from '@material-ui/icons/Menu';
 import CloseIcon from '@material-ui/icons/Close';
 import WbSunnyOutlinedIcon from '@material-ui/icons/WbSunnyOutlined';
@@ -14,11 +13,20 @@ import Brightness2Icon from '@material-ui/icons/Brightness2';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import SwapCallsIcon from '@material-ui/icons/SwapCalls';
 import ListIcon from '@material-ui/icons/List';
+import ExploreIcon from '@material-ui/icons/Explore';
+
+import { useRouter } from 'next/router'
 
 import Unlock from '../unlock'
 import Footer from '../footer'
 
 import stores from '../../stores'
+
+import {
+  ACCOUNT_CONFIGURED,
+  ACCOUNT_CHANGED
+} from '../../stores/constants'
+
 import { formatAddress } from '../../utils'
 
 import classes from './navigation.module.css'
@@ -78,12 +86,10 @@ const StyledSwitch = withStyles((theme) => ({
 function Navigation(props) {
   const router = useRouter()
 
-
-  const account = stores.accountStore.getStore('account')
-
   const [ darkMode, setDarkMode ] = useState(props.theme.palette.type === 'dark' ? true : false);
   const [ unlockOpen, setUnlockOpen ] = useState(false);
   const [ menuOpen, setMenuOpen ] = useState(false)
+  const [ account, setAccount ] = useState(null)
 
   function handleNavigate(route) {
     router.push(route)
@@ -109,6 +115,19 @@ function Navigation(props) {
   useEffect(function() {
     const localStorageDarkMode = window.localStorage.getItem('yearn.finance-dark-mode')
     setDarkMode(localStorageDarkMode ? localStorageDarkMode === 'dark' : false)
+
+    setAccount(stores.accountStore.getStore('account'))
+
+    const accountConfigure = () => {
+      setAccount(stores.accountStore.getStore('account'))
+    }
+
+    stores.emitter.on(ACCOUNT_CONFIGURED, accountConfigure)
+    stores.emitter.on(ACCOUNT_CHANGED, accountConfigure)
+    return () => {
+      stores.emitter.removeListener(ACCOUNT_CONFIGURED, accountConfigure)
+      stores.emitter.removeListener(ACCOUNT_CHANGED, accountConfigure)
+    }
   },[]);
 
 
@@ -126,6 +145,14 @@ function Navigation(props) {
           <Typography variant='h2' className={ activePath.includes('/history') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>History</Typography>
         </div>
       }
+      <div className={ activePath.includes('/explorer') ? classes.navigationOptionActive : classes.navigationOption } onClick={ () => { handleNavigate('/explorer') }}>
+        <ExploreIcon className={ activePath.includes('/explorer') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
+        <Typography variant='h2' className={ activePath.includes('/explorer') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>Explorer</Typography>
+      </div>
+      <div className={ activePath.includes('/tokens') ? classes.navigationOptionActive : classes.navigationOption } onClick={ () => { handleNavigate('/tokens') }}>
+        <SwapVerticalCircleOutlinedIcon className={ activePath.includes('/tokens') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
+        <Typography variant='h2' className={ activePath.includes('/tokens') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>Tokens</Typography>
+      </div>
       <div className={ activePath.includes('/stats') ? classes.navigationOptionActive : classes.navigationOption } onClick={ () => { handleNavigate('/stats') }}>
         <BarChartIcon className={ activePath.includes('/stats') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
         <Typography variant='h2' className={ activePath.includes('/stats') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>Stats</Typography>

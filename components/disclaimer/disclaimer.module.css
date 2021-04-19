@@ -1,0 +1,11 @@
+.footerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.beta {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+}
