@@ -1076,8 +1076,13 @@ class Store {
             return BigNumber(a).plus(b[1].tvl).toNumber()
           }
 
+        let baseUSD = 0
+        if(b[1].chainId && b[1].markets && Number(b[1].markets)) {
+          baseUSD = bridgeInfoJson.baseUSD[b[1].chainId].market
+        } else {
           return a
-        } catch(ex) {
+        }
+      } catch(ex) {
           console.log(ex)
         }
       }, 0)
@@ -1167,7 +1172,7 @@ class Store {
               swap.toChain = CHAIN_MAP[250]
 
               let asset = this.store.swapAssets.filter((asset) => {
-                return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+                return asset.chainID == 250 && asset.pairID && swap.pairid && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
               })
 
               if(asset[0]) {
@@ -1248,7 +1253,7 @@ class Store {
               swap.toChain = CHAIN_MAP[250]
 
               let asset = this.store.swapAssets.filter((asset) => {
-                return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+                return asset.chainID == 250 && asset.pairID && swap.pairid && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
               })
 
               if(asset[0]) {
@@ -1532,7 +1537,7 @@ class Store {
               swap.toChain = CHAIN_MAP[250]
 
               let asset = this.store.swapAssets.filter((asset) => {
-                return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+                return asset.chainID == 250 && asset.pairID && swap.pairid && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
               })
 
               if(asset[0]) {
@@ -1613,7 +1618,7 @@ class Store {
               swap.toChain = CHAIN_MAP[250]
 
               let asset = this.store.swapAssets.filter((asset) => {
-                return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+                return asset.chainID == 250 && asset.pairID && swap.pairid && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
               })
 
               if(asset[0]) {
@@ -1640,7 +1645,7 @@ class Store {
               swap.toChain = CHAIN_MAP[1]
 
               let asset = this.store.swapAssets.filter((asset) => {
-                return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+                return asset.chainID == 1 && asset.pairID && swap.pairid && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
               })
 
               if(asset[0]) {
@@ -1667,7 +1672,7 @@ class Store {
               swap.toChain = CHAIN_MAP[56]
 
               let asset = this.store.swapAssets.filter((asset) => {
-                return asset.chainID == 56 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
+                return asset.chainID == 56 && asset.pairID && swap.pairid && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
               })
 
               if(asset[0]) {
