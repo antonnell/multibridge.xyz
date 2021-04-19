@@ -1076,13 +1076,13 @@ class Store {
             return BigNumber(a).plus(b[1].tvl).toNumber()
           }
 
-          let baseUSD = 0
-          if(b[1].chainId && b[1].markets && Number(b[1].markets)) {
-            baseUSD = bridgeInfoJson.baseUSD[b[1].chainId].market
-          } else {
-            return a
-          }
-        } catch(ex) {
+        let baseUSD = 0
+        if(b[1].chainId && b[1].markets && Number(b[1].markets)) {
+          baseUSD = bridgeInfoJson.baseUSD[b[1].chainId].market
+        } else {
+          return a
+        }
+      } catch(ex) {
           console.log(ex)
         }
       }, 0)
