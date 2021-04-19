@@ -42,6 +42,16 @@ class Store {
           icon: 'BNB.svg',
         },
         {
+          name: 'xDAI Chain',
+          symbol: 'xDAI',
+          icon: 'STAKE.png',
+        },
+        {
+          name: 'Matic Mainnet',
+          symbol: 'MATIC',
+          icon: 'MATIC.png',
+        },
+        {
           name: 'Huobi Mainnet',
           symbol: 'HT',
           icon: 'HT.svg',
@@ -80,25 +90,48 @@ class Store {
           chainID: '1',
           explorer: 'https://etherscan.io',
           symbol: 'ETH',
-          icon: 'ETH.svg'
+          icon: 'ETH.svg',
+          decimals: 18,
         },
         56: {
-          name: 'BSC Mainnet',
+          name: 'Binance Smart Chain Mainnet',
           rpcURL: 'https://bsc-dataseed1.binance.org',
           rpcURLdisplay: 'https://bsc-dataseed1.binance.org',
           chainID: '56',
           explorer: 'https://bscscan.com',
           symbol: 'BNB',
-          icon: 'BNB.svg'
+          icon: 'BNB.svg',
+          decimals: 18,
+        },
+        100: {
+          name: 'xDAI Chain',
+          rpcURL: 'https://rpc.xdaichain.com',
+          rpcURLdisplay: 'https://rpc.xdaichain.com',
+          chainID: '100',
+          explorer: 'https://blockscout.com/xdai/mainnet/',
+          symbol: 'xDAI',
+          icon: 'STAKE.png',
+          decimals: 18,
         },
         128: {
-          name: 'HT Mainnet',
+          name: 'Huobi ECO Chain Mainnet',
           rpcURL: 'https://http-mainnet.hecochain.com',
           rpcURLdisplay: 'https://http-mainnet.hecochain.com',
           chainID: '128',
           explorer: 'https://scan.hecochain.com',
           symbol: 'HT',
-          icon: 'HT.svg'
+          icon: 'HT.svg',
+          decimals: 18,
+        },
+        137: {
+          name: 'Matic Mainnet',
+          rpcURL: 'https://rpc-mainnet.matic.network',
+          rpcURLdisplay: 'https://rpc-mainnet.matic.network',
+          chainID: '137',
+          explorer: 'https://explorer-mainnet.maticvigil.com/',
+          symbol: 'MATIC',
+          icon: 'MATIC.png',
+          decimals: 18,
         },
         250: {
           name: 'FTM Mainnet',
@@ -107,7 +140,8 @@ class Store {
           chainID: '250',
           explorer: 'https://ftmscan.com',
           symbol: 'FTM',
-          icon: 'FTM.png'
+          icon: 'FTM.png',
+          decimals: 18,
         },
         32659: {
           name: 'FSN Mainnet',
@@ -116,8 +150,19 @@ class Store {
           chainID: '32659',
           explorer: 'https://fsnex.com',
           symbol: 'FSN',
-          icon: 'FSN.svg'
-        }
+          icon: 'FSN.svg',
+          decimals: 18,
+        },
+        43114: {
+          name: 'Avalanche Mainnet',
+          rpcURL: 'https://api.avax.network/ext/bc/C/rpc',
+          rpcURLdisplay: 'https://api.avax.network/ext/bc/C/rpc',
+          chainID: '43114',
+          explorer: 'https://cchain.explorer.avax.network/',
+          symbol: 'AVAX',
+          icon: 'AVAX.svg',
+          decimals: 18,
+        },
       },
       chainID: null,
       account: null,

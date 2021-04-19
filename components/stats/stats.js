@@ -101,7 +101,7 @@ function Stats({ theme }) {
         <Grid item xs={12} sm={12} md={12} lg={12} xl={6}>
           <Paper elevation={ 2 } className={ classes.stat }>
             <div className={ classes.statsValues }>
-              <Typography variant='h1'>{ bridgedAssets === null ? <Skeleton /> : bridgedAssets } Assets</Typography>
+              <Typography variant='h1'>{ bridgedAssets === null ? <Skeleton /> : bridgedAssets } Tokens</Typography>
               <Typography variant='h5' color='textSecondary'>Supported</Typography>
             </div>
             <div className={ classes.blockchains }>

@@ -8,7 +8,6 @@ import classes from './swap.module.css'
 import SwapComponent from '../../components/swapComponent'
 
 function Swap({ changeTheme }) {
-
   return (
     <Layout changeTheme={ changeTheme }>
       <Head>

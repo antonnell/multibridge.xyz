@@ -1,3 +1,13 @@
+.newSwapContainer {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: calc(100vh - 72px);
+  align-items: center;
+}
+
 .swapContainer {
   max-width: 485px;
   width: 100%;
@@ -90,6 +100,11 @@
   display: flex;
   flex-direction: column;
   margin-top: 12px;
+  min-width: 390px;
+}
+
+.withBalanceToggle {
+  margin-left: 12px !important;
 }
 
 .displayAssetIcon {
@@ -98,12 +113,14 @@
   background: #fff;
   width: 100px;
   height: 100px;
+  padding: 10px;
 }
 
 .displayAssetIconSmall {
   border: 1px solid rgba(128, 128, 128, 0.5);
   border-radius: 30px;
   background: #fff;
+  padding: 6px;
 }
 
 .displayChainIcon {
@@ -205,10 +222,14 @@
 .addressField {
   border-radius: 10px;
   border: 1px solid rgba(128, 128, 128, 0.5);
-  padding: 12px;
+  padding: 6px 12px;
   width: 100%;
-  text-align: center;
   margin: 12px 0px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  cursor: pointer;
 }
 
 .swapDepositInfo {
@@ -232,9 +253,15 @@
 
 }
 
+.flexy2 {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .flexy {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
 .assetSelectMenu {
@@ -270,6 +297,149 @@
   padding-bottom: 12px;
 }
 
+.swapIconContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.swapIcon {
+  cursor: pointer;
+  padding: 12px;
+  font-size: 60px !important;
+}
+
+.swapInfoContainer {
+  width: 485px;
+}
+
+.swapInfo {
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  padding: 12px;
+  width: 100%;
+}
+
+.swapInfoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  padding-top: 12px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.5);
+}
+
+.inlineText {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.swapDirection {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 12px 0px;
+}
+
+.swapDirectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rightArrow {
+  margin-right: 18px;
+  margin-left: 18px;
+}
+
+.marginRightNone {
+  margin-right: 0;
+}
+
+.skelly {
+  margin-bottom: 12px;
+  margin-top: 12px;
+}
+
+.skelly1 {
+  margin-bottom: 6px;
+  margin-top: 6px;
+}
+
+.skelly2 {
+  margin-left: 24px;
+}
+
+.inline {
+  margin-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.swapStatusContainer {
+  padding: 24px 24px 12px 24px;
+  width: 500px;
+  border-radius: 10px;
+}
+
+.info {
+  border-left: 5px solid #2F80ED;
+}
+
+.success {
+  border-left: 5px solid #4caf50;
+}
+
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.swapHeader {
+  flex: 1;
+}
+
+.closeIcon {
+  position: absolute !important;
+  right: 12px;
+  top: 12px;
+}
+
+.limitsFlex {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 0px;
+  width: fit-content;
+}
+
+.infoIcon {
+  margin-right: 12px;
+}
+
+.tooltipNoMaxWidth {
+  max-width: none;
+}
+
+.searchInline {
+  display: flex;
+  align-items: center;
+}
+
+@media screen and (max-width: 1200px) {
+  .swapContainer {
+    padding: 12px;
+  }
+  .newSwapContainer {
+    flex-direction: column;
+  }
+}
+
 @media screen and (max-width: 576px) {
   .swapContainer {
     padding: 12px;
@@ -282,5 +452,8 @@
   }
   .addressField {
     font-size: 12px !important;
+  }
+  .swapInfoContainer {
+    width: 100%;
   }
 }

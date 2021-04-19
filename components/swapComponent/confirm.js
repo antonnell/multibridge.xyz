@@ -69,6 +69,7 @@ function Confirm({ theme, swapState, handleBack, handleNext }) {
               alt=""
               src={ swapState.fromAssetValue.tokenMetadata.icon }
               height='100px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
             <img
               className={ classes.displayChainIcon }
@@ -76,6 +77,7 @@ function Confirm({ theme, swapState, handleBack, handleNext }) {
               src={ `/blockchains/${swapState.fromAssetValue.icon}` }
               height='40px'
               width='40px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
           </div>
           <div className={ classes.chainDescrPadding }>
@@ -98,6 +100,7 @@ function Confirm({ theme, swapState, handleBack, handleNext }) {
               alt=""
               src={ swapState.toAssetValue.tokenMetadata.icon }
               height='100px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
             <img
               className={ classes.displayChainIcon }
@@ -105,6 +108,7 @@ function Confirm({ theme, swapState, handleBack, handleNext }) {
               src={ `/blockchains/${swapState.toAssetValue.icon}` }
               height='40px'
               width='40px'
+              onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
           </div>
           <div className={ classes.chainDescrPadding }>

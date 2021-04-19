@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Paper, Typography } from '@material-ui/core';
+import Skeleton from '@material-ui/lab/Skeleton';
 
 import Setup from './setup'
 import Confirm from './confirm'
 import Deposit from './deposit'
 import ShowTX from './showTX'
+import Disclaimer from '../disclaimer'
+import TransactionController from './swapTransactionController'
 
 import classes from './swap.module.css'
 
@@ -21,9 +24,12 @@ import {
   SWAP_STATUS_TRANSACTIONS
 } from '../../stores/constants'
 
+
+import { formatCurrencySmall } from '../../utils'
+
 function Swap({ theme }) {
 
-  const [ currentScreen, setCurrentScreen ] = useState('setup') //setup, confirm, depositAddress, showTX
+  const [ currentScreen, setCurrentScreen ] = useState('setup') //setup, showTX
   const [ swapState, setSwapState ] = useState(null)
   const [ depositAddress, setDepositAddress ] = useState(null)
   const [ depositTX, setDepositTX ] = useState(null)
@@ -41,17 +47,17 @@ function Swap({ theme }) {
 
     const depositTransactionReturned = (event) => {
       setDepositTX(event)
-      setCurrentScreen('showTX')
+      // setCurrentScreen('showTX')
     }
 
     const transferTransactionReturned = (event) => {
       setTransferTx(event)
-      setCurrentScreen('showTX')
+      // setCurrentScreen('showTX')
     }
 
     const transactionStatusReturned = (status) => {
       setTransferStatus(status.info)
-      setCurrentScreen('showTX')
+      // setCurrentScreen('showTX')
     }
 
     stores.emitter.on(ERROR, errorReturned)
@@ -70,6 +76,10 @@ function Swap({ theme }) {
     }
   },[]);
 
+  const setSetupSwapState = (state) => {
+    setSwapState(state)
+  }
+
   const handleNext = (setupSwapState) => {
     switch (currentScreen) {
       case 'setup':
@@ -77,6 +87,7 @@ function Swap({ theme }) {
         stores.dispatcher.dispatch({ type: SWAP_CONFIRM_SWAP, content: setupSwapState })
         break;
       case 'showTX':
+        stores.dispatcher.dispatch({ type: CLEARN_LISTENERS })
         setCurrentScreen('setup')
         break;
       default:
@@ -99,8 +110,8 @@ function Swap({ theme }) {
       default:
     }
 
-    setCurrentScreen(newScreen)
     stores.dispatcher.dispatch({ type: CLEARN_LISTENERS })
+    setCurrentScreen(newScreen)
   }
 
   const getDepositAddress = () => {
@@ -110,7 +121,7 @@ function Swap({ theme }) {
   }
 
   const renderSetup = () => {
-    return <Setup handleNext={ handleNext } swapState={ swapState } />
+    return <Setup handleNext={ handleNext } swapState={ swapState } setSwapState={ setSetupSwapState } />
   }
 
   const renderConfirm = () => {
@@ -122,16 +133,20 @@ function Swap({ theme }) {
   }
 
   const renderShowTX = () => {
-    return <ShowTX handleBack={ handleBack } handleNext={ handleNext } swapState={ swapState } depositAddress={ depositAddress } depositTX={ depositTX } transferTX={ transferTX } transferStatus={ transferStatus } />
+    return <ShowTX handleNext={ handleNext } handleBack={ handleBack } swapState={ swapState } depositAddress={ depositAddress } depositTX={ depositTX } transferTX={ transferTX } transferStatus={ transferStatus } />
   }
 
   return (
-    <Paper elevation={ 2 } className={ classes.swapContainer }>
-      { currentScreen === 'setup' && renderSetup() }
-      { currentScreen === 'confirm' && renderConfirm() }
-      { currentScreen === 'depositAddress' && renderDepositAddress() }
-      { currentScreen === 'showTX' && renderShowTX() }
-    </Paper>
+    <div className={ classes.newSwapContainer }>
+      <Paper elevation={ 2 } className={ classes.swapContainer }>
+        { currentScreen === 'setup' && renderSetup() }
+        { currentScreen === 'confirm' && renderConfirm() }
+        { currentScreen === 'depositAddress' && renderDepositAddress() }
+        { currentScreen === 'showTX' && renderShowTX() }
+      </Paper>
+
+      <TransactionController />
+    </div>
   )
 
 }

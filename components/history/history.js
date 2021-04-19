@@ -14,7 +14,7 @@ import {
 
 function History({ theme }) {
 
-  const [ swapHistory, setSwapHistory ] = useState([])
+  const [ swapHistory, setSwapHistory ] = useState(null)
 
   useEffect(function() {
     const swapHistoryReturned = (history) => {
@@ -22,15 +22,15 @@ function History({ theme }) {
     }
 
     stores.emitter.on(SWAP_HISTORY_RETURNED, swapHistoryReturned)
+    stores.dispatcher.dispatch({ type: GET_SWAP_HISTORY })
 
     return () => {
       stores.emitter.removeListener(SWAP_HISTORY_RETURNED, swapHistoryReturned)
-
     }
   },[]);
 
   return (
-    <Paper elevation={ 2 } className={ classes.swapContainer }>
+    <Paper elevation={ 0 } className={ classes.historyContainer }>
       <HistoryTable swapHistory={ swapHistory }/>
     </Paper>
   )

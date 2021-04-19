@@ -1,6 +1,5 @@
 .swapContainer {
   height: 100%;
-  padding: 48px;
   display: flex;
   align-items: flex-start;
   justify-content: space-evenly;
@@ -127,11 +126,6 @@
   text-decoration: none;
 }
 
-@media screen and (max-width: 1200px) {
-  .swapContainer {
-    padding: 24px;
-  }
-}
 
 @media screen and (max-width: 576px) {
   .swapContainer {
