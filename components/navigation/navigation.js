@@ -139,12 +139,6 @@ function Navigation(props) {
         <SwapCallsIcon className={ (activePath.includes('/swap') || activePath === '/') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
         <Typography variant='h2' className={ (activePath.includes('/swap') || activePath === '/') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>Swap</Typography>
       </div>
-      { account && account.address &&
-        <div className={ activePath.includes('/history') ? classes.navigationOptionActive : classes.navigationOption } onClick={ () => { handleNavigate('/history') }}>
-          <ListIcon className={ activePath.includes('/history') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
-          <Typography variant='h2' className={ activePath.includes('/history') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>History</Typography>
-        </div>
-      }
       <div className={ activePath.includes('/explorer') ? classes.navigationOptionActive : classes.navigationOption } onClick={ () => { handleNavigate('/explorer') }}>
         <ExploreIcon className={ activePath.includes('/explorer') ? (props.theme.palette.type === 'light' ? classes.navigationOptionIconBlue : classes.navigationOptionIconWhite) : classes.navigationOptionIcon } />
         <Typography variant='h2' className={ activePath.includes('/explorer') ? (props.theme.palette.type === 'light' ? classes.colorBlue : classes.colorWhite) : null }>Explorer</Typography>

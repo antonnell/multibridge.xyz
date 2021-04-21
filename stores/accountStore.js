@@ -57,6 +57,11 @@ class Store {
           icon: 'HT.svg',
         },
         {
+          name: 'Avalanche',
+          symbol: 'AVAX',
+          icon: 'AVAX.svg',
+        },
+        {
           name: 'Fantom Mainnet',
           symbol: 'FTM',
           icon: 'FTM.png',
