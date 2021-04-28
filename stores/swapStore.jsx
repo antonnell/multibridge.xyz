@@ -226,6 +226,10 @@ class Store {
 
         const val = details[1]
 
+        if(val.SrcToken.ContractAddress === '0x924828a9Fb17d47D0eb64b57271D10706699Ff11' || val.DestToken.ContractAddress === '0x924828a9Fb17d47D0eb64b57271D10706699Ff11') {
+          return null
+        }
+
         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
         if (val && val.SrcToken && val.SrcToken.DcrmAddress !== '0x65e64963b755043CA4FFC88029FfB8305615EeDD' || key === 'fantom') {
           return [
