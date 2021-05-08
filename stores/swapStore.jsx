@@ -843,7 +843,11 @@ class Store {
       this.emitter.emit(ERROR, ex)
     }
 
-    if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '250' && pairID == 'fantom')  {
+    if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '32659' && pairID == 'FSN') {
+      return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
+    } else if (fromAssetValue.chainID === '32659' && toAssetValue.chainID === '1' && pairID == 'FSN') {
+      return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
+    } else if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '250' && pairID == 'fantom')  {
       //check approval first
       const account = await stores.accountStore.getStore('account')
       if(!account) {
