@@ -151,11 +151,17 @@ class Store {
       function (payload) {
         switch (payload.type) {
           case CONFIGURE_SWAP:
-            this.configureNew(payload)
+            this.configure(payload)
             break;
+          // case CONFIGURE_SWAP:
+          //   this.configureNew(payload)
+          //   break;
           case GET_SWAP_BALANCES:
-            this.getSwapBalancesNew(payload);
+            this.getSwapBalances(payload);
             break;
+          // case GET_SWAP_BALANCES:
+          //   this.getSwapBalancesNew(payload);
+          //   break;
           case APPROVE_SWAP:
             this.approveSwap(payload);
             break;
@@ -201,140 +207,169 @@ class Store {
     this.setStore({ listener: false })
   }
 
-  configureNew = async (payload) => {
+  configure = async (payload) => {
     const anyswapServerResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/serverInfo/chainid`);
     const anyswapServerJson = await anyswapServerResult.json()
 
+    this.setStore({ anyswapServerJson: anyswapServerJson })
+
     const anyswapServerArray = Object.keys(anyswapServerJson).map((key) => [key, anyswapServerJson[key]]);
+    console.log(anyswapServerArray)
 
     const assets = anyswapServerArray.map((chainDetails) => {
-
       const chainKey = chainDetails[0]
-      if(chainKey == 4 || chainKey == 46688) {
-        return null
-      }
       const chainVal = chainDetails[1]
 
       const chainValArray = Object.keys(chainVal).map((key) => [key, chainVal[key]]);
-
       const anyswapInfoFormatted = chainValArray.map((details) => {
         const key = details[0]
+        const val = details[1]
 
-        if(['ltc', 'btc', 'any', 'block', 'sfi', 'frax'].includes(key)) {
+        // exclude a bunch of tokens that we don't support
+        if(['ltc', 'btc', 'btc2fsn', 'any', 'block', 'sfi', 'frax', 'fkrwv2', 'fusdv2'].includes(key)) {
           return null
         }
 
-        const val = details[1]
-
+        // exclude a bunch of tokens that we don't support
         if(val.SrcToken.ContractAddress === '0x924828a9Fb17d47D0eb64b57271D10706699Ff11' || val.DestToken.ContractAddress === '0x924828a9Fb17d47D0eb64b57271D10706699Ff11') {
           return null
         }
 
-        const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
-        if (val && val.SrcToken && val.SrcToken.DcrmAddress !== '0x65e64963b755043CA4FFC88029FfB8305615EeDD' || key === 'fantom') {
-          return [
-            {
-              id: sourceChainInfo.sourceChainID+'_'+key,
-              chainID: sourceChainInfo.sourceChainID,
-              chainDescription: sourceChainInfo.sourceChainDescription,
-              icon: sourceChainInfo.sourceChainIcon,
-              pairID: val.PairID,
-              contractAddress: val.SrcToken.ContractAddress,
-              dcrmAddress: val.SrcToken.DcrmAddress,
-              minimumSwap: val.SrcToken.MinimumSwap,
-              maximumSwap: val.SrcToken.MaximumSwap,
-              swapFeeRate: val.SrcToken.SwapFeeRate,
-              maximumSwapFee: val.SrcToken.MaximumSwapFee,
-              minimumSwapFee: val.SrcToken.MinimumSwapFee,
-              bigValueThreshold: val.SrcToken.BigValueThreshold,
-              tokenMetadata: {
-                icon: `/tokens/${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)}.png`,
-                address: val.SrcToken.ContractAddress,
-                symbol: val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol,
-                decimals: val.SrcToken.Decimals,
-                name: val.PairID === 'fantom' ? 'Fantom' : val.SrcToken.Name,
-                description: `${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)} on ${sourceChainInfo.sourceChainDescription}`
-              }
-            },
-            {
-              id: chainKey+'_'+key,
-              chainID: chainKey,
-              chainDescription: sourceChainInfo.destinationChainDescription,
-              icon: sourceChainInfo.destinationChainIcon,
-              pairID: val.PairID,
-              contractAddress: val.DestToken.ContractAddress,
-              dcrmAddress: val.DestToken.DcrmAddress,
-              minimumSwap: val.DestToken.MinimumSwap,
-              maximumSwap: val.DestToken.MaximumSwap,
-              swapFeeRate: val.DestToken.SwapFeeRate,
-              maximumSwapFee: val.DestToken.MaximumSwapFee,
-              minimumSwapFee: val.DestToken.MinimumSwapFee,
-              bigValueThreshold: val.DestToken.BigValueThreshold,
-              tokenMetadata: {
-                icon: `/tokens/${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)}.png`,
-                address: val.DestToken.IsDelegateContract ? val.DestToken.DelegateToken : val.DestToken.ContractAddress,
-                symbol: val.PairID === 'fantom' ? 'FTM' : val.DestToken.Symbol,
-                decimals: val.DestToken.Decimals,
-                name: val.PairID === 'fantom' ? 'Fantom' : val.DestToken.Name,
-                description: `${(val.PairID === 'fantom' ? 'FTM' : val.DestToken.Symbol)} on ${sourceChainInfo.destinationChainDescription}`
-              }
-            }
-          ]
-        } else {
-          return null
+        if(val.PairID === 'fantom') {
+          console.log('pairID === fantom')
+          val.SrcToken.ContractAddress = 'FTM'
+          val.SrcToken.Name = 'Fantom'
+          val.SrcToken.Symbol = 'FTM'
+
+          val.DestToken.Name = 'Fantom'
+          val.DestToken.Symbol = 'FTM'
         }
 
-      }).filter((a) => { return a !== null }).flat()
+        if(val.PairID === 'FSN') {
+          val.SrcToken.ContractAddress = 'FSN'
+          val.SrcToken.Name = 'Fusion'
+          val.SrcToken.Symbol = 'FSN'
+
+          val.DestToken.Name = 'Fusion'
+          val.DestToken.Symbol = 'FSN'
+        }
+
+        if(val.PairID === 'HT') {
+          val.SrcToken.ContractAddress = 'HT'
+          val.SrcToken.Name = 'Huobi Token'
+          val.SrcToken.Symbol = 'HT'
+
+          val.DestToken.Name = 'Huobi Token'
+          val.DestToken.Symbol = 'HT'
+        }
+
+        if(val.PairID === 'ETH' || val.PairID === 'ETHv3') {
+          val.SrcToken.ContractAddress = 'ETH'
+          val.SrcToken.Name = 'Ethereum'
+          val.SrcToken.Symbol = 'ETH'
+
+          val.DestToken.Name = 'Ethereum'
+          val.DestToken.Symbol = 'ETH'
+        }
+
+        if(val.PairID === 'BNB') {
+          val.SrcToken.ContractAddress = 'BNB'
+          val.SrcToken.Name = 'Binance Coin'
+          val.SrcToken.Symbol = 'BNB'
+
+          val.DestToken.Name = 'Binance Coin'
+          val.DestToken.Symbol = 'BNB'
+        }
+
+        val.SrcToken.chainID = val.srcChainID
+        val.DestToken.chainID = val.destChainID
+
+        val.SrcToken.tokenMetadata = {
+          icon: `/tokens/${ val.SrcToken.Symbol }.png`,
+          address: val.SrcToken.ContractAddress,
+          symbol: val.SrcToken.Symbol,
+          decimals: val.SrcToken.Decimals,
+          name: val.SrcToken.Name,
+        }
+        val.SrcToken.chainMetadata = this._getChainInfo(val.srcChainID)
+
+        val.DestToken.tokenMetadata = {
+          icon: `/tokens/${ val.DestToken.Symbol }.png`,
+          address: val.DestToken.ContractAddress,
+          symbol: val.DestToken.Symbol,
+          decimals: val.DestToken.Decimals,
+          name: val.DestToken.Name,
+        }
+        val.DestToken.chainMetadata = this._getChainInfo(val.destChainID)
+
+        return val
+      }).filter((a) => { return a !== null })
 
       return anyswapInfoFormatted
-    }).filter((a) => { return a !== null }).flat()
+    }).flat()
+
+    console.log(assets)
 
     const uniqueAssets = [];
-    const map = new Map();
     for (const item of assets) {
-        if(!map.has(item.id)){
-            map.set(item.id, true);
-            uniqueAssets.push(item);
+
+      if(!item.SrcToken.ContractAddress) {
+        console.log('Missing SrcToken.ContractAddress')
+        console.log(item)
+      }
+      if(!item.DestToken.ContractAddress) {
+        console.log('Missing DestToken.ContractAddress')
+        console.log(item)
+      }
+
+      let found = false;
+      //check srcAssets
+      for(var i = 0; i < uniqueAssets.length; i++) {
+        if (uniqueAssets[i].ContractAddress === item.SrcToken.ContractAddress && uniqueAssets[i].chainID === item.SrcToken.chainID) {
+          found = true;
+          break;
         }
+      }
+
+      if(!found) {
+        uniqueAssets.push(item.SrcToken)
+      }
+
+      found = false;
+      //check destAssets
+      for(var i = 0; i < uniqueAssets.length; i++) {
+        if (uniqueAssets[i].ContractAddress === item.DestToken.ContractAddress && uniqueAssets[i].chainID === item.DestToken.chainID) {
+          found = true;
+          break;
+        }
+      }
+
+      if(!found) {
+        uniqueAssets.push(item.DestToken)
+      }
     }
 
+    console.log(uniqueAssets)
+
     const uniqueAssetsWithTargets = uniqueAssets.map((asset) => {
-      const targets = anyswapServerArray.map((chainDetails) => {
-        const chainKey = chainDetails[0]
-        const chainVal = chainDetails[1]
+      const targets = assets.map((val) => {
+        if(asset.ContractAddress === val.SrcToken.ContractAddress && asset.chainID === val.SrcToken.chainID) {
+          //... set dest token
+          return val.DestToken
+        }
 
-        const chainValArray = Object.keys(chainVal).map((key) => [key, chainVal[key]]);
+        if(asset.ContractAddress === val.DestToken.ContractAddress && asset.chainID === val.DestToken.chainID) {
+          //... set src token
+          return val.SrcToken
+        }
 
-        const anyswapInfoFormatted = chainValArray.map((details) => {
-          const key = details[0]
-          const val = details[1]
-
-          const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
-
-          if(val.PairID === asset.pairID && chainKey === asset.chainID && (asset.tokenMetadata.symbol === val.DestToken.Symbol || (asset.tokenMetadata.symbol === 'FTM' && val.DestToken.Symbol === ''))) {
-            return {
-              id: sourceChainInfo.sourceChainID+'_'+key,
-              chainID: sourceChainInfo.sourceChainID,
-              pairID: val.PairID,
-              symbol: asset.tokenMetadata.symbol === 'FTM' ? 'FTM' : val.SrcToken.Symbol
-            }
-          } else if (val.PairID === asset.pairID && sourceChainInfo.sourceChainID === asset.chainID && (asset.tokenMetadata.symbol === val.SrcToken.Symbol || (asset.tokenMetadata.symbol === 'FTM' && val.SrcToken.Symbol === ''))) {
-            return {
-              id: chainKey+'_'+key,
-              chainID: chainKey,
-              pairID: val.PairID,
-              symbol: asset.tokenMetadata.symbol === 'FTM' ? 'FTM' : val.DestToken.Symbol
-            }
-          } else {
-            return null
-          }
-        })
-        return anyswapInfoFormatted.filter((info) => { return info != null })
+        return null
       }).filter((asset) => { return asset != null }).flat()
       asset.targets = targets
-
       return asset
     })
+
+    console.log(uniqueAssetsWithTargets)
 
     this.setStore({ swapAssets: uniqueAssetsWithTargets.sort((a, b) => {
         if(a.chainID > b.chainID) {
@@ -354,8 +389,167 @@ class Store {
     this.emitter.emit(SWAP_CONFIGURED)
     this.emitter.emit(SWAP_UPDATED)
     this.dispatcher.dispatch({ type: GET_SWAP_BALANCES, content: {} })
-
   }
+
+  _getChainInfo = (chainKey) => {
+    return CHAIN_MAP[chainKey]
+  }
+
+  // configureNew = async (payload) => {
+  //   const anyswapServerResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/serverInfo/chainid`);
+  //   const anyswapServerJson = await anyswapServerResult.json()
+  //
+  //   const anyswapServerArray = Object.keys(anyswapServerJson).map((key) => [key, anyswapServerJson[key]]);
+  //
+  //   const assets = anyswapServerArray.map((chainDetails) => {
+  //
+  //     const chainKey = chainDetails[0]
+  //     if(chainKey == 4 || chainKey == 46688) {
+  //       return null
+  //     }
+  //     const chainVal = chainDetails[1]
+  //
+  //     const chainValArray = Object.keys(chainVal).map((key) => [key, chainVal[key]]);
+  //
+  //     const anyswapInfoFormatted = chainValArray.map((details) => {
+  //       const key = details[0]
+  //
+  //       if(['ltc', 'btc', 'any', 'block', 'sfi', 'frax'].includes(key)) {
+  //         return null
+  //       }
+  //
+  //       const val = details[1]
+  //
+  //       if(val.SrcToken.ContractAddress === '0x924828a9Fb17d47D0eb64b57271D10706699Ff11' || val.DestToken.ContractAddress === '0x924828a9Fb17d47D0eb64b57271D10706699Ff11') {
+  //         return null
+  //       }
+  //
+  //       const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
+  //       if (val && val.SrcToken && val.SrcToken.DcrmAddress !== '0x65e64963b755043CA4FFC88029FfB8305615EeDD' || key === 'fantom') {
+  //         return [
+  //           {
+  //             id: sourceChainInfo.sourceChainID+'_'+key,
+  //             chainID: sourceChainInfo.sourceChainID,
+  //             chainDescription: sourceChainInfo.sourceChainDescription,
+  //             icon: sourceChainInfo.sourceChainIcon,
+  //             pairID: val.PairID,
+  //             contractAddress: val.SrcToken.ContractAddress,
+  //             dcrmAddress: val.SrcToken.DcrmAddress,
+  //             minimumSwap: val.SrcToken.MinimumSwap,
+  //             maximumSwap: val.SrcToken.MaximumSwap,
+  //             swapFeeRate: val.SrcToken.SwapFeeRate,
+  //             maximumSwapFee: val.SrcToken.MaximumSwapFee,
+  //             minimumSwapFee: val.SrcToken.MinimumSwapFee,
+  //             bigValueThreshold: val.SrcToken.BigValueThreshold,
+  //             tokenMetadata: {
+  //               icon: `/tokens/${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)}.png`,
+  //               address: val.SrcToken.ContractAddress,
+  //               symbol: val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol,
+  //               decimals: val.SrcToken.Decimals,
+  //               name: val.PairID === 'fantom' ? 'Fantom' : val.SrcToken.Name,
+  //               description: `${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)} on ${sourceChainInfo.sourceChainDescription}`
+  //             }
+  //           },
+  //           {
+  //             id: chainKey+'_'+key,
+  //             chainID: chainKey,
+  //             chainDescription: sourceChainInfo.destinationChainDescription,
+  //             icon: sourceChainInfo.destinationChainIcon,
+  //             pairID: val.PairID,
+  //             contractAddress: val.DestToken.ContractAddress,
+  //             dcrmAddress: val.DestToken.DcrmAddress,
+  //             minimumSwap: val.DestToken.MinimumSwap,
+  //             maximumSwap: val.DestToken.MaximumSwap,
+  //             swapFeeRate: val.DestToken.SwapFeeRate,
+  //             maximumSwapFee: val.DestToken.MaximumSwapFee,
+  //             minimumSwapFee: val.DestToken.MinimumSwapFee,
+  //             bigValueThreshold: val.DestToken.BigValueThreshold,
+  //             tokenMetadata: {
+  //               icon: `/tokens/${(val.PairID === 'fantom' ? 'FTM' : val.SrcToken.Symbol)}.png`,
+  //               address: val.DestToken.IsDelegateContract ? val.DestToken.DelegateToken : val.DestToken.ContractAddress,
+  //               symbol: val.PairID === 'fantom' ? 'FTM' : val.DestToken.Symbol,
+  //               decimals: val.DestToken.Decimals,
+  //               name: val.PairID === 'fantom' ? 'Fantom' : val.DestToken.Name,
+  //               description: `${(val.PairID === 'fantom' ? 'FTM' : val.DestToken.Symbol)} on ${sourceChainInfo.destinationChainDescription}`
+  //             }
+  //           }
+  //         ]
+  //       } else {
+  //         return null
+  //       }
+  //
+  //     }).filter((a) => { return a !== null }).flat()
+  //
+  //     return anyswapInfoFormatted
+  //   }).filter((a) => { return a !== null }).flat()
+  //
+  //   const uniqueAssets = [];
+  //   const map = new Map();
+  //   for (const item of assets) {
+  //       if(!map.has(item.id)){
+  //           map.set(item.id, true);
+  //           uniqueAssets.push(item);
+  //       }
+  //   }
+  //
+  //   const uniqueAssetsWithTargets = uniqueAssets.map((asset) => {
+  //     const targets = anyswapServerArray.map((chainDetails) => {
+  //       const chainKey = chainDetails[0]
+  //       const chainVal = chainDetails[1]
+  //
+  //       const chainValArray = Object.keys(chainVal).map((key) => [key, chainVal[key]]);
+  //
+  //       const anyswapInfoFormatted = chainValArray.map((details) => {
+  //         const key = details[0]
+  //         const val = details[1]
+  //
+  //         const sourceChainInfo = this.mapSrcChainInfo(chainKey, key)
+  //
+  //         if(val.PairID === asset.pairID && chainKey === asset.chainID && (asset.tokenMetadata.symbol === val.DestToken.Symbol || (asset.tokenMetadata.symbol === 'FTM' && val.DestToken.Symbol === ''))) {
+  //           return {
+  //             id: sourceChainInfo.sourceChainID+'_'+key,
+  //             chainID: sourceChainInfo.sourceChainID,
+  //             pairID: val.PairID,
+  //             symbol: asset.tokenMetadata.symbol === 'FTM' ? 'FTM' : val.SrcToken.Symbol
+  //           }
+  //         } else if (val.PairID === asset.pairID && sourceChainInfo.sourceChainID === asset.chainID && (asset.tokenMetadata.symbol === val.SrcToken.Symbol || (asset.tokenMetadata.symbol === 'FTM' && val.SrcToken.Symbol === ''))) {
+  //           return {
+  //             id: chainKey+'_'+key,
+  //             chainID: chainKey,
+  //             pairID: val.PairID,
+  //             symbol: asset.tokenMetadata.symbol === 'FTM' ? 'FTM' : val.DestToken.Symbol
+  //           }
+  //         } else {
+  //           return null
+  //         }
+  //       })
+  //       return anyswapInfoFormatted.filter((info) => { return info != null })
+  //     }).filter((asset) => { return asset != null }).flat()
+  //     asset.targets = targets
+  //
+  //     return asset
+  //   })
+  //
+  //   this.setStore({ swapAssets: uniqueAssetsWithTargets.sort((a, b) => {
+  //       if(a.chainID > b.chainID) {
+  //         return 1
+  //       } else if ( a.chainID < b.chainID) {
+  //         return -1
+  //       } else if ( a.symbol > b.symbol) {
+  //         return 1
+  //       } else if( a.symbol < b.symbol) {
+  //         return -1
+  //       } else {
+  //         return 0
+  //       }
+  //     })
+  //   })
+  //
+  //   this.emitter.emit(SWAP_CONFIGURED)
+  //   this.emitter.emit(SWAP_UPDATED)
+  //   this.dispatcher.dispatch({ type: GET_SWAP_BALANCES, content: {} })
+  //
+  // }
 
   mapSrcChainInfo = (chainKey, key) => {
     let sourceChainID = ''
@@ -434,7 +628,7 @@ class Store {
     }
   }
 
-  getSwapBalancesNew = async () => {
+  getSwapBalances = async () => {
     const account = await stores.accountStore.getStore('account')
     if(!account) {
       return false
@@ -442,36 +636,16 @@ class Store {
 
     const swapAssets = this.getStore('swapAssets')
 
-    const coingeckoCoins = await CoinGeckoClient.coins.list()
-
-    const mappedAssetSymbols = swapAssets.map((asset) => {
-      return asset.tokenMetadata.symbol.toLowerCase()
-    })
-
-    const filteredCoingeckoCoins = coingeckoCoins.data.filter((coin) => {
-      return mappedAssetSymbols.includes(coin.symbol.toLowerCase())
-    })
-
-    const priceData = await CoinGeckoClient.simple.price({
-      ids: filteredCoingeckoCoins.map(coin => coin.id),
-      vs_currencies: ['usd'],
-    });
-
-    // get address from contract thing
     async.map(swapAssets, async (asset, callback) => {
       try {
-
-        if(['BTC', 'LTC', 'BLOCK', 'ANY'].includes(asset.chainID)) {
-          callback(null, asset)
-          return
-        }
-
-        let web3 = null
-        web3 = await stores.accountStore.getReadOnlyWeb3(asset.chainID)
+        const web3 = await stores.accountStore.getReadOnlyWeb3(asset.chainID)
 
         let erc20Address = asset.tokenMetadata.address
+        if(asset.DelegateToken) {
+          erc20Address = asset.DelegateToken
+        }
 
-        if(asset.chainID === '250' && asset.pairID === 'fantom') {
+        if(['ETH', 'FTM', 'FSN', 'HT', 'BNB'].includes(erc20Address)) {
           const balanceOf = await web3.eth.getBalance(account.address)
 
           const balance = BigNumber(balanceOf).div(10**18).toFixed(18, 1)
@@ -504,96 +678,100 @@ class Store {
     })
   }
 
-  getSwapBalances = async () => {
-
-    const account = await stores.accountStore.getStore('account')
-    if(!account) {
-
-      return false
-    }
-
-    const web3 = await stores.accountStore.getWeb3Provider()
-    const swapChains = this.getStore('swapChains')
-
-    const allAssets = swapChains.map((chain) => {
-      return chain.pairs.map((pair) => {
-        return pair.sourceAsset.tokenMetadata.symbol.toLowerCase()
-      })
-    }).flat()
-
-    const coingeckoCoins = await CoinGeckoClient.coins.list()
-
-    const filteredCoingeckoCoins = coingeckoCoins.data.filter((coinData) => {
-      return allAssets.includes(coinData.symbol.toLowerCase())
-    })
-
-    const priceData = await CoinGeckoClient.simple.price({
-      ids: filteredCoingeckoCoins.map(coin => coin.id),
-      vs_currencies: ['usd'],
-    });
-
-    const swapChainsWithPrice = swapChains.map((chain) => {
-      const pairs = chain.pairs.map((pair) => {
-
-        let theCoinArr = filteredCoingeckoCoins.filter((coinData) => {
-          return coinData.symbol.toLowerCase() === pair.sourceAsset.tokenMetadata.symbol.toLowerCase()
-        })
-
-        if(theCoinArr.length >  0) {
-          pair.coingeckoID = theCoinArr[0].id
-
-          let thePriceData = priceData.data[theCoinArr[0].id]
-          if(thePriceData) {
-            pair.destinationAsset.tokenMetadata.price = thePriceData.usd
-            pair.sourceAsset.tokenMetadata.price = thePriceData.usd
-          }
-
-        }
-        return pair
-      })
-      chain.pairs = pairs
-      return chain
-    })
-
-    this.setStore({ swapChains: swapChainsWithPrice })
-
-    this.emitter.emit(SWAP_UPDATED)
-    this.emitter.emit(SWAP_BALANCES_RETURNED)
-  }
+  // getSwapBalancesNew = async () => {
+  //   const account = await stores.accountStore.getStore('account')
+  //   if(!account) {
+  //     return false
+  //   }
+  //
+  //   const swapAssets = this.getStore('swapAssets')
+  //
+  //   const coingeckoCoins = await CoinGeckoClient.coins.list()
+  //
+  //   const mappedAssetSymbols = swapAssets.map((asset) => {
+  //     return asset.tokenMetadata.symbol.toLowerCase()
+  //   })
+  //
+  //   const filteredCoingeckoCoins = coingeckoCoins.data.filter((coin) => {
+  //     return mappedAssetSymbols.includes(coin.symbol.toLowerCase())
+  //   })
+  //
+  //   const priceData = await CoinGeckoClient.simple.price({
+  //     ids: filteredCoingeckoCoins.map(coin => coin.id),
+  //     vs_currencies: ['usd'],
+  //   });
+  //
+  //   // get address from contract thing
+  //   async.map(swapAssets, async (asset, callback) => {
+  //     try {
+  //
+  //       if(['BTC', 'LTC', 'BLOCK', 'ANY'].includes(asset.chainID)) {
+  //         callback(null, asset)
+  //         return
+  //       }
+  //
+  //       let web3 = null
+  //       web3 = await stores.accountStore.getReadOnlyWeb3(asset.chainID)
+  //
+  //       let erc20Address = asset.tokenMetadata.address
+  //
+  //       if(asset.chainID === '250' && asset.pairID === 'fantom') {
+  //         const balanceOf = await web3.eth.getBalance(account.address)
+  //
+  //         const balance = BigNumber(balanceOf).div(10**18).toFixed(18, 1)
+  //         asset.tokenMetadata.balance = balance
+  //       } else if(erc20Address) {
+  //         const erc20Contract = new web3.eth.Contract(ERC20ABI, erc20Address)
+  //
+  //         const decimals = await erc20Contract.methods.decimals().call()
+  //         const balanceOf = await erc20Contract.methods.balanceOf(account.address).call()
+  //         const balance = BigNumber(balanceOf).div(10**decimals).toFixed(parseInt(decimals), 1)
+  //         asset.tokenMetadata.balance = balance
+  //       }
+  //
+  //       callback(null, asset)
+  //     } catch(ex) {
+  //       console.log(asset)
+  //       console.log(ex)
+  //       callback(null, asset)
+  //     }
+  //   }, (err, swapAssetsMapped) => {
+  //     if(err) {
+  //       console.log(err)
+  //       return this.emitter.emit(ERROR, err)
+  //     }
+  //
+  //     this.setStore({ swapAssets: swapAssetsMapped })
+  //
+  //     this.emitter.emit(SWAP_UPDATED)
+  //     this.emitter.emit(SWAP_BALANCES_RETURNED)
+  //   })
+  // }
 
   approveSwap = async (payload) => {
 
   }
 
-  callStatusAPIRepeat = async (fromAsset, toAsset, toAddressValue, fromTXHash) => {
+  callStatusAPIRepeat = async (fromAsset, toAsset, toAddressValue, fromTXHash, pair) => {
     try {
-      let chainID = null
-      let pairID = null
 
-      if(toAsset.chainID == '1') {
-        chainID = fromAsset.chainID
-        pairID = fromAsset.pairID
-      } else {
-        chainID = toAsset.chainID
-        pairID = toAsset.pairID
-      }
+      console.log(fromAsset, toAsset, toAddressValue, fromTXHash, pair)
 
       let statusJson = null
       let callType = ''
-      let params = ''
+      let toAssetChainID = null
 
-      if(toAsset.chainID === '250' && toAsset.pairID === 'fantom') {
-        callType = 'getWithdrawHashStatus/'
-        params = `${toAddressValue}/${fromTXHash}/1/FTM/250?pairid=fantom`
-      } else if (toAsset.chainID === '1' && toAsset.pairID === 'fantom') {
+      if(fromAsset.ID === pair.SrcToken.ID) {
         callType = 'getHashStatus/'
-        params = `${toAddressValue}/${fromTXHash}/1/FTM/250?pairid=fantom`
-      } else if (toAsset.chainID == '1') {
-        callType = 'getWithdrawHashStatus/'
-        params = `${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/1`
+        toAssetChainID = pair.destChainID
       } else {
-        callType = 'getHashStatus/'
-        params = `${toAddressValue}/${fromTXHash}/${chainID}/${pairID}/1`
+        callType = 'getWithdrawHashStatus/'
+        toAssetChainID = pair.srcChainID
+      }
+
+      let params = `${toAddressValue}/${fromTXHash}/${pair.destChainID}/${pair.PairID}/${pair.srcChainID}`
+      if(pair.PairID === 'fantom') {
+        params = params+'?pairid=fantom'
       }
 
       this.setStore({ listener: true })
@@ -606,11 +784,11 @@ class Store {
           //once we have the transfer we can stop listening
           this.setStore({ listener: false })
 
-          const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
+          const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAssetChainID)
           this.createTransactionListener(toWeb3, statusJson.info.swaptx, statusJson.info.txid)
         }
 
-        await this.sleep(1000)
+        await this.sleep(3000)
       }
     } catch(ex) {
       console.log(ex)
@@ -676,7 +854,7 @@ class Store {
     contract.methods[method](...params).send({ from: account.address, gasPrice: web3.utils.toWei(gasPrice, 'gwei') })
       .on('transactionHash', function(hash){
         callback(null, hash)
-        context.emitter.emit(TX_HASH, hash, payload.fromAsset, payload.toAsset, payload.amount )
+        context.emitter.emit(TX_HASH, hash, payload.fromAsset, payload.toAsset, payload.amount, payload.pair )
       })
       .on('confirmation', function(confirmationNumber, receipt){
         context.emitter.emit(TX_CONFIRMED, receipt, confirmationNumber)
@@ -684,7 +862,7 @@ class Store {
           context.dispatcher.dispatch({ type: dispatchEvent })
         }
         if(confirmationNumber === 1) {
-          context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.fromAddressValue, receipt.transactionHash)
+          context.callStatusAPIRepeat(payload.fromAsset, payload.toAsset, payload.fromAddressValue, receipt.transactionHash, payload.pair)
         }
       })
       .on('receipt', function(receipt) {
@@ -762,46 +940,67 @@ class Store {
     try {
       const registerAccountResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/register/${toAddressValue}/${chainID}/${pairID}`);
       const registerAccouontJson = await registerAccountResult.json()
-
-      /*if(registerAccouontJson.msg && registerAccouontJson.msg === 'Success') {
-
-        registerAccouontJson.info.receiveAccount = toAddressValue
-        registerAccouontJson.info.chainID = chainID
-        registerAccouontJson.info.coinType = pairID
-
-        this.setStore({ depositInfo: registerAccouontJson.info })
-
-        this.emitter.emit(SWAP_DEPOSIT_ADDRESS_RETURNED)
-
-      } else {
-        this.emitter.emit(ERROR, registerAccouontJson.msg)
-      }*/
-
     } catch(ex) {
       console.log(ex)
       this.emitter.emit(ERROR, ex)
     }
   }
 
-  swapConfirmSwap = async (payload) => {
-    const { fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue } = payload.content
+  _findPairID = (fromAssetValue, toAssetValue) => {
+    const anyswapServerJson = this.getStore('anyswapServerJson')
 
-    let chainID = null
-    let pairID = null
+    const anyswapServerArray = Object.keys(anyswapServerJson).map((key) => [key, anyswapServerJson[key]]);
 
-    if(toAssetValue.chainID == '1') {
-      if(toAssetValue.pairID === 'fantom') {
-        chainID = toAssetValue.chainID
-        pairID = toAssetValue.pairID
-      } else {
-        chainID = fromAssetValue.chainID
-        pairID = fromAssetValue.pairID
+    const pair = anyswapServerArray.map((chainDetails) => {
+      const chainVal = chainDetails[1]
+
+      const chainValArray = Object.keys(chainVal).map((key) => [key, chainVal[key]]);
+      const anyswapInfoFormatted = chainValArray.filter((details) => {
+        const val = details[1]
+
+        if((val.SrcToken.ContractAddress === fromAssetValue.ContractAddress && val.DestToken.ContractAddress === toAssetValue.ContractAddress) ||
+          (val.DestToken.ContractAddress === fromAssetValue.ContractAddress && val.SrcToken.ContractAddress === toAssetValue.ContractAddress)) {
+            return true
+          }
+
+        return false
+      })
+
+      if(anyswapInfoFormatted.length > 0) {
+        return anyswapInfoFormatted[0][1]
       }
+
+      return null
+    }).filter((a) => { return a !== null })
+
+    console.log(pair)
+    if(pair.length > 0) {
+      return pair[0]
     } else {
-      chainID = toAssetValue.chainID
-      pairID = toAssetValue.pairID
+      return null
+    }
+  }
+
+  swapConfirmSwap = async (payload) => {
+    const { fromAssetValue, toAssetValue, fromAmountValue } = payload.content
+
+    const account = await stores.accountStore.getStore('account')
+    if(!account) {
+      return false
     }
 
+    const fromAddressValue = account.address
+    const toAddressValue = account.address
+
+    let pair = this._findPairID(fromAssetValue, toAssetValue)
+    if(!pair) {
+      return null
+    }
+
+    let chainID = pair.srcChainID
+    let pairID = pair.PairID
+
+    // registers the swap direction if it is the first time we use it
     try {
 
       const localStorageRegistration = localStorage.getItem('multichain-register')
@@ -843,49 +1042,116 @@ class Store {
       this.emitter.emit(ERROR, ex)
     }
 
-    if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '32659' && pairID == 'FSN') {
-      return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
-    } else if (fromAssetValue.chainID === '32659' && toAssetValue.chainID === '1' && pairID == 'FSN') {
-      return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
-    } else if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '250' && pairID == 'fantom')  {
-      //check approval first
-      const account = await stores.accountStore.getStore('account')
-      if(!account) {
-        return false
-      }
-
-      const web3 = await stores.accountStore.getWeb3Provider()
-      if(!web3) {
-        return false
-      }
-
-      const tokenContract = new web3.eth.Contract(ERC20ABI, fromAssetValue.tokenMetadata.address)
-
-      //get approved amoutn
-      const approved = await tokenContract.methods.allowance(account.address, fromAssetValue.contractAddress).call()
-
-      if(BigNumber(approved).div(18**fromAssetValue.tokenMetadata.decimals).gt(fromAmountValue)) {
-        return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
-      } else {
-        const gasPrice = await stores.accountStore.getGasPrice()
-        return this._callContractWait(web3, tokenContract, 'approve', [fromAssetValue.contractAddress, MAX_UINT256], account, gasPrice, null, async (err, txHash) => {
-          if(err) {
-            return this.emitter.emit(ERROR, err);
-          }
-          return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
-        })
-      }
-    } else if (fromAssetValue.chainID === '250' && toAssetValue.chainID === '1' && pairID == 'fantom') {
-      return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
-    } if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
-      return this._ercToNative(fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue)
-    } else if(toAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAssetValue.chainID)) {
-      return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
+    //get direction of swap (src -> dest or dest -> src)
+    let direction = null
+    let fromAsset = null
+    let toAsset = null
+    if(fromAssetValue.chainID === pair.srcChainID && toAssetValue.chainID === pair.destChainID) {
+      direction = 'SrcToDest'
+      fromAsset = pair.SrcToken
+      fromAsset.tokenMetadata = fromAssetValue.tokenMetadata
+      fromAsset.chainMetadata = fromAssetValue.chainMetadata
+      toAsset = pair.DestToken
+      toAsset.tokenMetadata = toAssetValue.tokenMetadata
+      toAsset.chainMetadata = toAssetValue.chainMetadata
+    } else {
+      direction = 'DestToSrc'
+      fromAsset = pair.DestToken
+      fromAsset.tokenMetadata = fromAssetValue.tokenMetadata
+      fromAsset.chainMetadata = fromAssetValue.chainMetadata
+      toAsset = pair.SrcToken
+      toAsset.tokenMetadata = toAssetValue.tokenMetadata
+      toAsset.chainMetadata = toAssetValue.chainMetadata
     }
+
+    if(direction === 'SrcToDest') {
+      //SrcToDest, we do transfer to DepositAddress
+
+      if(['ETH', 'FTM', 'FSN', 'HT', 'BNB'].includes(fromAssetValue.ContractAddress)) {
+        return this._transferNativeToken(fromAsset, toAsset, fromAddressValue, fromAmountValue, pair)
+      }
+
+      return this._ercToNative(fromAsset, toAsset, fromAddressValue, toAddressValue, fromAmountValue, pair)
+    } else if(direction === 'DestToSrc') {
+      //DestToSrc, we do swapout on ContractAddress
+
+      if(fromAsset.DelegateToken) {
+        //check approval first
+        const account = await stores.accountStore.getStore('account')
+        if(!account) {
+          return false
+        }
+
+        const web3 = await stores.accountStore.getWeb3Provider()
+        if(!web3) {
+          return false
+        }
+
+        const tokenContract = new web3.eth.Contract(ERC20ABI, fromAsset.DelegateToken)
+        console.log(tokenContract)
+
+        //get approved amoutn
+        const approved = await tokenContract.methods.allowance(account.address, fromAsset.ContractAddress).call()
+
+        if(BigNumber(approved).div(18**fromAsset.Decimals).gt(fromAmountValue)) {
+          return this._nativeToERC(fromAsset, toAsset, fromAmountValue, fromAddressValue, pair)
+        } else {
+          const gasPrice = await stores.accountStore.getGasPrice()
+          return this._callContractWait(web3, tokenContract, 'approve', [fromAsset.ContractAddress, MAX_UINT256], account, gasPrice, null, async (err, txHash) => {
+            if(err) {
+              return this.emitter.emit(ERROR, err);
+            }
+            return this._nativeToERC(fromAsset, toAsset, fromAmountValue, fromAddressValue, pair)
+          })
+        }
+      } else {
+        return this._nativeToERC(fromAsset, toAsset, fromAmountValue, fromAddressValue, pair)
+      }
+    }
+
+    // if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '32659' && pairID == 'FSN') {
+    //   return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
+    // } else if (fromAssetValue.chainID === '32659' && toAssetValue.chainID === '1' && pairID == 'FSN') {
+    //   return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
+    // } else if (fromAssetValue.chainID === '1' && toAssetValue.chainID === '250' && pairID == 'fantom')  {
+    //   //check approval first
+    //   const account = await stores.accountStore.getStore('account')
+    //   if(!account) {
+    //     return false
+    //   }
+    //
+    //   const web3 = await stores.accountStore.getWeb3Provider()
+    //   if(!web3) {
+    //     return false
+    //   }
+    //
+    //   const tokenContract = new web3.eth.Contract(ERC20ABI, fromAssetValue.tokenMetadata.address)
+    //
+    //   //get approved amoutn
+    //   const approved = await tokenContract.methods.allowance(account.address, fromAssetValue.contractAddress).call()
+    //
+    //   if(BigNumber(approved).div(18**fromAssetValue.tokenMetadata.decimals).gt(fromAmountValue)) {
+    //     return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
+    //   } else {
+    //     const gasPrice = await stores.accountStore.getGasPrice()
+    //     return this._callContractWait(web3, tokenContract, 'approve', [fromAssetValue.contractAddress, MAX_UINT256], account, gasPrice, null, async (err, txHash) => {
+    //       if(err) {
+    //         return this.emitter.emit(ERROR, err);
+    //       }
+    //       return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
+    //     })
+    //   }
+    // } else if (fromAssetValue.chainID === '250' && toAssetValue.chainID === '1' && pairID == 'fantom') {
+    //   return this._transferNativeToken(fromAssetValue, toAssetValue, fromAddressValue, fromAmountValue)
+    // } if(fromAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(toAssetValue.chainID)) {
+    //   return this._ercToNative(fromAssetValue, toAssetValue, fromAddressValue, toAddressValue, fromAmountValue)
+    // } else if(toAssetValue.chainID === '1' && !['BTC', 'LTC', 'BLOCK', 'ANY'].includes(fromAssetValue.chainID)) {
+    //   return this._nativeToERC(fromAssetValue, toAssetValue, fromAmountValue, fromAddressValue)
+    // }
   }
 
-  _ercToNative = async (fromAsset, toAsset, fromAddressValue, toAddressValue, amount) => {
-    const depositAddress = toAsset.dcrmAddress
+  _ercToNative = async (fromAsset, toAsset, fromAddressValue, toAddressValue, amount, pair) => {
+    const depositAddress = toAsset.DcrmAddress
 
     const web3 = await stores.accountStore.getWeb3Provider()
     if(!web3) {
@@ -897,31 +1163,16 @@ class Store {
       return false
     }
 
-    const tokenContract = new web3.eth.Contract(ERC20ABI, fromAsset.tokenMetadata.address)
-    const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
+    const tokenContract = new web3.eth.Contract(ERC20ABI, fromAsset.ContractAddress)
+    const amountToSend = BigNumber(amount).times(10**fromAsset.Decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
 
-    this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount, toAddressValue }, async (err, txHash) => {
+    this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount, toAddressValue, pair }, async (err, txHash) => {
       if(err) {
         return this.emitter.emit(ERROR, err);
       }
 
       this.emitter.emit(SWAP_SHOW_TX_STATUS, txHash)
-
-      // const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
-      // const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
-      //
-      // const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
-      // const toCurrentBlock = await toWeb3.eth.getBlockNumber()
-      //
-      // this.setStore({ listener: true })
-      // const that = this
-      //
-      // while(this.getStore('listener') === true) {
-      //   await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, depositAddress, fromCurrentBlock, toCurrentBlock, fromAddressValue, toAddressValue, '0x0000000000000000000000000000000000000000', txHash,  () => {
-      //     this.setStore({ listener: false })
-      //   })
-      // }
     })
   }
 
@@ -994,7 +1245,7 @@ class Store {
     });
   }
 
-  _nativeToERC = async (fromAsset, toAsset, amount, fromAddressValue) => {
+  _nativeToERC = async (fromAsset, toAsset, amount, fromAddressValue, pair) => {
     const account = await stores.accountStore.getStore('account')
     if(!account) {
       return false
@@ -1005,35 +1256,20 @@ class Store {
       return false
     }
 
-    const tokenContract = new web3.eth.Contract(ERC20SWAPASSETABI, fromAsset.contractAddress)
-    const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
+    const tokenContract = new web3.eth.Contract(ERC20SWAPASSETABI, fromAsset.ContractAddress)
+    const amountToSend = BigNumber(amount).times(10**fromAsset.Decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
 
-    this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount }, async (err, txHash) => {
+    this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount, pair }, async (err, txHash) => {
       if(err) {
         return this.emitter.emit(ERROR, err);
       }
 
       this.emitter.emit(SWAP_SHOW_TX_STATUS, txHash)
-
-      // const fromWeb3 = await stores.accountStore.getReadOnlyWeb3(fromAsset.chainID)
-      // const toWeb3 = await stores.accountStore.getReadOnlyWeb3(toAsset.chainID)
-      //
-      // const fromCurrentBlock = await fromWeb3.eth.getBlockNumber()
-      // const toCurrentBlock = await toWeb3.eth.getBlockNumber()
-      //
-      // this.setStore({ listener: true })
-      // const that = this
-      //
-      // while(this.getStore('listener') === true) {
-      //   await this._getNewTransfers(fromWeb3, toWeb3, fromAsset, toAsset, '0x0000000000000000000000000000000000000000', fromCurrentBlock, toCurrentBlock, account.address, account.address, fromAsset.dcrmAddress, txHash, () => {
-      //     that.setStore({ listener: false })
-      //   })
-      // }
     })
   }
 
-  _transferNativeToken = async (fromAsset, toAsset, fromAddressValue, amount) => {
+  _transferNativeToken = async (fromAsset, toAsset, fromAddressValue, amount, pair) => {
     const account = await stores.accountStore.getStore('account')
     if(!account) {
       return false
@@ -1044,24 +1280,24 @@ class Store {
       return false
     }
 
-    const amountToSend = BigNumber(amount).times(10**fromAsset.tokenMetadata.decimals).toFixed(0)
+    const amountToSend = BigNumber(amount).times(10**fromAsset.Decimals).toFixed(0)
     const gasPrice = await stores.accountStore.getGasPrice()
 
     const context = this
 
     web3.eth.sendTransaction({
       from: account.address,
-      to: fromAsset.dcrmAddress,
+      to: fromAsset.DcrmAddress,
       value: amountToSend,
       gasPrice: web3.utils.toWei(gasPrice, 'gwei'),
     })
     .on('transactionHash', function(hash){
-      stores.emitter.emit(TX_HASH, hash, fromAsset, toAsset, amount )
+      stores.emitter.emit(TX_HASH, hash, fromAsset, toAsset, amount, pair )
     })
     .on('confirmation', function(confirmationNumber, receipt){
       stores.emitter.emit(TX_CONFIRMED, receipt, confirmationNumber)
       if(confirmationNumber === 1) {
-        context.callStatusAPIRepeat(fromAsset, toAsset, fromAddressValue, receipt.transactionHash)
+        context.callStatusAPIRepeat(fromAsset, toAsset, fromAddressValue, receipt.transactionHash, pair)
       }
     })
     .on('receipt', function(receipt) {
@@ -1519,12 +1755,11 @@ class Store {
               swap.toDescription = toChain.name
               swap.toChain = toChain
 
-              let asset = this.store.swapAssets.filter((asset) => {
-                return asset.pairID?.toLowerCase() === swap.pairid?.toLowerCase()
-              })
-
-              if(asset[0]) {
-                swap.tokenMetadata = asset[0].tokenMetadata
+              const pair = this.store.anyswapServerJson[swap.destChainID][swap.pairid]
+              swap.tokenMetadata = {
+                symbol: pair.SrcToken.Symbol,
+                decimals: pair.SrcToken.Decimals,
+                icon: `/tokens/${ pair.SrcToken.Symbol }.png`
               }
 
               return swap
@@ -1539,8 +1774,8 @@ class Store {
         if(!swapHistoryOutJson.error && swapHistoryOutJson.info.length > 0) {
           populatedSwapOut = swapHistoryOutJson.info.map((swap) => {
             try {
-              const fromChain = CHAIN_MAP[swap.srcChainID]
-              const toChain = CHAIN_MAP[swap.destChainID]
+              const fromChain = CHAIN_MAP[swap.destChainID]
+              const toChain = CHAIN_MAP[swap.srcChainID]
 
               swap.from = fromChain.chainID
               swap.fromDescription = fromChain.name
@@ -1549,12 +1784,11 @@ class Store {
               swap.toDescription = toChain.name
               swap.toChain = toChain
 
-              let asset = this.store.swapAssets.filter((asset) => {
-                return asset.pairID?.toLowerCase() === swap.pairid?.toLowerCase()
-              })
-
-              if(asset[0]) {
-                swap.tokenMetadata = asset[0].tokenMetadata
+              const pair = this.store.anyswapServerJson[swap.destChainID][swap.pairid]
+              swap.tokenMetadata = {
+                symbol: pair.SrcToken.Symbol,
+                decimals: pair.SrcToken.Decimals,
+                icon: `/tokens/${ pair.SrcToken.Symbol }.png`
               }
 
               return swap

@@ -53,16 +53,12 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
 
   const [ fromAmountValue, setFromAmountValue ] = useState(swapState ? swapState.fromAmountValue : '')
   const [ fromAmountError, setFromAmountError ] = useState(false)
-  const [ fromAddressValue, setFromAddressValue ] = useState(swapState ? swapState.fromAddressValue : '')
-  const [ fromAddressError, setFromAddressError ] = useState(false)
   const [ fromAssetValue, setFromAssetValue ] = useState(swapState ? swapState.fromAssetValue : null)
   const [ fromAssetError, setFromAssetError ] = useState(false)
   const [ fromAssetOptions, setFromAssetOptions ] = useState(storeSwapAssets)
 
   const [ toAmountValue, setToAmountValue ] = useState(swapState ? swapState.toAmountValue : '')
   const [ toAmountError, setToAmountError ] = useState(false)
-  const [ toAddressValue, setToAddressValue ] = useState(swapState ? swapState.toAddressValue : '')
-  const [ toAddressError, setToAddressError ] = useState(false)
   const [ toAssetValue, setToAssetValue ] = useState(swapState ? swapState.toAssetValue : null)
   const [ toAssetError, setToAssetError ] = useState(false)
   const [ toAssetOptions, setToAssetOptions ] = useState([])
@@ -81,21 +77,9 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
         stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: storeSwapAssets[index].chainID } } })
       }
 
-      if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(storeSwapAssets[index].chainID)) {
-        setFromAddressValue(account ? account.address : '')
-      }
-
-      const targetOption = storeSwapAssets.filter((asset) => {
-        return storeSwapAssets[index].targets.map((as) => { return as.id }).includes(asset.id)
-      })
-
-      setToAssetOptions(targetOption)
+      setToAssetOptions(storeSwapAssets[index].targets)
       if(!toAssetValue) {
-        setToAssetValue(targetOption[0])
-      }
-
-      if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
-        setToAddressValue(account ? account.address : '')
+        setToAssetValue(storeSwapAssets[index].targets[0])
       }
     }
   }, [storeSwapAssets])
@@ -103,61 +87,113 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
   useEffect(function() {
     const swapUpdated = () => {
       const storeSwapAssets = stores.swapStore.getStore('swapAssets')
-      let index = 0
-
-      console.log(router.query)
-
-      // get URL params to set swap assets
-      if(storeSwapAssets && storeSwapAssets.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
-        index = storeSwapAssets.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.src) })
-        if(index === -1) {
-          index = 0
-        }
-      }
+      const rawJson = stores.swapStore.getStore('anyswapServerJson')
 
       setFromAssetOptions(storeSwapAssets)
-      if(!fromAssetValue) {
-        setFromAssetValue(storeSwapAssets[index])
-        stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: storeSwapAssets[index].chainID } } })
-      }
 
-      if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(storeSwapAssets[index].chainID)) {
-        setFromAddressValue(account ? account.address : '')
-      }
 
-      setChain(storeSwapAssets[index].chainID)
+      if(router.query.src && router.query.dest) {
+        const srcChainInfo = rawJson[router.query.src][router.query.pairID]
+        const destChainInfo = rawJson[router.query.dest][router.query.pairID]
 
-      const targetOption = storeSwapAssets.filter((asset) => {
-        return storeSwapAssets[index].targets.map((as) => { return as.id }).includes(asset.id)
-      })
+        let index = 0
 
-      let targetIndex = 0
-
-      setToAssetOptions(targetOption)
-      if(!toAssetValue) {
-        // get URL params to set swap assets
-        if(targetOption && targetOption.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
-          targetIndex = targetOption.findIndex((i) => { return (i.pairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.dest) })
-          if(targetIndex === -1) {
-            targetIndex = 0
+        if(srcChainInfo) {
+          let searchToken = null
+          if(router.query.src === srcChainInfo.SrcToken.chainID) {
+            searchToken = srcChainInfo.SrcToken
+          } else if (router.query.src === srcChainInfo.DestToken.chainID) {
+            searchToken = srcChainInfo.DestToken
           }
+
+          index = storeSwapAssets.findIndex((i) => { return (i.ContractAddress == searchToken.ContractAddress && router.query.src == searchToken.chainID) })
+          if(index === -1) {
+            index = 0
+          }
+        } else if (destChainInfo) {
+          index = storeSwapAssets.findIndex((i) => { return (i.ContractAddress == destChainInfo.SrcToken.ContractAddress && router.query.src == destChainInfo.SrcToken.chainID) })
+          if(index === -1) {
+            index = 0
+          }
+        } else {
+          //ignore
         }
 
-        setToAssetValue(targetOption[targetIndex])
+        if(!fromAssetValue) {
+          setFromAssetValue(storeSwapAssets[index])
+          stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: storeSwapAssets[index].chainID } } })
+        }
+
+        setChain(storeSwapAssets[index].chainID)
+
+        const targetOption = storeSwapAssets[index].targets
+
+        let targetIndex = 0
+
+        setToAssetOptions(targetOption)
+        if(!toAssetValue) {
+          if(srcChainInfo) {
+            targetIndex = targetOption.findIndex((i) => { return (i.ContractAddress == srcChainInfo.DestToken.ContractAddress) })
+            if(targetIndex === -1) {
+              targetIndex = 0
+            }
+          } else if (destChainInfo) {
+            targetIndex = targetOption.findIndex((i) => { return (i.ContractAddress == destChainInfo.DestToken.ContractAddress) })
+            if(targetIndex === -1) {
+              targetIndex = 0
+            }
+          } else {
+            //ignore
+          }
+
+          setToAssetValue(targetOption[targetIndex])
+        }
+
+        setSwapState({
+          fromAmountValue: fromAmountValue,
+          fromAssetValue: storeSwapAssets[index],
+          toAmountValue: toAmountValue,
+          toAssetValue: targetOption[targetIndex],
+        })
       }
 
-      if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
-        setToAddressValue(account ? account.address : '')
-      }
+      // get URL params to set swap assets
+      // if(storeSwapAssets && storeSwapAssets.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
+      //   index = storeSwapAssets.findIndex((i) => { console.log(i);  return (i.PairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.src) })
+      //   if(index === -1) {
+      //     index = 0
+      //   }
+      // }
+      // if(!fromAssetValue) {
+      //   setFromAssetValue(storeSwapAssets[index])
+      //   stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: storeSwapAssets[index].chainID } } })
+      // }
 
-      setSwapState({
-        fromAmountValue: fromAmountValue,
-        fromAssetValue: storeSwapAssets[index],
-        fromAddressValue: account ? account.address : '',
-        toAmountValue: toAmountValue,
-        toAssetValue: targetOption[targetIndex],
-        toAddressValue: account ? account.address : '',
-      })
+      // setChain(storeSwapAssets[index].chainID)
+      //
+      // const targetOption = storeSwapAssets[index].targets
+      //
+      // let targetIndex = 0
+      //
+      // setToAssetOptions(targetOption)
+      // if(!toAssetValue) {
+      //   // get URL params to set swap assets
+      //   if(targetOption && targetOption.length > 0 && router && router.query.pairID && router.query.src && router.query.dest) {
+      //     targetIndex = targetOption.findIndex((i) => { return (i.PairID.toLowerCase() == router.query.pairID.toLowerCase() && i.chainID == router.query.dest) })
+      //     if(targetIndex === -1) {
+      //       targetIndex = 0
+      //     }
+      //   }
+      //
+      //   setToAssetValue(targetOption[targetIndex])
+      // }
+      //
+      // setSwapState({
+      //   fromAmountValue: fromAmountValue,
+      //   fromAssetValue: storeSwapAssets[index],
+      //   toAmountValue: toAmountValue,
+      //   toAssetValue: targetOption[targetIndex],
+      // })
     }
 
     const errorReturned = () => {
@@ -248,39 +284,12 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
       setFromAssetValue(value)
       stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: value.chainID } } })
 
-      if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(value.chainID)) {
-        setFromAddressValue(account ? account.address : '')
-      } else {
-        setFromAddressValue('')
-      }
+      setToAssetOptions(value.targets)
+      setToAssetValue(value.targets[0])
 
-
-      const targetOption = fromAssetOptions.filter((asset) => {
-        return value.targets.map((as) => { return as.id }).includes(asset.id)
-      })
-
-      setToAssetOptions(targetOption)
-      setToAssetValue(targetOption[0])
-
-      if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
-        setToAddressValue(account ? account.address : '')
-      } else {
-        setToAddressValue('')
-      }
-
-
-
-      calculateReceiveAmount(fromAmountValue, value, targetOption[0])
+      calculateReceiveAmount(fromAmountValue, value, value.targets[0])
     } else {
       setToAssetValue(value)
-
-      if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(value.chainID)) {
-        setToAddressValue(account ? account.address : '')
-      } else {
-        setToAddressValue('')
-      }
-
-
 
       calculateReceiveAmount(fromAmountValue, fromAssetValue, value)
     }
@@ -295,23 +304,15 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
   const toAmountChanged = (event) => {
   }
 
-  const fromAddressChanged = (event) => {
-    setFromAddressValue(event.target.value)
-  }
-
-  const toAddressChanged = (event) => {
-    setToAddressValue(event.target.value)
-  }
-
   const calculateReceiveAmount = (amount, from, to) => {
     let receive = 0
     let fee = 0
     if(amount && amount !== '' && !isNaN(amount)) {
-      fee = BigNumber(amount).times(from.swapFeeRate).toNumber()
-      if(fee > from.maximumSwapFee) {
-        fee = from.maximumSwapFee
-      } else if (fee < from.minimumSwapFee) {
-        fee = from.minimumSwapFee
+      fee = BigNumber(amount).times(from.SwapFeeRate).toNumber()
+      if(fee > from.MaximumSwapFee) {
+        fee = from.MaximumSwapFee
+      } else if (fee < from.MinimumSwapFee) {
+        fee = from.MinimumSwapFee
       }
 
       receive = BigNumber(amount).minus(fee).toNumber()
@@ -325,19 +326,15 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
     setSwapState({
       fromAmountValue: amount,
       fromAssetValue: from,
-      fromAddressValue: fromAddressValue,
       toAmountValue: receive,
       toAssetValue: to,
-      toAddressValue: toAddressValue,
     })
   }
 
   const onNext = () => {
     setFromAmountError(false)
     setFromAssetError(false)
-    setFromAddressError(false)
     setToAssetError(false)
-    setToAddressError(false)
 
     let error = false
 
@@ -351,11 +348,11 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
       } else if(BigNumber(fromAmountValue).lt(0)) {
         setFromAmountError('Invalid amount')
         error = true
-      } else if(fromAssetValue && BigNumber(fromAmountValue).lt(fromAssetValue.minimumSwap)) {
-        setFromAmountError(`Less than min swap amount ${fromAssetValue.minimumSwap}`)
+      } else if(fromAssetValue && BigNumber(fromAmountValue).lt(fromAssetValue.MinimumSwap)) {
+        setFromAmountError(`Less than min swap amount ${fromAssetValue.MinimumSwap}`)
         error = true
-      } else if (fromAssetValue && BigNumber(fromAmountValue).gt(fromAssetValue.maximumSwap)) {
-        setFromAmountError(`Greater than max swap amount ${fromAssetValue.maximumSwap}`)
+      } else if (fromAssetValue && BigNumber(fromAmountValue).gt(fromAssetValue.MaximumSwap)) {
+        setFromAmountError(`Greater than max swap amount ${fromAssetValue.MaximumSwap}`)
         error = true
       } else if (fromAssetValue && BigNumber(fromAmountValue).gt(fromAssetValue.tokenMetadata.balance)) {
         setFromAmountError(`Greater than your available balance`)
@@ -373,30 +370,14 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
       error = true
     }
 
-    if(!toAddressValue || toAddressValue === '') {
-      setFromAssetError('To address is required')
-      error = true
-    } else {
-      //check receving address validation somehow
-    }
-
-    if(!fromAddressValue || fromAddressValue === '') {
-      setFromAssetError('From address is required')
-      error = true
-    } else {
-      //check receving address validation somehow
-    }
-
     if(!error) {
       setLoading(true)
       handleNext({
         fromAmountValue: fromAmountValue,
         fromAssetValue: fromAssetValue,
-        fromAddressValue: fromAddressValue,
         toAmountValue: toAmountValue,
         toAssetValue: toAssetValue,
-        toAddressValue: toAddressValue,
-      }) // probably need to pass values to main container
+      })
     }
   }
 
@@ -407,34 +388,17 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
   }
 
   const swapAssets = () => {
-
+    let from = fromAssetValue
     setFromAssetValue(toAssetValue)
     stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: toAssetValue.chainID } } })
 
-    if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(toAssetValue.chainID)) {
-      setFromAddressValue(account ? account.address : '')
-    } else {
-      setFromAddressValue('')
-    }
+    setToAssetOptions(toAssetValue.targets)
+    setToAssetValue(from)
 
-
-    const targetOption = fromAssetOptions.filter((asset) => {
-      return toAssetValue.targets.map((as) => { return as.id }).includes(asset.id)
-    })
-
-    setToAssetOptions(targetOption)
-    setToAssetValue(fromAssetValue)
-
-    if(!['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(targetOption[0].chainID)) {
-      setToAddressValue(account ? account.address : '')
-    } else {
-      setToAddressValue('')
-    }
-
-    calculateReceiveAmount(fromAmountValue, toAssetValue, fromAssetValue)
+    calculateReceiveAmount(fromAmountValue, toAssetValue, from)
   }
 
-  const renderMassiveInput = (type, amountValue, amountError, amountChanged, addressValue, addressError, addressChanged, assetValue, assetError, assetOptions, onAssetSelect) => {
+  const renderMassiveInput = (type, amountValue, amountError, amountChanged, assetValue, assetError, assetOptions, onAssetSelect) => {
     const isDark = theme.palette.type === 'dark'
 
     return (
@@ -474,19 +438,6 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
               }}
             />
           </div>
-          <div className={ classes.massiveInputAddress }>
-            <TextField
-              fullWidth
-              placeholder={ `${type} address` }
-              error={ addressError }
-              value={ addressValue }
-              onChange={ addressChanged }
-              disabled={ !['BTC', 'LTC', 'BLOCK',  'ANY' ].includes(assetValue ? assetValue.chainID : '') }
-              InputProps={{
-                className: classes.addressInput
-              }}
-            />
-          </div>
         </div>
       </div>
     )
@@ -511,7 +462,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
                   <img
                     className={ classes.displayChainIconSmall }
                     alt=""
-                    src={ (swapState && swapState.fromAssetValue) ? `/blockchains/${swapState.fromAssetValue.icon}` : '' }
+                    src={ (swapState && swapState.fromAssetValue) ? `/blockchains/${swapState.fromAssetValue.chainMetadata.icon}` : '' }
                     height='30px'
                     width='30px'
                     onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -531,7 +482,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
                   <img
                     className={ classes.displayChainIconSmall }
                     alt=""
-                    src={ (swapState && swapState.toAssetValue) ? `/blockchains/${swapState.toAssetValue.icon}` : '' }
+                    src={ (swapState && swapState.toAssetValue) ? `/blockchains/${swapState.toAssetValue.chainMetadata.icon}` : '' }
                     height='30px'
                     width='30px'
                     onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -542,26 +493,26 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
           </div>
           <div className={ classes.swapInfoRow }>
             <Typography color='textSecondary'>Max Swap Amount </Typography>
-            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.maximumSwap : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.MaximumSwap : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
           </div>
           <div className={ classes.swapInfoRow }>
             <Typography color='textSecondary'>Min Swap Amount</Typography>
-            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.minimumSwap : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.MinimumSwap : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
           </div>
           <div className={ classes.swapInfoRow }>
             <Typography color='textSecondary'>Swap Fee</Typography>
-            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? (swapState.fromAssetValue.swapFeeRate*100) : 0) }%</Typography>
+            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? (swapState.fromAssetValue.SwapFeeRate*100) : 0) }%</Typography>
           </div>
           <div className={ classes.swapInfoRow }>
             <Typography color='textSecondary'>Max Fee Amount</Typography>
-            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.maximumSwapFee : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.MaximumSwapFee : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
           </div>
           <div className={ classes.swapInfoRow }>
             <Typography color='textSecondary'>Min Fee Amount</Typography>
-            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.minimumSwapFee : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
+            <Typography>{ formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.MinimumSwapFee : 0) } { swapState && swapState.fromAssetValue ? swapState.fromAssetValue.tokenMetadata.symbol : '' }</Typography>
           </div>
           <div className={ classes.swapInfoRow }>
-            <Typography color='textSecondary' className={ classes.flexy }>Deposits <Typography color={ 'textPrimary' } className={ classes.inlineText }>> {formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.bigValueThreshold : 0)} {(swapState && swapState.fromAssetValue && swapState.fromAssetValue.tokenMetadata) ? swapState && swapState.fromAssetValue.tokenMetadata.symbol : ''} </Typography> could take up to <Typography color='textPrimary' className={ classes.inlineText }> 12 hours</Typography></Typography>
+            <Typography color='textSecondary' className={ classes.flexy }>Deposits <Typography color={ 'textPrimary' } className={ classes.inlineText }>> {formatCurrencySmall(swapState && swapState.fromAssetValue ? swapState.fromAssetValue.BigValueThreshold : 0)} {(swapState && swapState.fromAssetValue && swapState.fromAssetValue.tokenMetadata) ? swapState && swapState.fromAssetValue.tokenMetadata.symbol : ''} </Typography> could take up to <Typography color='textPrimary' className={ classes.inlineText }> 12 hours</Typography></Typography>
           </div>
         </div>
       </div>
@@ -570,11 +521,11 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
 
   return (
     <div className={ classes.swapInputs }>
-      { renderMassiveInput('From', fromAmountValue, fromAmountError, fromAmountChanged, fromAddressValue, fromAddressError, fromAddressChanged, fromAssetValue, fromAssetError, fromAssetOptions, onAssetSelect) }
+      { renderMassiveInput('From', fromAmountValue, fromAmountError, fromAmountChanged, fromAssetValue, fromAssetError, fromAssetOptions, onAssetSelect) }
       <div className={ classes.swapIconContainer }>
         <SwapVertIcon className={ classes.swapIcon } onClick={ swapAssets }/>
       </div>
-      { renderMassiveInput('To', toAmountValue, toAmountError, toAmountChanged, toAddressValue, toAddressError, toAddressChanged, toAssetValue, toAssetError, toAssetOptions, onAssetSelect) }
+      { renderMassiveInput('To', toAmountValue, toAmountError, toAmountChanged, toAssetValue, toAssetError, toAssetOptions, onAssetSelect) }
       <Tooltip interactive title={ renderTooltip() } placement='left-end'>
         <div className={ classes.limitsFlex }>
           <InfoIcon className={ classes.infoIcon } /> <Typography>View Limits</Typography>
@@ -670,7 +621,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
             <img
               className={ classes.displayChainIconSmall }
               alt=""
-              src={ asset ? `/blockchains/${asset.icon}` : '' }
+              src={ asset ? `/blockchains/${asset.chainMetadata.icon}` : '' }
               height='30px'
               width='30px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -679,7 +630,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
         </div>
         <div className={ classes.assetSelectIconName }>
           <Typography variant='h5'>{ asset ? asset.tokenMetadata.symbol : '' }</Typography>
-          <Typography variant='subtitle1' color='textSecondary'>{ asset ? asset.tokenMetadata.description : '' }</Typography>
+          <Typography variant='subtitle1' color='textSecondary'>{ asset ? asset.chainMetadata.name : '' }</Typography>
         </div>
         <div className={ classes.assetSelectBalance}>
           <Typography variant='h5'>{ (asset && asset.tokenMetadata.balance) ? formatCurrency(asset.tokenMetadata.balance) : '0.00' }</Typography>
@@ -704,7 +655,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
             <img
               className={ classes.displayChainIcon }
               alt=""
-              src={ value ? `/blockchains/${value.icon}` : '' }
+              src={ value ? `/blockchains/${value.chainMetadata.icon}` : '' }
               height='40px'
               width='40px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -751,7 +702,6 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
               }).filter((asset) => {
                 if(search && search !== '') {
                   return asset.tokenMetadata.symbol.toLowerCase().includes(search.toLowerCase()) ||
-                    asset.tokenMetadata.description.toLowerCase().includes(search.toLowerCase()) ||
                     asset.tokenMetadata.name.toLowerCase().includes(search.toLowerCase())
                 } else {
                   return true

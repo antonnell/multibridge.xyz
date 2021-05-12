@@ -216,7 +216,6 @@ class Store {
   configure = async () => {
 
     this.getGasPrices()
-    this.getCurrentBlock()
 
     injected.isAuthorized().then(isAuthorized => {
       if (isAuthorized) {

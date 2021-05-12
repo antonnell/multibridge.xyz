@@ -35,13 +35,14 @@ class TransactionController extends Component {
     emitter.removeListener(TX_CONFIRMED, this.txConfirmation);
   };
 
-  txHash = (tx, fromAsset, toAsset, amount) => {
+  txHash = (tx, fromAsset, toAsset, amount, pair) => {
     console.log('TX_HASH emitted', tx, fromAsset, toAsset, amount)
     const { swaps } = this.state
 
     let newSwaps = swaps
 
     newSwaps.push({
+      pair: pair,
       fromAsset: fromAsset,
       toAsset: toAsset,
       amount: amount,

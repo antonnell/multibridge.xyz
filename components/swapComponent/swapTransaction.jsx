@@ -71,8 +71,8 @@ class Transaction extends Component {
             </Tooltip>
             <div className={ classes.headerContainer } >
               <div>
-                <Typography variant='subtitle1'>{`${swap.fromAsset.chainDescription} -> ${swap.toAsset.chainDescription}`}</Typography>
-                <Typography variant='h1' className={ classes.swapHeader } >{ formatCurrency(swap.amount) } { swap.fromAsset.tokenMetadata.symbol }</Typography>
+                <Typography variant='subtitle1'>{`${swap.fromAsset.chainMetadata?.name} -> ${swap.toAsset.chainMetadata?.name}`}</Typography>
+                <Typography variant='h1' className={ classes.swapHeader } >{ formatCurrency(swap.amount) } { swap.fromAsset.tokenMetadata?.symbol }</Typography>
               </div>
               <div className={ classes.swapDirection }>
                 <div className={ classes.assetSelectMenuItem }>
@@ -80,14 +80,14 @@ class Transaction extends Component {
                     <img
                       className={ classes.displayAssetIconSmall }
                       alt=""
-                      src={ (swap.fromAsset) ? swap.fromAsset.tokenMetadata.icon : '' }
+                      src={ (swap.fromAsset) ? swap.fromAsset.tokenMetadata?.icon : '' }
                       height='60px'
                       onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
                     />
                     <img
                       className={ classes.displayChainIconSmall }
                       alt=""
-                      src={ (swap.fromAsset) ? `/blockchains/${swap.fromAsset.icon}` : '' }
+                      src={ (swap.fromAsset) ? `/blockchains/${swap.fromAsset.chainMetadata?.icon}` : '' }
                       height='30px'
                       width='30px'
                       onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -100,14 +100,14 @@ class Transaction extends Component {
                     <img
                       className={ classes.displayAssetIconSmall }
                       alt=""
-                      src={ (swap.toAsset) ? swap.toAsset.tokenMetadata.icon : '' }
+                      src={ (swap.toAsset) ? swap.toAsset.tokenMetadata?.icon : '' }
                       height='60px'
                       onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
                     />
                     <img
                       className={ classes.displayChainIconSmall }
                       alt=""
-                      src={ (swap.toAsset) ? `/blockchains/${swap.toAsset.icon}` : '' }
+                      src={ (swap.toAsset) ? `/blockchains/${swap.toAsset.chainMetadata?.icon}` : '' }
                       height='30px'
                       width='30px'
                       onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
