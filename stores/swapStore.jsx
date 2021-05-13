@@ -951,6 +951,9 @@ class Store {
 
     const anyswapServerArray = Object.keys(anyswapServerJson).map((key) => [key, anyswapServerJson[key]]);
 
+    console.log(fromAssetValue)
+    console.log(toAssetValue)
+
     const pair = anyswapServerArray.map((chainDetails) => {
       const chainVal = chainDetails[1]
 
@@ -958,13 +961,15 @@ class Store {
       const anyswapInfoFormatted = chainValArray.filter((details) => {
         const val = details[1]
 
-        if((val.SrcToken.ContractAddress === fromAssetValue.ContractAddress && val.DestToken.ContractAddress === toAssetValue.ContractAddress && val.SrcToken.DcrmAddress === toAssetValue.DcrmAddress) ||
-          (val.DestToken.ContractAddress === fromAssetValue.ContractAddress && val.SrcToken.ContractAddress === toAssetValue.ContractAddress && val.SrcToken.DcrmAddress === toAssetValue.DcrmAddress)) {
+        if((val.SrcToken.ContractAddress === fromAssetValue.ContractAddress && val.DestToken.ContractAddress === toAssetValue.ContractAddress && (val.srcChainID === toAssetValue.chainID || val.destChainID === toAssetValue.chainID) && (val.srcChainID === fromAssetValue.chainID || val.destChainID === fromAssetValue.chainID)) ||
+          (val.DestToken.ContractAddress === fromAssetValue.ContractAddress && val.SrcToken.ContractAddress === toAssetValue.ContractAddress && (val.srcChainID === toAssetValue.chainID || val.destChainID === toAssetValue.chainID) && (val.srcChainID === fromAssetValue.chainID || val.destChainID === fromAssetValue.chainID))) {
             return true
           }
 
         return false
       })
+
+      console.log(anyswapInfoFormatted)
 
       if(anyswapInfoFormatted.length > 0) {
         return anyswapInfoFormatted[0][1]
