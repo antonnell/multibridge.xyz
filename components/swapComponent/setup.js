@@ -131,14 +131,20 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
         let targetIndex = 0
 
         setToAssetOptions(targetOption)
+
+        console.log(targetOption)
+        console.log(toAssetValue)
+
         if(!toAssetValue) {
+          console.log(srcChainInfo)
+          console.log(destChainInfo)
           if(srcChainInfo) {
-            targetIndex = targetOption.findIndex((i) => { return (i.ContractAddress == srcChainInfo.DestToken.ContractAddress) })
+            targetIndex = targetOption.findIndex((i) => { return (i.ContractAddress == srcChainInfo.DestToken.ContractAddress && i.DcrmAddress == srcChainInfo.DestToken.DcrmAddress) })
             if(targetIndex === -1) {
               targetIndex = 0
             }
           } else if (destChainInfo) {
-            targetIndex = targetOption.findIndex((i) => { return (i.ContractAddress == destChainInfo.DestToken.ContractAddress) })
+            targetIndex = targetOption.findIndex((i) => { return (i.ContractAddress == destChainInfo.DestToken.ContractAddress && i.DcrmAddress == destChainInfo.DestToken.DcrmAddress) })
             if(targetIndex === -1) {
               targetIndex = 0
             }
