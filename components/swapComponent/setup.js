@@ -280,6 +280,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
   }
 
   const onAssetSelect = (type, value) => {
+    console.log(value)
     if(type === 'From') {
       setFromAssetValue(value)
       stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: value.chainID } } })

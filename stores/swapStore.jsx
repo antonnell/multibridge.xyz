@@ -958,8 +958,8 @@ class Store {
       const anyswapInfoFormatted = chainValArray.filter((details) => {
         const val = details[1]
 
-        if((val.SrcToken.ContractAddress === fromAssetValue.ContractAddress && val.DestToken.ContractAddress === toAssetValue.ContractAddress) ||
-          (val.DestToken.ContractAddress === fromAssetValue.ContractAddress && val.SrcToken.ContractAddress === toAssetValue.ContractAddress)) {
+        if((val.SrcToken.ContractAddress === fromAssetValue.ContractAddress && val.DestToken.ContractAddress === toAssetValue.ContractAddress && val.SrcToken.DcrmAddress === toAssetValue.DcrmAddress) ||
+          (val.DestToken.ContractAddress === fromAssetValue.ContractAddress && val.SrcToken.ContractAddress === toAssetValue.ContractAddress && val.SrcToken.DcrmAddress === toAssetValue.DcrmAddress)) {
             return true
           }
 
@@ -996,6 +996,7 @@ class Store {
     if(!pair) {
       return null
     }
+    console.log(pair)
 
     let chainID = pair.srcChainID
     let pairID = pair.PairID
