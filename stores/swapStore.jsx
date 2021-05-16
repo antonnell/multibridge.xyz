@@ -226,7 +226,7 @@ class Store {
         const val = details[1]
 
         // exclude a bunch of tokens that we don't support
-        if(['ltc', 'btc', 'btc2fsn', 'any', 'block', 'sfi', 'frax', 'fkrwv2', 'fusdv2'].includes(key)) {
+        if(['ltc', 'btc', 'btc2fsn', 'block', 'sfi', 'frax'].includes(key)) {
           return null
         }
 
