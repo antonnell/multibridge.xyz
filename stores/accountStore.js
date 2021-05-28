@@ -231,9 +231,16 @@ class Store {
       if (isAuthorized) {
         injected.activate()
         .then((a) => {
+
+          let networkVersion = a.provider.networkVersion
+
+          if(networkVersion === '0x63564c40') {
+            networkVersion = '1666600000'
+          }
+
           this.setStore({
-            selectedChainID: a.provider.networkVersion,
-            chainID: a.provider.networkVersion,
+            selectedChainID: networkVersion,
+            chainID: networkVersion,
             account: {
               address: a.account
             },
@@ -282,8 +289,15 @@ class Store {
           web3context: null
         })
       } else {
+
+        let networkVersion = window.ethereum.networkVersion
+
+        if(networkVersion === '0x63564c40') {
+          networkVersion = '1666600000'
+        }
+
         that.setStore({
-          chainID: window.ethereum.networkVersion,
+          chainID: networkVersion,
           account: {
             address: accounts[0]
           },
