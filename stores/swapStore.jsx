@@ -121,6 +121,14 @@ const CHAIN_MAP = {
     symbol: 'AVAX',
     icon: 'AVAX.svg'
   },
+  1666600000: {
+    name: 'Harmony Mainnet',
+    rpcURL: 'https://api.harmony.one',
+    chainID: '1666600000',
+    explorer: 'https://explorer.harmony.one/#/shard/0/',
+    symbol: 'ONE',
+    icon: 'ONE.png'
+  },
   'BTC': {
     name: 'Bitcoin Mainnet',
     rpcURL: '??',
@@ -284,8 +292,10 @@ class Store {
         val.SrcToken.chainID = val.srcChainID
         val.DestToken.chainID = val.destChainID
 
+        const icon = val.logoUrl
+
         val.SrcToken.tokenMetadata = {
-          icon: `/tokens/${ val.SrcToken.Symbol }.png`,
+          icon: icon ? icon : `/tokens/${ val.SrcToken.Symbol }.png`,
           address: val.SrcToken.ContractAddress,
           symbol: val.SrcToken.Symbol,
           decimals: val.SrcToken.Decimals,
@@ -294,7 +304,7 @@ class Store {
         val.SrcToken.chainMetadata = this._getChainInfo(val.srcChainID)
 
         val.DestToken.tokenMetadata = {
-          icon: `/tokens/${ val.DestToken.Symbol }.png`,
+          icon: icon ? icon : `/tokens/${ val.DestToken.Symbol }.png`,
           address: val.DestToken.ContractAddress,
           symbol: val.DestToken.Symbol,
           decimals: val.DestToken.Decimals,

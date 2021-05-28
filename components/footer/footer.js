@@ -42,7 +42,7 @@ function Footer(props) {
         <a className={ classes.link } href='https://github.com/anyswap/Anyswap-Audit/blob/master/SlowMist/AnySwap%20CrossChain-Bridge%20Security%20Audit%20Report.pdf' target='_blank' rel="noreferrer">
         <Typography variant='h5' className={ classes.auditText } color='textPrimary'><PolicyIcon className={ classes.policyIcon } /> Security Audit</Typography>
       </a>
-      <Typography className={classes.smallVersion}>Version 1.0.6</Typography>
+      <Typography className={classes.smallVersion}>Version 1.0.7</Typography>
     </div>
   )
 }
