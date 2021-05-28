@@ -289,6 +289,15 @@ class Store {
           val.DestToken.Symbol = 'BNB'
         }
 
+        if(val.PairID === 'ONEv4') {
+          val.SrcToken.ContractAddress = 'ONE'
+          val.SrcToken.Name = 'Harmony'
+          val.SrcToken.Symbol = 'ONE'
+
+          val.DestToken.Name = 'Harmony'
+          val.DestToken.Symbol = 'ONE'
+        }
+
         val.SrcToken.chainID = val.srcChainID
         val.DestToken.chainID = val.destChainID
 
@@ -655,7 +664,7 @@ class Store {
           erc20Address = asset.DelegateToken
         }
 
-        if(['ETH', 'FTM', 'FSN', 'HT', 'BNB'].includes(erc20Address)) {
+        if(['ETH', 'FTM', 'FSN', 'HT', 'BNB', 'ONE'].includes(erc20Address)) {
           const balanceOf = await web3.eth.getBalance(account.address)
 
           const balance = BigNumber(balanceOf).div(10**18).toFixed(18, 1)
@@ -1083,7 +1092,7 @@ class Store {
     if(direction === 'SrcToDest') {
       //SrcToDest, we do transfer to DepositAddress
 
-      if(['ETH', 'FTM', 'FSN', 'HT', 'BNB'].includes(fromAssetValue.ContractAddress)) {
+      if(['ETH', 'FTM', 'FSN', 'HT', 'BNB', 'ONE'].includes(fromAssetValue.ContractAddress)) {
         return this._transferNativeToken(fromAsset, toAsset, fromAddressValue, fromAmountValue, pair)
       }
 

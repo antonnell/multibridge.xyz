@@ -303,6 +303,9 @@ class Store {
 
     ethereum.on('networkChanged', (data) => {
       // window.location.reload();
+      if(data === '0x63564c40') {
+        data = '1666600000'
+      }
       that.setStore({
         chainID: data
       })
