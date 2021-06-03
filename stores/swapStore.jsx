@@ -125,7 +125,7 @@ const CHAIN_MAP = {
     name: 'Harmony Mainnet',
     rpcURL: 'https://api.harmony.one',
     chainID: '1666600000',
-    explorer: 'https://explorer.harmony.one/#/shard/0/',
+    explorer: 'https://explorer.harmony.one/#',
     symbol: 'ONE',
     icon: 'ONE.png'
   },
