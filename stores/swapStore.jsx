@@ -62,6 +62,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31',
     chainID: '1',
     explorer: 'https://etherscan.io',
+    transactionSuffix: 'tx',
     symbol: 'ETH',
     icon: 'ETH.svg'
   },
@@ -70,6 +71,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://bsc-dataseed1.binance.org',
     chainID: '56',
     explorer: 'https://bscscan.com',
+    transactionSuffix: 'tx',
     symbol: 'BNB',
     icon: 'BNB.svg'
   },
@@ -78,6 +80,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://rpc.xdaichain.com',
     chainID: '100',
     explorer: 'https://blockscout.com/xdai/mainnet/',
+    transactionSuffix: 'tx',
     symbol: 'xDAI',
     icon: 'STAKE.png'
   },
@@ -86,6 +89,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://http-mainnet.hecochain.com',
     chainID: '128',
     explorer: 'https://scan.hecochain.com',
+    transactionSuffix: 'tx',
     symbol: 'HT',
     icon: 'HT.svg'
   },
@@ -94,6 +98,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://rpc-mainnet.matic.network',
     chainID: '137',
     explorer: 'https://explorer-mainnet.maticvigil.com/',
+    transactionSuffix: 'tx',
     symbol: 'MATIC',
     icon: 'MATIC.png'
   },
@@ -102,6 +107,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://rpcapi.fantom.network',
     chainID: '250',
     explorer: 'https://ftmscan.com',
+    transactionSuffix: 'tx',
     symbol: 'FTM',
     icon: 'FTM.png'
   },
@@ -110,6 +116,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://mainnet.anyswap.exchange',
     chainID: '32659',
     explorer: 'https://fsnex.com',
+    transactionSuffix: 'transaction',
     symbol: 'FSN',
     icon: 'FSN.svg'
   },
@@ -118,6 +125,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://api.avax.network/ext/bc/C/rpc',
     chainID: '43114',
     explorer: 'https://cchain.explorer.avax.network/',
+    transactionSuffix: 'tx',
     symbol: 'AVAX',
     icon: 'AVAX.svg'
   },
@@ -126,6 +134,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://api.harmony.one',
     chainID: '1666600000',
     explorer: 'https://explorer.harmony.one/#',
+    transactionSuffix: 'tx',
     symbol: 'ONE',
     icon: 'ONE.png'
   },
@@ -134,6 +143,7 @@ const CHAIN_MAP = {
     rpcURL: '??',
     chainID: 'BTC',
     explorer: 'https://www.blockchain.com/btc/',
+    transactionSuffix: 'tx',
     symbol: 'BTC',
     icon: 'BTC.png'
   }

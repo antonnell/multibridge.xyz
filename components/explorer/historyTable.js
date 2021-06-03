@@ -252,9 +252,9 @@ export default function EnhancedTable({ swapHistory }) {
 
   const addressClicked = (row, direction) => {
     if(direction === 'from') {
-      window.open(`${row.fromChain?.explorer}/tx/${row.txid}`, '_blank')
+      window.open(`${row.fromChain?.explorer}/${row.fromChain?.transactionSuffix}/${row.txid}`, '_blank')
     } else {
-      window.open(`${row.toChain?.explorer}/tx/${row.swaptx}`, '_blank')
+      window.open(`${row.toChain?.explorer}/${row.toChain?.transactionSuffix}/${row.swaptx}`, '_blank')
     }
   }
 
