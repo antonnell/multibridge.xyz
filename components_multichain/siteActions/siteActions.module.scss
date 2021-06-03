@@ -1,0 +1,18 @@
+@use "../../styles/base";
+.siteActions {
+  display: flex;
+  flex-direction: row;
+  z-index: 1000;
+  button:last-child {
+    //NOTE: Alternative approach gap property. flex-gap, gap
+    margin-left: 16px;
+  }
+  &.isMobile {
+    flex-direction: column-reverse;
+  }
+}
+.walletsDialog {
+  :global .MuiPaper-rounded {
+    min-width: 600px;
+  }
+}

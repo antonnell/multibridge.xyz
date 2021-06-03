@@ -1,0 +1,48 @@
+@use "../../../styles/base";
+$base-duration: 250ms;
+$spacer: 1rem;
+.accordion {
+  width: 100%;
+  &Trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: bold;
+    padding-bottom: 12px;
+    padding-top: 16px;
+    margin-bottom: 8px;
+
+    cursor: pointer;
+    border-bottom: base.$border-style;
+  }
+  &Content {
+    max-height: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    transition: $base-duration ease;
+
+    .itemBody {
+      margin-top: 24px;
+      opacity: 0;
+      transform: translateY(-$spacer * 2);
+      transition: $base-duration * 2 ease;
+    }
+    &.isActive {
+      max-height: 25rem;
+      .itemBody {
+        opacity: 1;
+        transform: translateY(0);
+        transition: $base-duration * 2 ease;
+      }
+    }
+  }
+  &Icon {
+    transition: $base-duration * 2 ease;
+    &.isActive {
+      transform: rotate(-180deg);
+      -webkit-transform: rotate(-180deg);
+      transition: $base-duration * 2 ease;
+    }
+  }
+}

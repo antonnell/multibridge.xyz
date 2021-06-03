@@ -18,6 +18,8 @@ import {
   ACCOUNT_CONFIGURED,
 } from '../stores/constants'
 
+import '../styles/globals.scss';
+
 export default function MyApp({ Component, pageProps }) {
   const [ themeConfig, setThemeConfig ] = useState(lightTheme);
   const [ accountConfigured, setAccountConfigured ] = useState(false)
@@ -66,17 +68,22 @@ export default function MyApp({ Component, pageProps }) {
       <Head>
         <title>Multichain</title>
         <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+          />
       </Head>
-      <ThemeProvider theme={ themeConfig }>
+      {/* <ThemeProvider theme={ themeConfig }> */}
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-        <CssBaseline />
+        {/* <CssBaseline /> */}
         {
           swapConfigured && accountConfigured && <Component {...pageProps} changeTheme={ changeTheme } />
         }
         {
           !(swapConfigured && accountConfigured) && <Configure {...pageProps} />
         }
-      </ThemeProvider>
+      {/* </ThemeProvider> */}
     </React.Fragment>
   );
 }

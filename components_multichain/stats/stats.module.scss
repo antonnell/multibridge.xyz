@@ -1,0 +1,123 @@
+@use "../../styles/base";
+.countTile {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #000000;
+  padding-left: 40px;
+  height: 140px;
+  background: #ffffff;
+  border-radius: 6px;
+  .title {
+    font-weight: bold;
+    font-size: 60px;
+    line-height: 73px;
+  }
+
+  %subtitle {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 19px;
+  }
+  .subtitle {
+    @extend %subtitle;
+  }
+  .subtitleLink {
+    @extend %subtitle;
+    color: base.$primary-color;
+    text-decoration-line: underline;
+    cursor: pointer;
+  }
+}
+.lockedValueDisplayTile {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  color: #000000;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding-left: 43px;
+  padding-right: 43px;
+  min-height: 200px;
+
+  .lockedValueBlock {
+    .lockedValue {
+      font-weight: bold;
+      font-size: 48px;
+      line-height: 58px;
+      margin-bottom: 15px;
+    }
+    .lockedValueText {
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 19px;
+    }
+  }
+  .lockedValueInfoBlock {
+    display: flex;
+    align-items: center;
+    .divider {
+      border-left: 1px solid #000000;
+      width: 1px;
+      height: 69px;
+      margin-left: 50px;
+      margin-right: 50px;
+    }
+    .textBlock {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      .title {
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 19px;
+        margin-bottom: 12px;
+      }
+      .subtitle {
+        font-weight: normal;
+        font-size: 14px;
+        line-height: 17px;
+      }
+    }
+  }
+}
+.lockedValueDisplayTile.isMobile {
+  padding-left: 24px;
+  padding-right: 8px;
+  .lockedValueBlock {
+    .lockedValue {
+      font-weight: bold;
+      font-size: 32px;
+      line-height: 42px;
+      margin-bottom: 15px;
+    }
+    .lockedValueText {
+      font-weight: 600;
+      font-size: 16px;
+      line-height: 19px;
+    }
+  }
+}
+.countTile.isMobile {
+  padding-left: 24px;
+  padding-right: 8px;
+  width: 100%;
+  min-height: 150px;
+  margin-bottom: 10px;
+  .title {
+    font-size: 32px;
+    line-height: 42px;
+  }
+
+  %subtitle {
+    font-size: 16px;
+    line-height: 19px;
+  }
+  .subtitle {
+    @extend %subtitle;
+  }
+  .subtitleLink {
+    @extend %subtitle;
+  }
+}

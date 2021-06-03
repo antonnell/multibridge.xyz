@@ -1,0 +1,239 @@
+@use "../../styles/base";
+$swap-field-padding-left: 14px;
+.downIcon {
+  margin-left: 12px;
+  display: block;
+}
+
+.swapFieldContainer {
+  display: flex;
+  flex-direction: column;
+  @extend %border-default;
+  width: 100%;
+  .networkHeader {
+    padding: 6px 0px 0px $swap-field-padding-left;
+    font-size: 12px;
+    line-height: 22px;
+    color: base.$secondary-text-color;
+  }
+}
+.networkAndAmount {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-bottom: 8px;
+  justify-content: space-between;
+  border-bottom: base.$border-style;
+  padding-left: $swap-field-padding-left;
+  .networkAndAmountBlock {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    .divider {
+      height: 30px;
+      margin-left: 14px;
+      margin-right: 13px;
+      border-left: base.$border-style;
+    }
+    .amount {
+      color: base.$primary-text-color;
+      width: 100%;
+      font-weight: bold;
+      font-size: 28px;
+      line-height: 34px;
+      border: none;
+    }
+  }
+}
+
+.selectedCoinDisplay {
+  padding-left: $swap-field-padding-left;
+  display: flex;
+  flex-direction: row;
+  padding-top: 4px;
+  padding-bottom: 4px;
+
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toleranceContainer,
+.settingsContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 74px;
+  justify-content: space-between;
+}
+.toleranceInput {
+  flex-grow: 1;
+  display: flex;
+  height: 100%;
+  @extend %border-default;
+  align-items: center;
+  padding-right: 15px;
+  &.selected {
+    border: base.$border-style-with-primary-color;
+    span,
+    input {
+      color: base.$primary-color;
+    }
+  }
+  input {
+    margin-left: 12px;
+    height: 100%;
+    width: 100%;
+    font-style: normal;
+    font-weight: bold;
+    font-size: 28px;
+    min-width: 5px;
+    border: none;
+  }
+  span {
+    font-size: 16px;
+    line-height: 22px;
+    color: base.$secondary-text-color;
+  }
+}
+.toleranceOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  min-width: 84px;
+
+  height: 100%;
+  @extend %border-default;
+  margin-right: 16px;
+  font-size: 28px;
+  font-weight: bold;
+  color: base.$secondary-text-color;
+  &.selected {
+    color: base.$primary-color;
+    border: base.$border-style-with-primary-color;
+  }
+}
+.settingsHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  align-items: center;
+  padding-right: 6px;
+  .settingsTitle {
+    color: base.$secondary-text-color;
+    font-size: 16px;
+  }
+  .img {
+    width: 16px;
+    height: 16px;
+  }
+}
+.gasSettingOption {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  @extend %border-default;
+  margin-right: 16px;
+  color: base.$secondary-text-color;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: center;
+  &.selected {
+    color: base.$primary-color;
+    border: base.$border-style-with-primary-color;
+  }
+  .gasSettingName {
+    font-weight: bold;
+  }
+}
+.settingsContainer > :last-child {
+  margin-right: 0px;
+}
+
+.swapLimits {
+  display: flex;
+  flex-direction: column;
+  .limitItem {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 16px;
+    line-height: 22px;
+    color: base.$primary-text-color;
+    .limitAmount {
+      font-weight: bold;
+    }
+  }
+  .limitNote {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    .img {
+      display: block;
+      margin-right: 5px;
+      height: 16px;
+      width: 16px;
+    }
+  }
+}
+
+.swapContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; // Set this to relative, so child element ( message dispaly) can use absolute or other reltive positioning styles
+  .swapIcon {
+    display: block;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .accordionWrapper {
+    margin-top: 12px;
+    width: 100%;
+  }
+  button {
+    margin-top: 32px;
+    width: 100%;
+  }
+}
+.gassSettingsWrapper {
+  margin-top: 16px;
+}
+.estimatedFee {
+  font-size: 16px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+  .feeAmount {
+    font-weight: bold;
+  }
+}
+
+.coinSelectorDialog {
+  :global .MuiPaper-rounded {
+    height: 100%;
+  }
+}
+.swapMessageDisplay {
+  position: absolute;
+  top: -125px;
+}
+
+.isMobile {
+  .swapMessageDisplay {
+    position: absolute;
+    top: -60px;
+  }
+}

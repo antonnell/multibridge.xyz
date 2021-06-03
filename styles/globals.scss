@@ -1,0 +1,47 @@
+@use 'base';
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: base.$font-family;
+  font-style: normal;
+  color: base.$primary-text-color;
+  height: 100%;
+}
+img {
+  display: block; /* img introduces 4 px vertical height to the outer container, since its inline by default. Hence make it block to avoid this padding */
+}
+
+@font-face {
+  font-family: 'GT America';
+  src: url('../public/fonts/GT-America/GT-America-Expanded-Medium.otf');
+  font-style: normal;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+input,
+select,
+textarea,
+button {
+  font-family: inherit; /* Form elements don't inherit automatically */
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none; /*Remove the blue box comes up */
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}

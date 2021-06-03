@@ -1,0 +1,96 @@
+@use "../../../styles/base";
+.selector {
+  :global .selector__control {
+    box-shadow: none;
+    border-style: none;
+  }
+  :global .selector__control--menu-is-open :global .selector__single-value {
+    display: none;
+  }
+  :global .selector__value-container {
+    min-height: 40px;
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+  :global .selector__menu {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    box-shadow: none;
+    position: relative; //react-select by default has aboslute. This is to bring inline, so that container can adjust its height accordingly
+    // With absolute, parent can't determine height
+  }
+
+  :global .selector__menu-list {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    max-height: 100%; // react-select sets max-height to 300px by default. Since we show full page list, we don't need this limit
+  }
+  :global .selector__option {
+    background-color: transparent;
+    border-bottom: 1px solid #e8e8ea;
+    padding: 11px base.$dialog-padding 8px base.$dialog-padding;
+  }
+  //Note: Keep is-focused styling ahead of .selector__option--is-selected
+  //THis is to ensure that is-focussed style doesnt get aplied to is-selected elements
+  :global .selector__option--is-focused {
+    //border-color: base.$primary-color;
+    @extend %selector-option-is-focused;
+    // Note: Explicitly set the background-color. Chrome, background-color is not picked up
+    background-color: base.$background-color-focus;
+    cursor: pointer;
+    &:active {
+      background-color: base.$background-color-focus;
+    }
+  }
+  :global .selector__option--is-selected {
+    @extend %selector-option-is-selected;
+    //background-color: inherit;
+    color: inherit;
+    cursor: inherit;
+    background-color: base.$background-color-secondary;
+  }
+  .selectorInput {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-left: base.$dialog-padding;
+    margin-right: base.$dialog-padding;
+    border: base.$border-style;
+    box-sizing: border-box;
+    border-radius: 6px;
+    width: 100%;
+    .searchImg {
+      margin-left: 12px;
+      margin-right: 12px;
+    }
+  }
+}
+.selectionDisplay {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 40px;
+  min-width: 150px;
+  .icon,
+  .downIcon {
+    width: 24px;
+    height: 24px;
+  }
+  .downIcon {
+    margin-left: 4px;
+  }
+  .name {
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 22px;
+    color: base.$secondary-text-color;
+    flex-grow: 1;
+    margin-left: 18px;
+  }
+
+  .selectedNetworkName {
+    width: 200px;
+  }
+}
