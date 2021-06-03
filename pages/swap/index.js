@@ -21,17 +21,3 @@ function Swap({ changeTheme }) {
 }
 
 export default Swap
-
-/*
-
-<div className={ classes.explanationContainer }>
-  <div className={ classes.explanationHeader }>
-    <Typography variant='h3'>YEARN</Typography>
-    <Typography variant='h4'>swaps</Typography>
-  </div>
-  <div className={ classes.explanationSubheader }>
-    <Typography variant='h2'>Cross-chain swaps, <span className={ classes.accentColor }>made simple</span>.</Typography>
-  </div>
-</div>
-
-*/

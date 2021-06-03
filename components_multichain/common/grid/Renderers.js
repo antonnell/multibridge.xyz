@@ -1,9 +1,14 @@
 import React from 'react';
 
+import BigNumber from 'bignumber.js';
+import * as moment from 'moment';
 import ImageTextCell from '../imagetextcell/ImageTextCell';
-import { formatAddress, timeFromNow } from '../../../framework/utils';
+import AddressTextCell from '../imagetextcell/AddressTextCell';
+
+import { formatAddress } from '../../../framework/utils';
 import styles from './grid.module.scss';
 import config from '../../../config';
+import { formatCurrency } from '../../../utils';
 
 const okIcon = '/images/okIcon.svg';
 const errorIcon = '/images/errorIcon.svg';
@@ -13,6 +18,7 @@ export const chainRenderer = ({ value: { icon, text } }) => (
 );
 export const contractRenderer = ({ value }) =>
   formatAddress(value, config.contractFormat);
+
 export const statusRenderer = ({ value }) => (
   <img
     className={styles.status}
@@ -21,20 +27,33 @@ export const statusRenderer = ({ value }) => (
   />
 );
 export const addressRenderer = ({ value: { network, coinIcon, address } }) => (
-  <ImageTextCell
-    icon={coinIcon}
-    title={network}
-    subtitle={formatAddress(address)}
-  />
+  <AddressTextCell icon={coinIcon} title={network} subtitle={address} />
 );
 export const timeRenderer = ({ value }) => (
-  <div className={styles.time}>{timeFromNow(value)}</div>
+  <div className={styles.time}>{moment(value * 1000).fromNow()}</div>
 );
 
 export const sentCellRenderer = ({
-  value: { icon, sentAmount, receivedAmount },
+  value: { value, tokenMetadata, swapvalue },
 }) => {
-  const title = `Sent: ${sentAmount}`;
-  const subtitle = `Received: ${receivedAmount}`;
-  return <ImageTextCell icon={icon} title={title} subtitle={subtitle} />;
+  // const title = `Sent: ${sentAmount}`;
+  // const subtitle = `Received: ${receivedAmount}`;
+  const iconImg = tokenMetadata
+    ? tokenMetadata.icon
+    : '/tokens/unknown-logo.png';
+
+  const titleTxt = `${formatCurrency(
+    BigNumber(value)
+      .div(10 ** (tokenMetadata ? tokenMetadata.decimals : 18))
+      .toNumber()
+  )} ${tokenMetadata ? tokenMetadata.symbol : ''}`;
+
+  const subtitle = `${formatCurrency(
+    BigNumber(swapvalue)
+      .div(10 ** (tokenMetadata ? tokenMetadata.decimals : 18))
+      .toNumber()
+  )} ${tokenMetadata ? tokenMetadata.symbol : ''}`;
+  console.log(value, titleTxt, subtitle);
+
+  return <ImageTextCell icon={iconImg} title={titleTxt} subtitle={subtitle} />;
 };

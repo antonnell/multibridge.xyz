@@ -8,6 +8,7 @@ import lightTheme from '../theme/light';
 import darkTheme from '../theme/dark';
 
 import Configure from './configure'
+import WalletContext from '../framework/WalletContext';
 
 import stores from '../stores/index.js'
 
@@ -24,6 +25,10 @@ export default function MyApp({ Component, pageProps }) {
   const [ themeConfig, setThemeConfig ] = useState(lightTheme);
   const [ accountConfigured, setAccountConfigured ] = useState(false)
   const [ swapConfigured, setSwapConfigured ] = useState(false)
+
+
+  const [wallet, setWallet] = useState(false);
+  const value = { wallet, setWallet };
 
   useEffect(() => {
     // Remove the server-side injected CSS.
@@ -64,6 +69,7 @@ export default function MyApp({ Component, pageProps }) {
   },[]);
 
   return (
+    <WalletContext.Provider value={value}>
     <React.Fragment>
       <Head>
         <title>Multichain</title>
@@ -85,6 +91,8 @@ export default function MyApp({ Component, pageProps }) {
         }
       {/* </ThemeProvider> */}
     </React.Fragment>
+    </WalletContext.Provider>
+
   );
 }
 

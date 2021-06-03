@@ -1,10 +1,19 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import PropTypes from 'prop-types';
 
 import SideBarMenuItem from './SideBarMenuItem';
 import styles from './sideBar.module.scss';
+
+
+import stores from '../../stores'
+
+import {
+  ACCOUNT_CONFIGURED,
+  ACCOUNT_CHANGED
+} from '../../stores/constants'
+
 
 const iconPath = '/images/sidebar/';
 
@@ -14,6 +23,28 @@ const iconPath = '/images/sidebar/';
  * @returns
  */
 function SideBarMenu({ menuItems, onSelect }) {
+
+  const [ account, setAccount ] = useState(null)
+
+
+
+
+  useEffect(function() {
+
+    setAccount(stores.accountStore.getStore('account'))
+
+    const accountConfigure = () => {
+      setAccount(stores.accountStore.getStore('account'))
+    }
+
+    stores.emitter.on(ACCOUNT_CONFIGURED, accountConfigure)
+    stores.emitter.on(ACCOUNT_CHANGED, accountConfigure)
+    return () => {
+      stores.emitter.removeListener(ACCOUNT_CONFIGURED, accountConfigure)
+      stores.emitter.removeListener(ACCOUNT_CHANGED, accountConfigure)
+    }
+  },[]);
+
   const getIcons = (id) => ({
     icon: `${iconPath}${id}.svg`,
     iconSelected: `${iconPath}${id}-selected.svg`,

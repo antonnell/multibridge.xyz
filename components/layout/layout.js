@@ -92,6 +92,8 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
             </>
           )}
           </div>
+          {showContent && <main className={ styles.content }>{children}</main>}
+
           </div>
 
 
@@ -102,7 +104,6 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
         {!configure && (
           <Header backClicked={backClicked} changeTheme={ changeTheme } />
         )} */}
-        {/* <main className={ classes.main }>{children}</main> */}
         <SnackbarController />
       {/* </div> */}
     </div>
