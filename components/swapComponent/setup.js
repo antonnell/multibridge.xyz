@@ -615,7 +615,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
 
   const renderAssetOption = (type, asset) => {
     return (
-      <MenuItem val={ asset.id } key={ asset.id } className={ classes.assetSelectMenu } onClick={ () => { onLocalSelect(type, asset) } }>
+      <MenuItem val={ asset.Name } key={ asset.Name } className={ classes.assetSelectMenu } onClick={ () => { onLocalSelect(type, asset) } }>
         <div className={ classes.assetSelectMenuItem }>
           <div className={ classes.displayDualIconContainerSmall }>
             <img

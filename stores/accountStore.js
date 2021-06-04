@@ -1,5 +1,6 @@
 import {
   GAS_PRICE_API,
+  ZAPPER_GAS_PRICE_API,
   ERROR,
   STORE_UPDATED,
   CONFIGURE,
@@ -362,12 +363,18 @@ class Store {
 
   _getGasPrices = async () => {
     try {
-      const url = GAS_PRICE_API
+      const url = ZAPPER_GAS_PRICE_API
       const priceResponse = await fetch(url);
       const priceJSON = await priceResponse.json()
 
       if(priceJSON) {
         return priceJSON
+      }
+      return {
+        "slow":90,
+        "standard":90,
+        "fast":100,
+        "instant":130
       }
     } catch(e) {
       console.log(e)
@@ -375,21 +382,26 @@ class Store {
     }
   }
 
-  getGasPrice = async (speed) => {
+  getGasPrice = async (speed, asset) => {
 
     let gasSpeed = speed
     if(!speed) {
       gasSpeed = this.getStore('gasSpeed')
     }
 
+    if(asset && asset.chainID === '250') {
+      return '80' //hard code FTM gas price to 80.
+    }
+
     try {
-      const url = GAS_PRICE_API
+      const url = ZAPPER_GAS_PRICE_API
       const priceResponse = await fetch(url);
       const priceJSON = await priceResponse.json()
 
       if(priceJSON) {
         return priceJSON[gasSpeed].toFixed(0)
       }
+      return '80'
     } catch(e) {
       console.log(e)
       return {}
