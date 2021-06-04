@@ -5,7 +5,7 @@ import {
   Paper,
 } from '@material-ui/core'
 import classes from './stats.module.css'
-import StatsComponent from '../../components/stats'
+import StatsMain from '../../components_multichain/stats_main/stats_main'
 
 function Stats({ changeTheme }) {
 
@@ -14,9 +14,7 @@ function Stats({ changeTheme }) {
       <Head>
         <title>Swaps</title>
       </Head>
-      <div className={ classes.swapContainer }>
-        <StatsComponent />
-      </div>
+      <StatsMain />
     </Layout>
   )
 }

@@ -66,7 +66,6 @@ function TransactionList({ swapHistory }) {
       status: getStatus(el.status),
     }));
 
-    console.log('herrre=- ', hist);
     const [rowData] = useState(hist);
 
     // Do not use flex:1 for mobile form factor. This shrinks the columns
