@@ -1,0 +1,25 @@
+@use "../../../styles/base";
+.imageTextCell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  max-height: 40px;
+  .img {
+    width: 40px;
+    height: 40px;
+    margin-right: 16px;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    line-height: 20px;
+    width: 230px;
+
+    .title {
+      font-weight: bold;
+    }
+    .subtitle {
+    }
+  }
+}

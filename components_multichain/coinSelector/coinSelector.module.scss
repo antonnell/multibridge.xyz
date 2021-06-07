@@ -1,0 +1,52 @@
+@use "../../styles/base";
+
+.coinSelector {
+  .menuListHeader {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 19px;
+    margin: 15px base.$dialog-padding;
+
+    .name {
+      min-width: 209px; //NOTE: coinOptions img and name width added here
+      margin-right: 11px; //Note: Figma has 73px width, 38 px margin right. Modified to give more space to label
+    }
+    .balance {
+      min-width: 100px;
+    }
+    .currencyValue {
+      flex: 1;
+      text-align: right;
+    }
+  }
+  .coinOptions {
+    display: flex;
+    align-items: center;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 22px;
+    color: base.$secondary-text-color;
+    .img {
+      width: 24px;
+      height: 24px;
+      margin-right: 15px;
+    }
+    .name {
+      min-width: 170px;
+      margin-right: 11px; //Note: Figma has 73px width, 38 px margin right. Modified to give more space to label
+    }
+    .balance {
+      min-width: 100px;
+      flex: 1;
+    }
+    .currencyValue {
+      width: 150px;
+      text-align: right;
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+}

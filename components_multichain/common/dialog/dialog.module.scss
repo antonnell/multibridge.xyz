@@ -1,0 +1,50 @@
+@use "../../../styles/base";
+
+.dialog {
+  :global .MuiDialogTitle-root,
+  :global .MuiDialogContent-root {
+    padding-left: base.$dialog-padding;
+    padding-right: base.$dialog-padding;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 24px;
+
+    color: base.$primary-text-color;
+  }
+  // Allow child element to control their padding
+  :global .MuiDialogContent-root {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+  :global .MuiDialog-scrollPaper {
+    // Default is vertical center aligned. Force this to top
+    align-items: flex-start;
+    background: rgba(0, 0, 0, 0.6);
+  }
+  :global .MuiPaper-rounded {
+    border-radius: 12px;
+    min-width: 600px; // Default to 600px. Let caller change if required
+  }
+}
+.dialogTitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  .titleText {
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 24px;
+    color: base.$primary-text-color;
+  }
+  .closeIcon {
+    margin-left: 8px;
+    cursor: pointer;
+  }
+}
+.isMobile {
+  :global .MuiPaper-rounded {
+    border-radius: 0px;
+    min-width: 100%;
+  }
+}

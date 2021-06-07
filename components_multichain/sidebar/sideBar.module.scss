@@ -1,0 +1,65 @@
+@use "../../styles/base";
+
+.sideBarMenuItemWrapper {
+  margin-top: 8px;
+}
+
+.sideBarMenu {
+  padding-bottom: 17px;
+}
+
+.sideBarMenuItem {
+  flex-grow: 1; // Fill entire page
+  display: flex;
+  align-items: center;
+  height: 44px;
+  border-radius: base.$border-radius;
+  cursor: pointer;
+  &:hover {
+    background: base.$background-color-focus;
+  }
+}
+
+.selected {
+  background: base.$primary-color;
+  cursor: initial;
+  &:hover {
+    background: base.$primary-color;
+  }
+}
+
+.icon {
+  margin-left: 12px;
+}
+
+.img {
+  display: block; /* img introduces 4 px vertical height to the outer container, since its inline by default. Hence make it block to avoid this padding */
+  width: 24px;
+  height: 24px;
+}
+
+.text {
+  margin-left: 35px; /*//90- 41+24*/
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 19px;
+  color: base.$primary-text-color;
+}
+
+.selected .text {
+  font-weight: bold;
+  color: base.$primary-text-color-inversed;
+}
+.appInfo {
+  font-size: 14px;
+  line-height: 22px;
+  color: base.$secondary-text-color;
+}
+.socialMedia {
+  padding-top: 22px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}

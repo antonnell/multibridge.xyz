@@ -15,6 +15,7 @@ function History({ theme }) {
 
   useEffect(function () {
     const swapHistoryReturned = (history) => {
+      console.log(history);
       setSwapHistory(history);
     };
 
@@ -37,7 +38,6 @@ function History({ theme }) {
       stores.dispatcher.dispatch({ type: GET_EXPLORER, content: { value: search } });
     }
   }
-
   return (
     <Paper elevation={0} className={classes.historyContainer}>
       <TextField

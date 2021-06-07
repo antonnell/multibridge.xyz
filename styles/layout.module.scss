@@ -1,0 +1,285 @@
+@use "../styles/base";
+$sidebar-padding-lr: 28px;
+$sidebar-padding-lr-mobile: 20px;
+.container {
+  height: 100vh;
+  background-color: base.$background-color;
+
+  .topPanel {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    margin-right: 30px;
+    margin-top: 30px;
+  }
+}
+
+.main {
+  display: flex;
+  flex-direction: row;
+  //Set height so that content would overlflow
+  //if not document goes beyond 100%, with side bar -footer icons becoming invisible
+  height: 100%;
+  .sideMenu {
+    min-width: 292px;
+    background-color: #ffffff;
+    height: 100%;
+    padding: 29px $sidebar-padding-lr 21px $sidebar-padding-lr;
+    display: flex;
+    flex-direction: column;
+    .sideMenuEndLine {
+      border-bottom: base.$border-style;
+    }
+    .appTitle {
+      display: flex;
+      flex-direction: row;
+      margin: 0px 1px 71px 3px;
+      justify-content: space-between;
+      align-items: center;
+      .appName {
+        font-family: GT America;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 18px;
+        line-height: 22px;
+        color: base.$primary-text-color;
+      }
+      .menuImg {
+        display: block;
+      }
+    }
+    .sideBarFooter {
+      margin-top: auto;
+      margin-bottom: 21px;
+    }
+    .separtor {
+      border-top: base.$border-style;
+      //Negative margins, so the separtor ignores padding
+      //introduced in parent element
+      margin-left: -$sidebar-padding-lr;
+      margin-right: -$sidebar-padding-lr;
+      padding-bottom: 20px;
+    }
+    .topPanel {
+      position: relative;
+      margin: 0px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: base.$border-style;
+    }
+  }
+  .sideMenu.hidden {
+    // Mobile view, when hidden, only app title is shown. Hence need not extend 100%
+    height: unset;
+  }
+  .content {
+    height: 100%;
+    width: 100%;
+    position: relative; //Set it so that child layouts can using CSS positioning as required
+    //let scrollbar appear only for content pane and not entire document
+    overflow: auto;
+  }
+}
+.swapPage {
+  margin-left: 118px;
+  margin-top: 134px;
+  margin-right: 118px;
+  margin-bottom: 2px;
+  display: flex;
+  justify-content: center;
+  min-width: 650px;
+  flex-wrap: reverse;
+  .swapPanelWrapper {
+    min-width: 501px;
+    max-width: 501px;
+    .continue {
+      width: 100%;
+    }
+  }
+  .panelOverride {
+    width: 100%; //Panel shrinks whenever page scroll bar appears. This is to force it to retain width given by parent
+  }
+  .infoBlock {
+    margin-left: 108px;
+    margin-top: 122px;
+
+    .header {
+      font-weight: bold;
+      font-size: 40px;
+      line-height: 48px;
+    }
+    .text {
+      margin-top: 13px;
+      font-size: 16px;
+      line-height: 22px;
+    }
+  }
+}
+
+.explorerPage,
+.tokensPage,
+.statsPage {
+  margin-left: 30px;
+  margin-right: 30px;
+  position: absolute; //Make it take 100% of parent
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  margin-bottom: 30px;
+}
+
+.statsPage {
+  margin-top: 110px;
+}
+.explorerPage,
+.tokensPage {
+  display: flex;
+  flex-direction: column;
+  .searchBar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 31px;
+    margin-bottom: 28px;
+    font-size: 16px;
+    line-height: 22px;
+    width: 70%;
+
+    .searchToken {
+      background: #ffffff;
+      border: base.$border-style;
+      border-radius: 6px;
+      //min-width: 200px; //figma 814px
+      width: 70%;
+      height: 50px;
+      margin-right: 20px;
+      background: white url('/images/searchIcon.svg') left no-repeat;
+      background-position: calc(18px);
+      padding-left: 50px;
+    }
+    .addTokenLink {
+      font-size: 14px;
+      line-height: 22px;
+      text-decoration-line: underline;
+      color: base.$primary-color;
+    }
+  }
+}
+.statsPage {
+  .countBlock {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    //gap: 39px; Safari has limitations in supporting Gap. Hence going with margin+ lastChild handling
+    > div {
+      flex: 1;
+      margin-right: 39px;
+    }
+    div:last-child {
+      margin-right: 0px;
+    }
+  }
+}
+.isMobile {
+  .explorerPage,
+  .tokensPage,
+  .statsPage {
+    margin-bottom: 10px;
+    margin-left: 14px;
+    margin-top: 20px;
+    margin-right: 14px;
+    .searchBar {
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+      .searchToken {
+        background: #ffffff;
+        border: base.$border-style;
+        border-radius: 6px;
+        //min-width: 200px; //figma 814px
+        width: 100%;
+        height: 50px;
+        margin-right: 0px;
+        background: white url('/images/searchIcon.svg') left no-repeat;
+        background-position: calc(18px);
+        padding-left: 50px;
+      }
+      .addTokenLink {
+        font-size: 14px;
+        line-height: 22px;
+        text-decoration-line: underline;
+        color: base.$primary-color;
+      }
+    }
+  }
+  .swapPage {
+    margin-left: 14px;
+    margin-top: 0px;
+    margin-right: 14px;
+    flex-wrap: wrap-reverse;
+    min-width: 0px;
+    .infoBlock {
+      margin-left: 0px;
+      margin-top: 0px;
+    }
+    .swapPanelWrapper {
+      margin-top: 20px;
+      flex-grow: 1;
+      min-width: unset;
+      min-width: unset;
+    }
+    .header {
+      margin-top: 24px;
+      margin-bottom: 9px;
+      font-weight: bold;
+      font-size: 18px;
+      line-height: 22px;
+    }
+    .text {
+      font-weight: normal;
+      font-size: 14px;
+      line-height: 18px;
+    }
+  }
+  .main {
+    flex-direction: column;
+    > .topPanel {
+      display: none;
+    }
+  }
+  .sideMenu {
+    flex-grow: 1;
+    min-height: inherit;
+    padding: 0px $sidebar-padding-lr-mobile 0px $sidebar-padding-lr-mobile;
+    .sideMenuEndLine {
+      border-bottom: none;
+    }
+    .appTitle {
+      height: 60px;
+      margin: 0px;
+    }
+    // Components other than title
+    .sideMenuComponents {
+      flex-grow: 1;
+    }
+  }
+  .statsPage {
+    .countBlock {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      > div {
+        margin-right: 0px;
+      }
+      div:last-child {
+        margin-right: 0px;
+      }
+    }
+  }
+}
