@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Head from 'next/head'
 import classes from './layout.module.css'
 import Link from 'next/link'
-import Header from '../header'
 import Navigation from '../navigation'
 import SnackbarController from '../snackbar'
 
@@ -11,6 +10,7 @@ import SideMenu from '../../components_multichain/sidebar/SideBarMenu';
 import AppInfo from '../../components_multichain/sidebar/AppInfo';
 import SocialMedia from '../../components_multichain/sidebar/SocialMedia';
 import SiteActions from '../../components_multichain/siteActions/SiteActions';
+
 
 import 'font-awesome/css/font-awesome.min.css';
 import styles from '../../styles/layout.module.scss';
@@ -38,7 +38,7 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
   return (
     <div className={rootClass}>
       <Head>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/favicon.png" />
         <link
             rel="preload"
             href="/fonts/Inter/Inter-Regular.ttf"
@@ -62,19 +62,7 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
         <div className={sideMenuClass}>
           <div className={styles.appTitle}>
             <span className={styles.appName}>multichain</span>
-            <div
-              className={styles.appMenu}
-              onClick={toggleMenuVisibility}
-              onKeyDown={toggleMenuVisibility}
-              role="button"
-              tabIndex="0"
-            >
-              <img
-                src={menuIcon}
-                className={styles.menuImg}
-                alt={menuVisible ? 'close menu' : 'open menu'}
-              />
-            </div>
+        
           </div>
           {menuVisible && (
             <>
@@ -86,26 +74,21 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
 
               <div className={styles.sideBarFooter}>
                 <div className={styles.separtor} />
-                <AppInfo />
-                <SocialMedia />
+                <AppInfo  version={'1.0.1'}/>
+                {/* <SocialMedia /> */}
               </div>
             </>
           )}
-          </div>
+          </div>    
           {showContent && <main className={ styles.content }>{children}</main>}
+          {!isMobile && (
+          <div className={styles.topPanel}>
+            <SiteActions />
+          </div>
+        )}
+          <SnackbarController />
 
           </div>
-
-
-      {/* {!configure && (
-        <Navigation backClicked={backClicked} changeTheme={ changeTheme } />
-      )}
-      <div className={ classes.content }>
-        {!configure && (
-          <Header backClicked={backClicked} changeTheme={ changeTheme } />
-        )} */}
-        <SnackbarController />
-      {/* </div> */}
     </div>
   )
 }

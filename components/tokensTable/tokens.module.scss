@@ -1,0 +1,38 @@
+@use "../../styles/base";
+.tokens {
+  // Row uniformly has 14px bold
+  :global .ag-row {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+  }
+}
+.imageTextCell {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  max-height: 40px;
+  white-space: pre-wrap !important;
+
+  .img {
+    width: 40px;
+    height: 40px;
+    margin-right: 16px;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    line-height: 20px;
+    width: 90px;
+
+    .title {
+      font-weight: bold;
+    }
+    .subtitle {
+      word-wrap: break-word;
+    }
+  }
+}
+
+
