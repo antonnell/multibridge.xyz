@@ -19,7 +19,6 @@ const ethText = 'ETH mainnet';
 
 function SiteActions({ variant }) {
   const { wallet } = useContext(WalletContext);
-  console.log(wallet);
   const [displayWalletConnector, setDisplayWalletConnector] = useState(false);
   // TODO: Dynamic field to display when connected.
   const connectWalletText = wallet ? 'todo-757..87' : 'Connect Wallet';
