@@ -19,11 +19,12 @@ function SideBarMenuItem({ selected, icon, iconSelected, text, onClick }) {
   return (
     <div className={root} {...props}>
       <div className={styles.icon}>
+       {icon !== null ?
         <img
           src={selected ? iconSelected : icon}
           className={styles.img}
           alt={selected ? 'Menu Selected' : ''}
-        />
+        />: null}
       </div>
       <div className={styles.text}>{text}</div>
     </div>
