@@ -37,7 +37,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
   const onViewTX = (event, val, asset) => {
     event.stopPropagation();
     const chainIDMapping = stores.accountStore.getStore('chainIDMapping')
-    window.open(`${chainIDMapping[asset.chainID].explorer}/tx/${val}`, '_blank')
+    window.open(`${chainIDMapping[asset.chainID].explorer}/${chainIDMapping[asset.chainID].transactionSuffix}/${val}`, '_blank')
   }
 
   const isDark = theme.palette.type === 'dark'

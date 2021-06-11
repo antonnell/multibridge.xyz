@@ -1,5 +1,6 @@
 import {
   GAS_PRICE_API,
+  ZAPPER_GAS_PRICE_API,
   ERROR,
   STORE_UPDATED,
   CONFIGURE,
@@ -94,6 +95,7 @@ class Store {
           rpcURLdisplay: 'https://ethmainnet.anyswap.exchange',
           chainID: '1',
           explorer: 'https://etherscan.io',
+          transactionSuffix: 'tx',
           symbol: 'ETH',
           icon: 'ETH.svg',
           decimals: 18,
@@ -104,6 +106,7 @@ class Store {
           rpcURLdisplay: 'https://bsc-dataseed1.binance.org',
           chainID: '56',
           explorer: 'https://bscscan.com',
+          transactionSuffix: 'tx',
           symbol: 'BNB',
           icon: 'BNB.svg',
           decimals: 18,
@@ -114,6 +117,7 @@ class Store {
           rpcURLdisplay: 'https://rpc.xdaichain.com',
           chainID: '100',
           explorer: 'https://blockscout.com/xdai/mainnet/',
+          transactionSuffix: 'tx',
           symbol: 'xDAI',
           icon: 'STAKE.png',
           decimals: 18,
@@ -124,6 +128,7 @@ class Store {
           rpcURLdisplay: 'https://http-mainnet.hecochain.com',
           chainID: '128',
           explorer: 'https://scan.hecochain.com',
+          transactionSuffix: 'tx',
           symbol: 'HT',
           icon: 'HT.svg',
           decimals: 18,
@@ -134,6 +139,7 @@ class Store {
           rpcURLdisplay: 'https://rpc-mainnet.matic.network',
           chainID: '137',
           explorer: 'https://explorer-mainnet.maticvigil.com/',
+          transactionSuffix: 'tx',
           symbol: 'MATIC',
           icon: 'MATIC.png',
           decimals: 18,
@@ -144,6 +150,7 @@ class Store {
           rpcURLdisplay: 'https://rpcapi.fantom.network',
           chainID: '250',
           explorer: 'https://ftmscan.com',
+          transactionSuffix: 'tx',
           symbol: 'FTM',
           icon: 'FTM.png',
           decimals: 18,
@@ -154,6 +161,7 @@ class Store {
           rpcURLdisplay: 'https://mainnet.anyswap.exchange',
           chainID: '32659',
           explorer: 'https://fsnex.com',
+          transactionSuffix: 'transaction',
           symbol: 'FSN',
           icon: 'FSN.svg',
           decimals: 18,
@@ -163,7 +171,8 @@ class Store {
           rpcURL: 'https://api.avax.network/ext/bc/C/rpc',
           rpcURLdisplay: 'https://api.avax.network/ext/bc/C/rpc',
           chainID: '43114',
-          explorer: 'https://cchain.explorer.avax.network/',
+          explorer: 'https://cchain.explorer.avax.network',
+          transactionSuffix: 'tx',
           symbol: 'AVAX',
           icon: 'AVAX.svg',
           decimals: 18,
@@ -173,7 +182,8 @@ class Store {
           rpcURL: 'https://api.harmony.one',
           rpcURLdisplay: 'https://api.harmony.one',
           chainID: '1666600000',
-          explorer: 'https://explorer.harmony.one/#/shard/0/',
+          explorer: 'https://explorer.harmony.one/#',
+          transactionSuffix: 'tx',
           symbol: 'ONE',
           icon: 'ONE.png',
           decimals: 18,
@@ -231,9 +241,16 @@ class Store {
       if (isAuthorized) {
         injected.activate()
         .then((a) => {
+
+          let networkVersion = a.provider.networkVersion
+
+          if(networkVersion === '0x63564c40') {
+            networkVersion = '1666600000'
+          }
+
           this.setStore({
-            selectedChainID: a.provider.networkVersion,
-            chainID: a.provider.networkVersion,
+            selectedChainID: networkVersion,
+            chainID: networkVersion,
             account: {
               address: a.account
             },
@@ -282,8 +299,15 @@ class Store {
           web3context: null
         })
       } else {
+
+        let networkVersion = window.ethereum.networkVersion
+
+        if(networkVersion === '0x63564c40') {
+          networkVersion = '1666600000'
+        }
+
         that.setStore({
-          chainID: window.ethereum.networkVersion,
+          chainID: networkVersion,
           account: {
             address: accounts[0]
           },
@@ -303,6 +327,9 @@ class Store {
 
     ethereum.on('networkChanged', (data) => {
       // window.location.reload();
+      if(data === '0x63564c40') {
+        data = '1666600000'
+      }
       that.setStore({
         chainID: data
       })
@@ -336,12 +363,18 @@ class Store {
 
   _getGasPrices = async () => {
     try {
-      const url = GAS_PRICE_API
+      const url = ZAPPER_GAS_PRICE_API
       const priceResponse = await fetch(url);
       const priceJSON = await priceResponse.json()
 
       if(priceJSON) {
         return priceJSON
+      }
+      return {
+        "slow":90,
+        "standard":90,
+        "fast":100,
+        "instant":130
       }
     } catch(e) {
       console.log(e)
@@ -349,21 +382,26 @@ class Store {
     }
   }
 
-  getGasPrice = async (speed) => {
+  getGasPrice = async (speed, asset) => {
 
     let gasSpeed = speed
     if(!speed) {
       gasSpeed = this.getStore('gasSpeed')
     }
 
+    if(asset && asset.chainID === '250') {
+      return '80' //hard code FTM gas price to 80.
+    }
+
     try {
-      const url = GAS_PRICE_API
+      const url = ZAPPER_GAS_PRICE_API
       const priceResponse = await fetch(url);
       const priceJSON = await priceResponse.json()
 
       if(priceJSON) {
         return priceJSON[gasSpeed].toFixed(0)
       }
+      return '80'
     } catch(e) {
       console.log(e)
       return {}

@@ -62,6 +62,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31',
     chainID: '1',
     explorer: 'https://etherscan.io',
+    transactionSuffix: 'tx',
     symbol: 'ETH',
     icon: 'ETH.svg'
   },
@@ -70,6 +71,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://bsc-dataseed1.binance.org',
     chainID: '56',
     explorer: 'https://bscscan.com',
+    transactionSuffix: 'tx',
     symbol: 'BNB',
     icon: 'BNB.svg'
   },
@@ -78,6 +80,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://rpc.xdaichain.com',
     chainID: '100',
     explorer: 'https://blockscout.com/xdai/mainnet/',
+    transactionSuffix: 'tx',
     symbol: 'xDAI',
     icon: 'STAKE.png'
   },
@@ -86,6 +89,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://http-mainnet.hecochain.com',
     chainID: '128',
     explorer: 'https://scan.hecochain.com',
+    transactionSuffix: 'tx',
     symbol: 'HT',
     icon: 'HT.svg'
   },
@@ -94,6 +98,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://rpc-mainnet.matic.network',
     chainID: '137',
     explorer: 'https://explorer-mainnet.maticvigil.com/',
+    transactionSuffix: 'tx',
     symbol: 'MATIC',
     icon: 'MATIC.png'
   },
@@ -102,6 +107,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://rpcapi.fantom.network',
     chainID: '250',
     explorer: 'https://ftmscan.com',
+    transactionSuffix: 'tx',
     symbol: 'FTM',
     icon: 'FTM.png'
   },
@@ -110,6 +116,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://mainnet.anyswap.exchange',
     chainID: '32659',
     explorer: 'https://fsnex.com',
+    transactionSuffix: 'transaction',
     symbol: 'FSN',
     icon: 'FSN.svg'
   },
@@ -118,6 +125,7 @@ const CHAIN_MAP = {
     rpcURL: 'https://api.avax.network/ext/bc/C/rpc',
     chainID: '43114',
     explorer: 'https://cchain.explorer.avax.network/',
+    transactionSuffix: 'tx',
     symbol: 'AVAX',
     icon: 'AVAX.svg'
   },
@@ -125,7 +133,8 @@ const CHAIN_MAP = {
     name: 'Harmony Mainnet',
     rpcURL: 'https://api.harmony.one',
     chainID: '1666600000',
-    explorer: 'https://explorer.harmony.one/#/shard/0/',
+    explorer: 'https://explorer.harmony.one/#',
+    transactionSuffix: 'tx',
     symbol: 'ONE',
     icon: 'ONE.png'
   },
@@ -134,6 +143,7 @@ const CHAIN_MAP = {
     rpcURL: '??',
     chainID: 'BTC',
     explorer: 'https://www.blockchain.com/btc/',
+    transactionSuffix: 'tx',
     symbol: 'BTC',
     icon: 'BTC.png'
   }
@@ -222,7 +232,6 @@ class Store {
     this.setStore({ anyswapServerJson: anyswapServerJson })
 
     const anyswapServerArray = Object.keys(anyswapServerJson).map((key) => [key, anyswapServerJson[key]]);
-    console.log(anyswapServerArray)
 
     const assets = anyswapServerArray.map((chainDetails) => {
       const chainKey = chainDetails[0]
@@ -234,7 +243,7 @@ class Store {
         const val = details[1]
 
         // exclude a bunch of tokens that we don't support
-        if(['ltc', 'btc', 'btc2fsn', 'block', 'sfi', 'frax'].includes(key)) {
+        if(['ltc', 'btc', 'btc2fsn', 'block', 'sfi', 'frax', 'colx'].includes(key)) {
           return null
         }
 
@@ -244,7 +253,6 @@ class Store {
         }
 
         if(val.PairID === 'fantom') {
-          console.log('pairID === fantom')
           val.SrcToken.ContractAddress = 'FTM'
           val.SrcToken.Name = 'Fantom'
           val.SrcToken.Symbol = 'FTM'
@@ -289,6 +297,15 @@ class Store {
           val.DestToken.Symbol = 'BNB'
         }
 
+        if(val.PairID === 'ONEv4') {
+          val.SrcToken.ContractAddress = 'ONE'
+          val.SrcToken.Name = 'Harmony'
+          val.SrcToken.Symbol = 'ONE'
+
+          val.DestToken.Name = 'Harmony'
+          val.DestToken.Symbol = 'ONE'
+        }
+
         val.SrcToken.chainID = val.srcChainID
         val.DestToken.chainID = val.destChainID
 
@@ -317,8 +334,6 @@ class Store {
 
       return anyswapInfoFormatted
     }).flat()
-
-    console.log(assets)
 
     const uniqueAssets = [];
     for (const item of assets) {
@@ -359,8 +374,6 @@ class Store {
       }
     }
 
-    console.log(uniqueAssets)
-
     const uniqueAssetsWithTargets = uniqueAssets.map((asset) => {
       const targets = assets.map((val) => {
         if(asset.ContractAddress === val.SrcToken.ContractAddress && asset.chainID === val.SrcToken.chainID) {
@@ -378,8 +391,6 @@ class Store {
       asset.targets = targets
       return asset
     })
-
-    console.log(uniqueAssetsWithTargets)
 
     this.setStore({ swapAssets: uniqueAssetsWithTargets.sort((a, b) => {
         if(a.chainID > b.chainID) {
@@ -655,7 +666,7 @@ class Store {
           erc20Address = asset.DelegateToken
         }
 
-        if(['ETH', 'FTM', 'FSN', 'HT', 'BNB'].includes(erc20Address)) {
+        if(['ETH', 'FTM', 'FSN', 'HT', 'BNB', 'ONE'].includes(erc20Address)) {
           const balanceOf = await web3.eth.getBalance(account.address)
 
           const balance = BigNumber(balanceOf).div(10**18).toFixed(18, 1)
@@ -765,8 +776,6 @@ class Store {
   callStatusAPIRepeat = async (fromAsset, toAsset, toAddressValue, fromTXHash, pair) => {
     try {
 
-      console.log(fromAsset, toAsset, toAddressValue, fromTXHash, pair)
-
       let statusJson = null
       let callType = ''
       let toAssetChainID = null
@@ -806,7 +815,6 @@ class Store {
   }
 
   createTransactionListener = async (web3, txHash, originalTX) => {
-    console.log('creating transaction listener')
     let currentBlock = 0
     let transaction = null
     let shouldCall = true
@@ -814,16 +822,11 @@ class Store {
       currentBlock = await web3.eth.getBlockNumber()
       transaction = await web3.eth.getTransaction(txHash)
 
-      console.log(currentBlock)
-      console.log(transaction)
-
       if(transaction) {
         let newTransactions = []
         const transactions = this.getStore('transactions')
-        console.log(transactions.some(e => e.transactionHash === transaction.transactionHash))
 
         if (transactions.some(e => e.transactionHash === transaction.transactionHash)) {
-          console.log('TX already exists, updating')
           // append to store transactions[]
           newTransactions = transactions.map((tx) => {
             if(tx.transactionHash === transaction.transactionHash) {
@@ -832,20 +835,16 @@ class Store {
             return tx
           })
 
-          console.log('Confirmations: ', (currentBlock - transaction.blockNumber))
-
           if(currentBlock - transaction.blockNumber >= 1) {
             shouldCall = false
           }
 
           this.emitter.emit(TX_CONFIRMED, transaction, (currentBlock - transaction.blockNumber), 'TO')
         } else {
-          console.log('TX is new, push')
           //new TX insert into transactions[]
           transactions.push(transaction)
           newTransactions = transactions
 
-          console.log('originalTX ', originalTX)
           this.emitter.emit(TX_RECEIPT, transaction, originalTX, 'TO')
         }
 
@@ -961,9 +960,6 @@ class Store {
 
     const anyswapServerArray = Object.keys(anyswapServerJson).map((key) => [key, anyswapServerJson[key]]);
 
-    console.log(fromAssetValue)
-    console.log(toAssetValue)
-
     const pair = anyswapServerArray.map((chainDetails) => {
       const chainVal = chainDetails[1]
 
@@ -979,8 +975,6 @@ class Store {
         return false
       })
 
-      console.log(anyswapInfoFormatted)
-
       if(anyswapInfoFormatted.length > 0) {
         return anyswapInfoFormatted[0][1]
       }
@@ -988,7 +982,6 @@ class Store {
       return null
     }).filter((a) => { return a !== null })
 
-    console.log(pair)
     if(pair.length > 0) {
       return pair[0]
     } else {
@@ -1011,7 +1004,6 @@ class Store {
     if(!pair) {
       return null
     }
-    console.log(pair)
 
     let chainID = pair.srcChainID
     let pairID = pair.PairID
@@ -1083,7 +1075,7 @@ class Store {
     if(direction === 'SrcToDest') {
       //SrcToDest, we do transfer to DepositAddress
 
-      if(['ETH', 'FTM', 'FSN', 'HT', 'BNB'].includes(fromAssetValue.ContractAddress)) {
+      if(['ETH', 'FTM', 'FSN', 'HT', 'BNB', 'ONE'].includes(fromAssetValue.ContractAddress)) {
         return this._transferNativeToken(fromAsset, toAsset, fromAddressValue, fromAmountValue, pair)
       }
 
@@ -1104,7 +1096,6 @@ class Store {
         }
 
         const tokenContract = new web3.eth.Contract(ERC20ABI, fromAsset.DelegateToken)
-        console.log(tokenContract)
 
         //get approved amoutn
         const approved = await tokenContract.methods.allowance(account.address, fromAsset.ContractAddress).call()
@@ -1112,7 +1103,7 @@ class Store {
         if(BigNumber(approved).div(18**fromAsset.Decimals).gt(fromAmountValue)) {
           return this._nativeToERC(fromAsset, toAsset, fromAmountValue, fromAddressValue, pair)
         } else {
-          const gasPrice = await stores.accountStore.getGasPrice()
+          const gasPrice = await stores.accountStore.getGasPrice(null, fromAsset)
           return this._callContractWait(web3, tokenContract, 'approve', [fromAsset.ContractAddress, MAX_UINT256], account, gasPrice, null, async (err, txHash) => {
             if(err) {
               return this.emitter.emit(ERROR, err);
@@ -1181,7 +1172,7 @@ class Store {
 
     const tokenContract = new web3.eth.Contract(ERC20ABI, fromAsset.ContractAddress)
     const amountToSend = BigNumber(amount).times(10**fromAsset.Decimals).toFixed(0)
-    const gasPrice = await stores.accountStore.getGasPrice()
+    const gasPrice = await stores.accountStore.getGasPrice(null, fromAsset)
 
     this._callContract(web3, tokenContract, 'transfer', [depositAddress, amountToSend], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount, toAddressValue, pair }, async (err, txHash) => {
       if(err) {
@@ -1233,14 +1224,10 @@ class Store {
       }
 
       if(statusJson && statusJson.info && statusJson.info.txid && statusJson.info.txid !== '') {
-        console.log('criteria met')
         let currentBlock = await fromWeb3.eth.blockNumber
-        console.log(currentBlock)
         let txBlock = await fromWeb3.eth.getTransaction(statusJson.info.txid).blockNumber
-        console.log(txBlock)
         statusJson.info.intitalConfirmations = currentBlock - txBlock
       }
-      console.log(statusJson.info.intitalConfirmations)
 
       if(statusJson && statusJson.info && statusJson.info.txid && statusJson.info.txid !== '' && statusJson.info.swaptx && statusJson.info.swaptx !== '') {
         //once we have the transfer we can stop listening
@@ -1274,7 +1261,7 @@ class Store {
 
     const tokenContract = new web3.eth.Contract(ERC20SWAPASSETABI, fromAsset.ContractAddress)
     const amountToSend = BigNumber(amount).times(10**fromAsset.Decimals).toFixed(0)
-    const gasPrice = await stores.accountStore.getGasPrice()
+    const gasPrice = await stores.accountStore.getGasPrice(null, fromAsset)
 
     this._callContract(web3, tokenContract, 'Swapout', [amountToSend, account.address], account, gasPrice, SWAP_RETURN_SWAP_PERFORMED, { fromAsset, toAsset, fromAddressValue, amount, pair }, async (err, txHash) => {
       if(err) {
@@ -1297,7 +1284,7 @@ class Store {
     }
 
     const amountToSend = BigNumber(amount).times(10**fromAsset.Decimals).toFixed(0)
-    const gasPrice = await stores.accountStore.getGasPrice()
+    const gasPrice = await stores.accountStore.getGasPrice(null, fromAsset)
 
     const context = this
 
@@ -1427,8 +1414,6 @@ class Store {
         let populatedSwapInBSC = []
         let populatedSwapOutBSC = []
 
-        console.log(this.store.swapAssets)
-
         if(!swapHistoryInJson.error && swapHistoryInJson.info.length > 0) {
           populatedSwapIn = swapHistoryInJson.info.map((swap) => {
             try {
@@ -1467,7 +1452,6 @@ class Store {
               swap.toChain = CHAIN_MAP[1]
 
               let asset = this.store.swapAssets.filter((asset) => {
-                console.log(asset)
                 return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
               })
 

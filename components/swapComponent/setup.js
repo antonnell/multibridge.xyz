@@ -469,7 +469,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
                   <img
                     className={ classes.displayChainIconSmall }
                     alt=""
-                    src={ (swapState && swapState.fromAssetValue) ? `/blockchains/${swapState.fromAssetValue.chainMetadata.icon}` : '' }
+                    src={ (swapState && swapState.fromAssetValue) ? `/blockchains/${swapState.fromAssetValue.chainMetadata?.icon}` : '' }
                     height='30px'
                     width='30px'
                     onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -489,7 +489,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
                   <img
                     className={ classes.displayChainIconSmall }
                     alt=""
-                    src={ (swapState && swapState.toAssetValue) ? `/blockchains/${swapState.toAssetValue.chainMetadata.icon}` : '' }
+                    src={ (swapState && swapState.toAssetValue) ? `/blockchains/${swapState.toAssetValue.chainMetadata?.icon}` : '' }
                     height='30px'
                     width='30px'
                     onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -615,20 +615,20 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
 
   const renderAssetOption = (type, asset) => {
     return (
-      <MenuItem val={ asset.id } key={ asset.id } className={ classes.assetSelectMenu } onClick={ () => { onLocalSelect(type, asset) } }>
+      <MenuItem val={ asset.Name } key={ asset.Name } className={ classes.assetSelectMenu } onClick={ () => { onLocalSelect(type, asset) } }>
         <div className={ classes.assetSelectMenuItem }>
           <div className={ classes.displayDualIconContainerSmall }>
             <img
               className={ classes.displayAssetIconSmall }
               alt=""
-              src={ asset ? asset.tokenMetadata.icon : '' }
+              src={ asset ? asset.tokenMetadata?.icon : '' }
               height='60px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
             />
             <img
               className={ classes.displayChainIconSmall }
               alt=""
-              src={ asset ? `/blockchains/${asset.chainMetadata.icon}` : '' }
+              src={ asset ? `/blockchains/${asset.chainMetadata?.icon}` : '' }
               height='30px'
               width='30px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -637,7 +637,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
         </div>
         <div className={ classes.assetSelectIconName }>
           <Typography variant='h5'>{ asset ? asset.tokenMetadata.symbol : '' }</Typography>
-          <Typography variant='subtitle1' color='textSecondary'>{ asset ? asset.chainMetadata.name : '' }</Typography>
+          <Typography variant='subtitle1' color='textSecondary'>{ asset ? asset.chainMetadata?.name : '' }</Typography>
         </div>
         <div className={ classes.assetSelectBalance}>
           <Typography variant='h5'>{ (asset && asset.tokenMetadata.balance) ? formatCurrency(asset.tokenMetadata.balance) : '0.00' }</Typography>
@@ -662,7 +662,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
             <img
               className={ classes.displayChainIcon }
               alt=""
-              src={ value ? `/blockchains/${value.chainMetadata.icon}` : '' }
+              src={ value ? `/blockchains/${value.chainMetadata?.icon}` : '' }
               height='40px'
               width='40px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
