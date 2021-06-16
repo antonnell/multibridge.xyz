@@ -62,7 +62,7 @@ function Tokens({ changeTheme }) {
 
 
   return (
-    <Layout changeTheme={ changeTheme }>
+    // <Layout changeTheme={ changeTheme }>
 
     <div className={styles.tokensPage}>
     <div className={styles.searchBar} style={{width: '60% !important'}}>
@@ -84,7 +84,7 @@ function Tokens({ changeTheme }) {
     </div>
     {filteredSwapTokens !== null ? <TokensTable swapTokens={filteredSwapTokens} chainMap={chainMap} /> : null}
     </div>
-  </Layout>
+  // </Layout>
 
   )
 }

@@ -6,7 +6,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 
 import lightTheme from '../theme/light';
 import darkTheme from '../theme/dark';
-
+import Layout from '../components/layout'
 import Configure from './configure'
 import WalletContext from '../framework/WalletContext';
 
@@ -21,7 +21,7 @@ import {
 
 import '../styles/globals.scss';
 
-export default function MyApp({ Component, pageProps }) {
+ function MyApp({ Component, pageProps }) {
   const [ themeConfig, setThemeConfig ] = useState(lightTheme);
   const [ accountConfigured, setAccountConfigured ] = useState(false)
   const [ swapConfigured, setSwapConfigured ] = useState(false)
@@ -80,23 +80,37 @@ export default function MyApp({ Component, pageProps }) {
             rel="stylesheet"
           />
       </Head>
-      {/* <ThemeProvider theme={ themeConfig }> */}
-        {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-        {/* <CssBaseline /> */}
-        {
-          swapConfigured && accountConfigured && <Component {...pageProps} changeTheme={ changeTheme } />
-        }
-        {
-          !(swapConfigured && accountConfigured) && <Configure {...pageProps} />
-        }
-      {/* </ThemeProvider> */}
+      <Layout {...pageProps}>
+        {swapConfigured && accountConfigured && <Component {...pageProps} changeTheme={ changeTheme } />}
+        {!(swapConfigured && accountConfigured) && <Configure {...pageProps} />}
+</Layout>
     </React.Fragment>
     </WalletContext.Provider>
 
   );
 }
+MyApp.getInitialProps = async ({ ctx }) => {
+  let UA;
+  if (ctx.req) {
+    // if you are on the server and you get a 'req' property from your context
+    UA = ctx.req.headers['user-agent']; // get the user-agent from the headers
+  } else {
+    UA = navigator.userAgent; // if you are on the client you can access the navigator from the window object
+  }
 
+  const isMobile = Boolean(
+    UA &&
+      UA.match(
+        /Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i
+      )
+  );
+  return { pageProps: { isMobile } };
+};
 MyApp.propTypes = {
   Component: PropTypes.elementType.isRequired,
   pageProps: PropTypes.object.isRequired,
 };
+MyApp.defaultProps = {
+  pageProps: {},
+};
+export default MyApp

@@ -37,7 +37,7 @@ function Explorer({ changeTheme }) {
   };
 
   return (
-    <Layout changeTheme={ changeTheme }>
+    // <Layout changeTheme={ changeTheme }>
     <div className={styles.explorerPage}>
     <div className={styles.searchBar}>
       <input
@@ -48,7 +48,7 @@ function Explorer({ changeTheme }) {
     </div>
       <TransactionList swapHistory={swapHistory} />
   </div>
-  </Layout>
+  // </Layout>
 
   )
 }

@@ -8,6 +8,9 @@ import Tooltip from "@material-ui/core/Tooltip";
 import { lighten, makeStyles } from "@material-ui/core/styles";
 import { formatCurrency, formatAddress } from '../../utils'
 import stores from '../../stores';
+import {
+  ERROR
+} from '../../stores/constants'
 
 /**
  * Renders tokens grid
@@ -140,16 +143,60 @@ export const statusRenderer = (value) => {
 export const chainRenderer = (value) => {
   const classes = useStyles();
 
+  const addToNetwork = async (row, type, chain) => {
+    const web3Provder = await stores.accountStore.getWeb3Provider()
+
+    const params = {
+      chainId: toHex(chain.chainID), // A 0x-prefixed hexadecimal string
+      chainName: chain.name,
+      nativeCurrency: {
+        name: chain.symbol,
+        symbol: chain.symbol, // 2-6 characters long
+        decimals: chain.decimals,
+      },
+      rpcUrls: [chain.rpcURLdisplay],
+      blockExplorerUrls: [chain.explorer]
+    }
+
+    web3Provder.eth.getAccounts((error, accounts) => {
+
+      if(!accounts || accounts.length === 0) {
+        return stores.emitter.emit(ERROR, 'Connect your account in MetaMask to add a chain')
+      }
+
+      window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [params, accounts[0]],
+      })
+      .then((result) => {
+        console.log(result)
+      })
+      .catch((error) => {
+        stores.emitter.emit(ERROR, error.message ? error.message : error)
+        console.log(error)
+      });
+    })
+  }
+
+  const toHex = (num) => {
+    return '0x'+parseInt(num).toString(16)
+  }
+
+
   var row = value.value;
   var title =
     row.name !== undefined
       ? "Add " + row.name + " to MetaMask"
       : "Add - to metaMask";
-  //  console.log('cell render ',row.name);
+      var coldef = value.colDef.field;
+  var answ = coldef.includes('srcChain') ? 'src': 'dest';
+  var chainInfo = answ.includes('src') ?  value.data.srcChain : value.data.dstChain;
+  // console.log(answ, chainInfo, row);
   return (
     //  null
     <div className={classes.cell}>
       <div className={classes.inline}>
+    
         <img
           src={`/blockchains/${row.icon}`}
           width={30}
@@ -165,7 +212,7 @@ export const chainRenderer = (value) => {
               <IconButton
                 className={classes.metamaskButton}
                 onClick={() => {
-                  addToNetwork(row, "src", srcChain);
+                  addToNetwork(row, answ, chainInfo);
                 }}
                 style={{ marginTop: "-100%" }}
               >
@@ -202,25 +249,33 @@ export const contractRenderer = (value) => {
         image: token.logo.url,
       }
     }
+    // if(!accounts || accounts.length === 0) {
+      return stores.emitter.emit(ERROR, 'Function error')
+    // }
 
-    window.ethereum.request({
-      method: 'wallet_watchAsset',
-      params: params,
-    })
-    .then((result) => {
-      console.log(result)
-    })
-    .catch((error) => {
-      stores.emitter.emit(ERROR, error.message ? error.message : error)
-      console.log(error)
-    });
+    // window.ethereum.request({
+    //   method: 'wallet_watchAsset',
+    //   params: params,
+    // })
+    // .then((result) => {
+    //   console.log(result)
+    // })
+    // .catch((error) => {
+    //   stores.emitter.emit(ERROR, error.message ? error.message : error)
+    //   console.log(error)
+    // });
+  }
+  const addressClicked = (url) => {
+    window.open(url, '_blank')
   }
 
   return (
-    <div className={classes.cell}>
-      <div className={classes.inline}>
-      <div className={classes.textSpaced}>{ row.address === 'Native' ? 'Native' : formatAddress(row.address) }</div>
-      { row.address && row.address != 'Native' && row.address != '0x0' ?
+    <div className={classes.cell} style={{flexDirection: 'row'}}>
+      <div className={classes.inline}  style={{flexDirection: 'row'}}>
+      <Tooltip title={`View in explorer`}>
+      <div className={classes.textSpaced} onClick={ () => { addressClicked(data.srcContract.url) }}>{ data.srcContract.address === 'Native' ? 'Native' : formatAddress(data.srcContract.address) }</div>
+      </Tooltip>
+      { data.srcContract.address && data.srcContract.address != 'Native' && data.srcContract.address != '0x0' ?
                           <Tooltip title={`Add ${data.name} on ${data.srcChain.name} to MetaMask`}>
                             <div>
                               <div className={ classes.metamaskButtonPlaceholder}></div>
@@ -242,13 +297,15 @@ export const contractRenderer = (value) => {
 };
 export const mpcRenderer = (value) => {
   const classes = useStyles();
-
+  const addressClicked = (url) => {
+    window.open(url, '_blank')
+  }
   var row = value.value;
   return (
     <div className={styles.imageTextCell}>
      
       <div className={styles.text}>
-        <div className={ classes.textSpacedCursor  }>{ row.address === 'Native' ? 'Native' : formatAddress(row.address) }</div>
+        <div className={ classes.textSpacedCursor  } onClick={ () => { addressClicked(row.url) } }>{ row.address === 'Native' ? 'Native' : formatAddress(row.address) }</div>
       </div>
     </div>
   );
@@ -331,39 +388,44 @@ export default function TokensTable({ swapTokens, chainMap }) {
     {
       headerName: "Symbol",
       field: "symbol",
-      width: 125,
+      width: 80,
     },
     {
       field: "decimals",
-      width: 125,
+      width: 70,
     },
     {
       headerName: "Src Chain",
       field: "srcChain",
       cellRenderer: "chainRenderer",
+      width: 120,
+
     },
     {
       headerName: "Dest Chain",
       field: "dstChain",
       cellRenderer: "chainRenderer",
+      width: 120,
+
     },
     {
       headerName: "Src Contract",
       field: "srcContract",
       cellRenderer: "contractRenderer",
-      flex: 1,
+      width: 80,
+
     },
     {
       headerName: "Dest Contract",
       field: "destContract",
       cellRenderer: "contractRenderer",
-      flex: 1,
+      width: 80,
+
     },
     {
       headerName: 'MPC Contract',
       field: 'mpc',
       cellRenderer: 'mpcRenderer',
-      flex: 1,
     },
     {
       field: 'status',

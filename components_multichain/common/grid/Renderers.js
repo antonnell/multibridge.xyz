@@ -26,9 +26,20 @@ export const statusRenderer = ({ value }) => (
     alt={value ? 'OK' : 'Error'}
   />
 );
-export const addressRenderer = ({ value: { network, coinIcon, address } }) => (
-  <AddressTextCell icon={coinIcon} title={network} subtitle={address} />
-);
+export const addressRenderer = (v) => {
+   console.log(v);
+  var value = {
+    coinIcon: v.value.coinIcon,
+    title: v.value.network,
+    subtitle: v.value.address
+  };
+var row = {
+  ...v.data
+}
+var coldef = v.colDef.field;
+// console.log(value , row)
+ return(<AddressTextCell icon={value.coinIcon} title={value.title} subtitle={value.subtitle} row={row} coldef={coldef} />)
+};
 export const timeRenderer = ({ value }) => (
   <div className={styles.time}>{moment(value * 1000).fromNow()}</div>
 );

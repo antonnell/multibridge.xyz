@@ -66,7 +66,8 @@ export default function Swap() {
     }, 3000);
   }
   return (
-    <Layout>
+    // <Layout>
+    <>
     <div className={styles.swapPage}>
     <div className={styles.swapPanelWrapper}>
       {!state.progress ? (
@@ -97,7 +98,8 @@ export default function Swap() {
       </div>
     )}
   </div>
-  </Layout>
+  </>
+  // </Layout>
 
   )
 

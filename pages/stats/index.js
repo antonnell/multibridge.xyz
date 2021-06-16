@@ -10,12 +10,14 @@ import StatsMain from '../../components_multichain/stats_main/stats_main'
 function Stats({ changeTheme }) {
 
   return (
-    <Layout changeTheme={ changeTheme }>
+    // <Layout changeTheme={ changeTheme }>
+    <>
       <Head>
         <title>Swaps</title>
       </Head>
       <StatsMain />
-    </Layout>
+      </>
+    // </Layout>
   )
 }
 

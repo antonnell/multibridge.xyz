@@ -111,11 +111,11 @@ function Grid({
       />
     ),
   };
-  // Let parent send style names explicitly
-  let styleNames = styles.grid + (className ? ` ${className}` : '');
+  // Attach parent sent className, mobile classes
+  const styleNames = `${styles.grid} ${className} ${
+    isMobile ? styles.isMobile : ''
+  }`;
 
-  // attach isMobile stylesheet
-  styleNames = `${styleNames} ${isMobile ? styles.isMobile : ''}`;
   rowsPerPageOptions.forEach((o) => {
     o.label = `Show ${o.value}`;
   });
@@ -126,7 +126,7 @@ function Grid({
         defaultColDef={defaultColDef}
         rowClass={styles.gridRow}
         rowHeight={70} // associated style: .gridRow padding. Any adjustments to height, revisit padding
-        headerHeight={67}
+        headerHeight={isMobile ? 50 : 67}
         columnDefs={columnDefsWithFiller}
         frameworkComponents={frameworkComponents}
         onGridReady={onGridReady}
@@ -190,7 +190,7 @@ Grid.propTypes = {
   agGridProps: PropTypes.object,
 };
 Grid.defaultProps = {
-  className: null,
+  className: '',
   rowData: [],
   frameworkComponents: {},
   columnDefs: [],

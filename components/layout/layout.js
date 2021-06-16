@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
+
 import Head from 'next/head'
 import classes from './layout.module.css'
 import Link from 'next/link'
@@ -19,7 +21,7 @@ const menuImg = { open: '/images/menu.svg', close: '/images/closeIcon.svg' };
 
 export const siteTitle = 'Multichain.xyz'
 
-export default function Layout({ children, configure, backClicked, changeTheme, isMobile }) {
+function Layout({ children, configure, backClicked, changeTheme, isMobile }) {
   const [menuVisible, setMenuVisible] = useState(true);
   const showContent = !isMobile || (isMobile && !menuVisible);
 
@@ -60,9 +62,21 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
       </Head>
       <div className={styles.main}>
         <div className={sideMenuClass}>
-          <div className={styles.appTitle}>
+        <div className={styles.appTitle}>
             <span className={styles.appName}>multichain</span>
-        
+            <div
+              className={styles.appMenu}
+              onClick={toggleMenuVisibility}
+              onKeyDown={toggleMenuVisibility}
+              role="button"
+              tabIndex="0"
+            >
+              <img
+                src={menuIcon}
+                className={styles.menuImg}
+                alt={menuVisible ? 'close menu' : 'open menu'}
+              />
+            </div>
           </div>
           {menuVisible && (
             <>
@@ -79,7 +93,7 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
               </div>
             </>
           )}
-          </div>    
+          </div>   
           {showContent && <main className={ styles.content }>{children}</main>}
           {!isMobile && (
           <div className={styles.topPanel}>
@@ -92,3 +106,12 @@ export default function Layout({ children, configure, backClicked, changeTheme, 
     </div>
   )
 }
+Layout.propTypes = {
+  children: PropTypes.node.isRequired,
+  isMobile: PropTypes.bool,
+};
+Layout.defaultProps = {
+  isMobile: false,
+};
+
+export default Layout
