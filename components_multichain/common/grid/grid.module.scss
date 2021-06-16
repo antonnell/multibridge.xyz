@@ -27,6 +27,7 @@ $grid-border-style: 1px solid $grid-border-color;
   :global .ag-center-cols-viewport {
     // ag-grid, leaves a gap at end of last row
     // Issue Ref:https://github.com/ag-grid/ag-grid/issues/1797
+    // NOTE: CRITICAL: Below is required only for desktop version. For mobile version this needs to be unset, so as to allow horizontal scroll
     overflow-x: inherit;
   }
   .gridRow {
@@ -103,19 +104,27 @@ $grid-border-style: 1px solid $grid-border-color;
   }
 }
 .isMobile {
+  :global .ag-center-cols-viewport {
+    // ag-grid, leaves a gap at end of last row
+    // Issue Ref:https://github.com/ag-grid/ag-grid/issues/1797
+    // NOTE: CRITICAL: Below is required only for desktop version. For mobile version this needs to be unset, so as to allow horizontal scroll
+    overflow-x: unset;
+  }
   .paginationPanel {
     background-color: base.$background-color;
     flex-wrap: wrap-reverse;
     padding-left: 0px;
     padding-right: 0px;
     padding-bottom: 0px;
+    .rowsPerPage {
+      width: 100%;
+      margin-top: 20px;
+      border: unset;
+      padding: 0px;
+    }
   }
   .pagination {
     width: 100%;
     justify-content: space-between;
-  }
-  .rowsPerPage {
-    width: 100%;
-    margin-top: 20px;
   }
 }

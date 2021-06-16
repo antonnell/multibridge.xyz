@@ -71,7 +71,7 @@ function TransactionList({ swapHistory }) {
     // Do not use flex:1 for mobile form factor. This shrinks the columns
     // to unreadable state. use fixed width instead, to allow horizontal scroll
     const { isMobile } = useBreakpoints();
-    const columnWidthProps = isMobile ? { minWidth: 200 } : { flex: 1 };
+    const columnWidthProps = isMobile ? { minWidth: 350 } : { flex: 1 };
 
     const columnDefs = [
       {

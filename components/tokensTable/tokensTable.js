@@ -11,7 +11,7 @@ import stores from '../../stores';
 import {
   ERROR
 } from '../../stores/constants'
-
+import useBreakpoints from '../../framework/useBreakpoints';
 /**
  * Renders tokens grid
  */
@@ -376,7 +376,10 @@ export default function TokensTable({ swapTokens, chainMap }) {
     };
   });
   const [rowData] = useState(temp_tok);
-
+   // Do not use flex:1 for mobile form factor. This shrinks the columns
+  // to unreadable state. use fixed width instead, to allow horizontal scroll
+  const { isMobile } = useBreakpoints();
+  const columnWidthProps = isMobile ? { minWidth: 200 } : { flex: 1 };
   const columnDefs = [
     {
       headerName: "Token",
@@ -392,40 +395,39 @@ export default function TokensTable({ swapTokens, chainMap }) {
     },
     {
       field: "decimals",
-      width: 70,
+      width: 80,
     },
     {
       headerName: "Src Chain",
       field: "srcChain",
       cellRenderer: "chainRenderer",
-      width: 120,
+      width: 110,
 
     },
     {
       headerName: "Dest Chain",
       field: "dstChain",
       cellRenderer: "chainRenderer",
-      width: 120,
+      width: 110,
 
     },
     {
       headerName: "Src Contract",
       field: "srcContract",
       cellRenderer: "contractRenderer",
-      width: 80,
-
+      ...columnWidthProps,
     },
     {
       headerName: "Dest Contract",
       field: "destContract",
       cellRenderer: "contractRenderer",
-      width: 80,
-
+      ...columnWidthProps,
     },
     {
       headerName: 'MPC Contract',
       field: 'mpc',
       cellRenderer: 'mpcRenderer',
+      ...columnWidthProps,
     },
     {
       field: 'status',
