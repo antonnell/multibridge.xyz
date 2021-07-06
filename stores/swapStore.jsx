@@ -66,6 +66,15 @@ const CHAIN_MAP = {
     symbol: 'ETH',
     icon: 'ETH.svg'
   },
+  5: {
+    name: 'Goerli Test Network',
+    rpcURL: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+    chainID: '5',
+    explorer: 'https://goerli.etherscan.io',
+    transactionSuffix: 'tx',
+    symbol: 'ETH',
+    icon: 'ETH.svg'
+  },
   56: {
     name: 'BSC Mainnet',
     rpcURL: 'https://bsc-dataseed1.binance.org',

@@ -87,6 +87,11 @@ class Store {
           symbol: 'LTC',
           icon: 'LTC.png',
         },
+        {
+          name: 'Goerli Test Network',
+          symbol: 'ETH',
+          icon: 'ETH.svg',
+        },
       ],
       chainIDMapping: {
         1: {
@@ -95,6 +100,17 @@ class Store {
           rpcURLdisplay: 'https://ethmainnet.anyswap.exchange',
           chainID: '1',
           explorer: 'https://etherscan.io',
+          transactionSuffix: 'tx',
+          symbol: 'ETH',
+          icon: 'ETH.svg',
+          decimals: 18,
+        },
+        5: {
+          name: 'Goerli Test Network',
+          rpcURL: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+          rpcURLdisplay: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
+          chainID: '5',
+          explorer: 'https://goerli.etherscan.io',
           transactionSuffix: 'tx',
           symbol: 'ETH',
           icon: 'ETH.svg',
