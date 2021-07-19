@@ -1,0 +1,45 @@
+$font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+  Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+
+$primary-color: rgba(238, 67, 98, 1); //#ee4362;
+$primary-color-hover: rgba(
+  238,
+  67,
+  98,
+  0.9
+); //On buttons change opacity on hover
+$primary-color-active: #cc344f; // on button click
+
+$primary-text-color: #0f0f10;
+$primary-text-color-inversed: #ffffff; //when applied over dark background
+$secondary-text-color: rgba(15, 15, 16, 0.8); //#0f0f10, 80%
+$border-color: #d4d5d9;
+$border-style: 1px solid $border-color;
+$border-radius: 6px;
+$border-style-with-primary-color: 1px solid #ee4362;
+
+$background-color: #e5e5e5;
+$background-color-secondary: #f2f3f6;
+$background-color-focus: #f9f9f9;
+%border-default {
+  border: $border-style;
+  border-radius: $border-radius;
+}
+$button-secondary-text-color: #23252e;
+//Note: Keep is-focused styling ahead of .selector__option--is-selected
+//THis is to ensure that is-focussed style doesnt get aplied to is-selected elements
+
+%selector-option-is-focused {
+  background-color: $background-color-focus;
+  cursor: pointer;
+  &:active {
+    background-color: $background-color-focus;
+  }
+}
+%selector-option-is-selected {
+  //background-color: inherit;
+  color: inherit;
+  cursor: inherit;
+  background-color: $background-color-secondary;
+}
+$dialog-padding: 14px;

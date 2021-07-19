@@ -1,0 +1,130 @@
+@use "../../../styles/base";
+$gridContentPadding: 30px;
+
+$grid-border-color: base.$background-color-secondary;
+$grid-border-style: 1px solid $grid-border-color;
+
+.grid {
+  border-radius: 12px;
+  background-color: #ffffff;
+  height: 100%;
+  //max-width: 1425px; //sent:400, from:400, to:400,time:150,status:75
+  display: flex;
+  flex-direction: column;
+  :global .ag-header-cell-text {
+    font-weight: bold;
+    font-size: 16px;
+  }
+  :global .ag-header {
+    border-bottom: $grid-border-style;
+  }
+  :global .ag-cell {
+    line-height: 40px;
+    display: flex;
+    align-items: center; //vertically align. Note: Rowheight is given in grid props
+  }
+
+  :global .ag-center-cols-viewport {
+    // ag-grid, leaves a gap at end of last row
+    // Issue Ref:https://github.com/ag-grid/ag-grid/issues/1797
+    // NOTE: CRITICAL: Below is required only for desktop version. For mobile version this needs to be unset, so as to allow horizontal scroll
+    overflow-x: inherit;
+  }
+  .gridRow {
+    border-bottom: $grid-border-style;
+  }
+  .time {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .paginationPanel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 17px;
+    padding-bottom: 17px;
+    padding-left: $gridContentPadding;
+    padding-right: $gridContentPadding;
+    font-size: 14px;
+    line-height: 22px;
+
+    .pagination {
+      display: flex;
+      flex-direction: row;
+    }
+    .startEndTotalDisplay {
+      font-weight: bold;
+      margin-left: 25px;
+      margin-right: 25px;
+    }
+    .rowsPerPage {
+      min-width: 125px;
+      border: base.$border-style;
+      border-radius: 6px;
+      padding: 2px;
+      height: 42px;
+
+      .downIcon {
+        height: 24px;
+        width: 24px;
+        margin-right: 8px;
+      }
+    }
+  }
+  .selector {
+    :global .selector__control {
+      // This references a BlueprintJS classname, so it should not be hashed as it won't work
+      box-shadow: none;
+      border-style: none;
+    }
+    :global .selector__option--is-selected {
+      @extend %selector-option-is-selected;
+
+      //background-color: inherit;
+      //color: inherit;
+    }
+    :global .selector__option--is-focused {
+      //border-color: base.$primary-color;
+      @extend %selector-option-is-focused;
+    }
+  }
+  .prev,
+  .next {
+    font-weight: bold;
+    text-decoration-line: underline;
+    color: base.$primary-color;
+    cursor: pointer;
+  }
+  .disabled {
+    color: grey;
+    cursor: inherit;
+    text-decoration: none;
+  }
+}
+.isMobile {
+  :global .ag-center-cols-viewport {
+    // ag-grid, leaves a gap at end of last row
+    // Issue Ref:https://github.com/ag-grid/ag-grid/issues/1797
+    // NOTE: CRITICAL: Below is required only for desktop version. For mobile version this needs to be unset, so as to allow horizontal scroll
+    overflow-x: unset;
+  }
+  .paginationPanel {
+    background-color: base.$background-color;
+    flex-wrap: wrap-reverse;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+    .rowsPerPage {
+      width: 100%;
+      margin-top: 20px;
+      border: unset;
+      padding: 0px;
+    }
+  }
+  .pagination {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

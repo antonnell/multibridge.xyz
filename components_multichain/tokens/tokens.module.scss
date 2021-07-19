@@ -1,0 +1,9 @@
+@use "../../styles/base";
+.tokens {
+  // Row uniformly has 14px bold
+  :global .ag-row {
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+  }
+}

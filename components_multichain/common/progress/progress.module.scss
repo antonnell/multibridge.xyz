@@ -1,0 +1,46 @@
+@use "../../../styles/base";
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+.progressPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  //min-height: 400px; //608px in figma
+  padding: 0px 28px 0px 28px; //override panel default padding
+  position: relative; // to enable children to be positioned towards end of panel
+}
+.progress {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 200px;
+
+  .progressImage {
+    margin-bottom: 25px;
+  }
+  .animate {
+    animation: rotation 2s infinite linear;
+  }
+  .progressText {
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 22px;
+    text-align: center;
+    color: base.$primary-text-color;
+  }
+}
+.children {
+  width: 100%;
+  position: absolute;
+  bottom: 0px;
+  padding: 0px 28px 28px 28px; //override panel default padding
+}

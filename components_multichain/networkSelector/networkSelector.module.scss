@@ -1,0 +1,18 @@
+@use "../../styles/base";
+//Default option styles for common icons, text etc
+.option {
+  display: flex;
+  align-items: center;
+  .img {
+    width: 24px;
+    height: 24px;
+  }
+  .label {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 22px;
+    color: base.$secondary-text-color;
+    margin-left: 18px;
+  }
+}

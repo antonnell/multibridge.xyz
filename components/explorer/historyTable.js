@@ -288,6 +288,7 @@ export default function EnhancedTable({ swapHistory }) {
                     tabIndex={-1}
                     key={row.txid}
                   >
+
                     <TableCell className={ classes.cell }>
                       <div className={ classes.inline }>
                         <img src={`${row.tokenMetadata ? row.tokenMetadata.icon : '/tokens/unknown-logo.png'}`} width={ 40 } height={ 40 } className={ classes.icon } />
@@ -321,6 +322,7 @@ export default function EnhancedTable({ swapHistory }) {
                     <TableCell className={ `${getStatus(row.status) === 'Success' ? classes.cellSuccess : classes.cell }` }>
                       <Typography variant='h5'>{ getStatus(row.status) }</Typography>
                     </TableCell>
+                    
                   </TableRow>
                 );
               })}
