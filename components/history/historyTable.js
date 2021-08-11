@@ -252,9 +252,9 @@ export default function EnhancedTable({ swapHistory }) {
 
   const addressClicked = (row, direction) => {
     if(direction === 'from') {
-      window.open(`${row.fromChain.explorer}/${row.fromChain.explorer}/${row.txid}`, '_blank')
+      window.open(`${row.fromChain.explorer.tx}${row.txid}`, '_blank')
     } else {
-      window.open(`${row.toChain.explorer}/${row.toChain.explorer}/${row.swaptx}`, '_blank')
+      window.open(`${row.toChain.explorer.tx}${row.swaptx}`, '_blank')
     }
   }
 
@@ -299,7 +299,7 @@ export default function EnhancedTable({ swapHistory }) {
                     </TableCell>
                     <TableCell className={ classes.cellAddress } onClick={ () => { addressClicked(row, 'from') } }>
                       <div className={ classes.inline }>
-                        <img src={`/blockchains/${row.fromChain.icon}`} width={ 40 } height={ 40 } className={ classes.icon } />
+                        <img src={`/${row.fromChain.logoUrl}`} width={ 40 } height={ 40 } className={ classes.icon } />
                         <div>
                           <Typography variant='h5' className={ classes.textSpaced }>{ row.fromDescription }</Typography>
                           <Typography variant='subtitle1' className={ classes.textSpaced }>{ formatAddress(row.txid, 'medium') }</Typography>
@@ -308,7 +308,7 @@ export default function EnhancedTable({ swapHistory }) {
                     </TableCell>
                     <TableCell className={ classes.cellAddress } onClick={ () => { addressClicked(row, 'to') } }>
                       <div className={ classes.inline }>
-                        <img src={`/blockchains/${row.toChain.icon}`} width={ 40 } height={ 40 } className={ classes.icon } />
+                        <img src={`${row.toChain.logoUrl}`} width={ 40 } height={ 40 } className={ classes.icon } />
                         <div>
                           <Typography variant='h5' className={ classes.textSpaced }>{ row.toDescription }</Typography>
                           <Typography variant='subtitle1' className={ classes.textSpaced }>{ formatAddress(row.swaptx, 'medium') }</Typography>

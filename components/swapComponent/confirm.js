@@ -74,7 +74,7 @@ function Confirm({ theme, swapState, handleBack, handleNext }) {
             <img
               className={ classes.displayChainIcon }
               alt=""
-              src={ `/blockchains/${swapState.fromAssetValue.icon}` }
+              src={ `${swapState.fromAssetValue.logoUrl}` }
               height='40px'
               width='40px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -105,7 +105,7 @@ function Confirm({ theme, swapState, handleBack, handleNext }) {
             <img
               className={ classes.displayChainIcon }
               alt=""
-              src={ `/blockchains/${swapState.toAssetValue.icon}` }
+              src={ `${swapState.toAssetValue.logoUrl}` }
               height='40px'
               width='40px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}

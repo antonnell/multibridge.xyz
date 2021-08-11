@@ -245,7 +245,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
   const handleConfigureNetwork = async () => {
 
     if(chain == 1) {
-    stores.emitter.emit(CONFIGURE_NETWORK)
+      stores.emitter.emit(CONFIGURE_NETWORK)
     } else {
       const web3Provder = await stores.accountStore.getWeb3Provider()
 
@@ -258,10 +258,10 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
         nativeCurrency: {
           name: theChain.symbol,
           symbol: theChain.symbol, // 2-6 characters long
-          decimals: theChain.decimals,
+          decimals: 18,
         },
-        rpcUrls: [theChain.rpcURLdisplay],
-        blockExplorerUrls: [theChain.explorer]
+        rpcUrls: [theChain.rpc],
+        blockExplorerUrls: [theChain.explorer.tx]
       }
 
       web3Provder.eth.getAccounts((error, accounts) => {
@@ -469,7 +469,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
                   <img
                     className={ classes.displayChainIconSmall }
                     alt=""
-                    src={ (swapState && swapState.fromAssetValue) ? `/blockchains/${swapState.fromAssetValue.chainMetadata?.icon}` : '' }
+                    src={ (swapState && swapState.fromAssetValue) ? `${swapState.fromAssetValue.chainMetadata?.logoUrl}` : '' }
                     height='30px'
                     width='30px'
                     onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -489,7 +489,7 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
                   <img
                     className={ classes.displayChainIconSmall }
                     alt=""
-                    src={ (swapState && swapState.toAssetValue) ? `/blockchains/${swapState.toAssetValue.chainMetadata?.icon}` : '' }
+                    src={ (swapState && swapState.toAssetValue) ? `${swapState.toAssetValue.chainMetadata?.logoUrl}` : '' }
                     height='30px'
                     width='30px'
                     onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -628,7 +628,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
             <img
               className={ classes.displayChainIconSmall }
               alt=""
-              src={ asset ? `/blockchains/${asset.chainMetadata?.icon}` : '' }
+              src={ asset ? `${asset.chainMetadata?.logoUrl}` : '' }
               height='30px'
               width='30px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -662,7 +662,7 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
             <img
               className={ classes.displayChainIcon }
               alt=""
-              src={ value ? `/blockchains/${value.chainMetadata?.icon}` : '' }
+              src={ value ? `${value.chainMetadata?.logoUrl}` : '' }
               height='40px'
               width='40px'
               onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}

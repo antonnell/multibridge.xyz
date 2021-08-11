@@ -94,116 +94,7 @@ class Store {
         },
       ],
       chainIDMapping: {
-        1: {
-          name: 'Eth Mainnet',
-          rpcURL: 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31',
-          rpcURLdisplay: 'https://ethmainnet.anyswap.exchange',
-          chainID: '1',
-          explorer: 'https://etherscan.io',
-          transactionSuffix: 'tx',
-          symbol: 'ETH',
-          icon: 'ETH.svg',
-          decimals: 18,
-        },
-        5: {
-          name: 'Goerli Test Network',
-          rpcURL: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-          rpcURLdisplay: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-          chainID: '5',
-          explorer: 'https://goerli.etherscan.io',
-          transactionSuffix: 'tx',
-          symbol: 'ETH',
-          icon: 'ETH.svg',
-          decimals: 18,
-        },
-        56: {
-          name: 'Binance Smart Chain Mainnet',
-          rpcURL: 'https://bsc-dataseed1.binance.org',
-          rpcURLdisplay: 'https://bsc-dataseed1.binance.org',
-          chainID: '56',
-          explorer: 'https://bscscan.com',
-          transactionSuffix: 'tx',
-          symbol: 'BNB',
-          icon: 'BNB.svg',
-          decimals: 18,
-        },
-        100: {
-          name: 'xDAI Chain',
-          rpcURL: 'https://rpc.xdaichain.com',
-          rpcURLdisplay: 'https://rpc.xdaichain.com',
-          chainID: '100',
-          explorer: 'https://blockscout.com/xdai/mainnet/',
-          transactionSuffix: 'tx',
-          symbol: 'xDAI',
-          icon: 'STAKE.png',
-          decimals: 18,
-        },
-        128: {
-          name: 'Huobi ECO Chain Mainnet',
-          rpcURL: 'https://http-mainnet.hecochain.com',
-          rpcURLdisplay: 'https://http-mainnet.hecochain.com',
-          chainID: '128',
-          explorer: 'https://scan.hecochain.com',
-          transactionSuffix: 'tx',
-          symbol: 'HT',
-          icon: 'HT.svg',
-          decimals: 18,
-        },
-        137: {
-          name: 'Matic Mainnet',
-          rpcURL: 'https://rpc-mainnet.matic.network',
-          rpcURLdisplay: 'https://rpc-mainnet.matic.network',
-          chainID: '137',
-          explorer: 'https://explorer-mainnet.maticvigil.com/',
-          transactionSuffix: 'tx',
-          symbol: 'MATIC',
-          icon: 'MATIC.png',
-          decimals: 18,
-        },
-        250: {
-          name: 'FTM Mainnet',
-          rpcURL: 'https://rpcapi.fantom.network',
-          rpcURLdisplay: 'https://rpcapi.fantom.network',
-          chainID: '250',
-          explorer: 'https://ftmscan.com',
-          transactionSuffix: 'tx',
-          symbol: 'FTM',
-          icon: 'FTM.png',
-          decimals: 18,
-        },
-        32659: {
-          name: 'FSN Mainnet',
-          rpcURL: 'https://mainnet.anyswap.exchange',
-          rpcURLdisplay: 'https://mainnet.anyswap.exchange',
-          chainID: '32659',
-          explorer: 'https://fsnex.com',
-          transactionSuffix: 'transaction',
-          symbol: 'FSN',
-          icon: 'FSN.svg',
-          decimals: 18,
-        },
-        43114: {
-          name: 'Avalanche Mainnet',
-          rpcURL: 'https://api.avax.network/ext/bc/C/rpc',
-          rpcURLdisplay: 'https://api.avax.network/ext/bc/C/rpc',
-          chainID: '43114',
-          explorer: 'https://cchain.explorer.avax.network',
-          transactionSuffix: 'tx',
-          symbol: 'AVAX',
-          icon: 'AVAX.svg',
-          decimals: 18,
-        },
-        1666600000: {
-          name: 'Harmony Mainnet',
-          rpcURL: 'https://api.harmony.one',
-          rpcURLdisplay: 'https://api.harmony.one',
-          chainID: '1666600000',
-          explorer: 'https://explorer.harmony.one/#',
-          transactionSuffix: 'tx',
-          symbol: 'ONE',
-          icon: 'ONE.png',
-          decimals: 18,
-        },
+
       },
       chainID: null,
       account: null,
@@ -250,6 +141,19 @@ class Store {
   };
 
   configure = async () => {
+
+    const anyswapChainInfoResult = await fetch('https://bridgeapi.anyswap.exchange/data/bridgeChainInfo');
+    const anyswapChainInfoJson = await anyswapChainInfoResult.json()
+
+    let chainIDs = Object.keys(anyswapChainInfoJson)
+    for(let i = 0; i < chainIDs.length; i++) {
+      anyswapChainInfoJson[chainIDs[i]].chainID = chainIDs[i]
+      if(chainIDs[i] === '1') {
+        anyswapChainInfoJson[chainIDs[i]].rpc = 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31'
+      }
+    }
+
+    this.setStore({ chainIDMapping: anyswapChainInfoJson })
 
     this.getGasPrices()
 
@@ -442,7 +346,7 @@ class Store {
 
   getReadOnlyWeb3 = async (chainID) => {
     const chainIDMapping = this.getStore('chainIDMapping')
-    return new Web3(new Web3.providers.HttpProvider(chainIDMapping[chainID].rpcURL));
+    return new Web3(new Web3.providers.HttpProvider(chainIDMapping[chainID].rpc));
   }
 
   changeNetwork = (payload) => {

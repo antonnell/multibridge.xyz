@@ -235,7 +235,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function EnhancedTable({ swapTokens, chainMap }) {
-  console.log(chainMap)
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('name');
@@ -459,7 +458,7 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
                     </TableCell>
                     <TableCell className={ classes.cell }>
                       <div className={ classes.inline }>
-                        <img src={`/blockchains/${srcChain.icon}`} width={ 30 } height={ 30 } className={ classes.icon } />
+                        <img src={`${srcChain.logoUrl}`} width={ 30 } height={ 30 } className={ classes.icon } />
                         <Typography variant='h5' className={ classes.textSpaced } >{ srcChain.chainID ? srcChain.chainID : row.srcChainID }</Typography>
                         { srcChain.chainID !== '1' ?
                           <Tooltip title={`Add ${srcChain.name} to MetaMask`}>
@@ -480,7 +479,7 @@ export default function EnhancedTable({ swapTokens, chainMap }) {
                     </TableCell>
                     <TableCell className={ classes.cell }>
                       <div className={ classes.inline }>
-                        <img src={`/blockchains/${dstChain.icon}`} width={ 30 } height={ 30 } className={ classes.icon } />
+                        <img src={`${dstChain.logoUrl}`} width={ 30 } height={ 30 } className={ classes.icon } />
                         <Typography variant='h5' className={ classes.textSpaced } >{ dstChain.chainID ? dstChain.chainID : row.destChainID }</Typography>
                         { dstChain.chainID !== '1' ?
                           <Tooltip title={`Add ${dstChain.name} to MetaMask`}>

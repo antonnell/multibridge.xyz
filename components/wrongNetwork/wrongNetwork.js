@@ -33,7 +33,7 @@ function WrongNetwork(props) {
     <div className={ classes.changeNetworkContainer }>
       <Typography variant='h2' className={ classes.sectionHeading }>Connect to <img
         alt=""
-        src={ `/blockchains/${storeChainIDMapping[selectedChainID].icon}` }
+        src={ `${storeChainIDMapping[selectedChainID].logoUrl}` }
         height="20px"
         style={{ marginLeft: '6px', marginRight: '6px' }}
       /> { (storeChainIDMapping && selectedChainID) ? storeChainIDMapping[selectedChainID].name : '' }</Typography>
@@ -56,9 +56,9 @@ function WrongNetwork(props) {
         <div className={ classes.settingContainer}>
           <div className={ classes.setting }>
             <Typography className={ classes.title} variant='h5'>RPC URL</Typography>
-            <Typography className={ classes.value } noWrap>{ storeChainIDMapping[selectedChainID].rpcURLdisplay }</Typography>
+            <Typography className={ classes.value } noWrap>{ storeChainIDMapping[selectedChainID].rpc }</Typography>
           </div>
-          <IconButton aria-label="copy" onClick={ (event) => { onCopy(event,  'rpcURLdisplay') } }>
+          <IconButton aria-label="copy" onClick={ (event) => { onCopy(event,  'rpc') } }>
             <FileCopyIcon />
           </IconButton>
         </div>
@@ -83,7 +83,7 @@ function WrongNetwork(props) {
         <div className={ classes.settingContainer}>
           <div className={ classes.setting }>
             <Typography className={ classes.title} variant='h5'>Explorer URL</Typography>
-            <Typography className={ classes.value }>{ storeChainIDMapping[selectedChainID].explorer }</Typography>
+            <Typography className={ classes.value }>{ storeChainIDMapping[selectedChainID].explorer.tx }</Typography>
           </div>
           <IconButton aria-label="copy" onClick={ (event) => { onCopy(event,  'explorer') } }>
             <FileCopyIcon />

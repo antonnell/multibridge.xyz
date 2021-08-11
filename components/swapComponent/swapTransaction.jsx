@@ -46,7 +46,7 @@ class Transaction extends Component {
   onViewTX = (event, val, asset) => {
     event.stopPropagation();
     const chainIDMapping = stores.accountStore.getStore('chainIDMapping')
-    window.open(`${chainIDMapping[asset.chainID].explorer}/${chainIDMapping[asset.chainID].transactionSuffix}/${val}`, '_blank')
+    window.open(`${chainIDMapping[asset.chainID].explorer.tx}`, '_blank')
   }
 
   render() {
@@ -87,7 +87,7 @@ class Transaction extends Component {
                     <img
                       className={ classes.displayChainIconSmall }
                       alt=""
-                      src={ (swap.fromAsset) ? `/blockchains/${swap.fromAsset.chainMetadata?.icon}` : '' }
+                      src={ (swap.fromAsset) ? `${swap.fromAsset.chainMetadata?.logoUrl}` : '' }
                       height='30px'
                       width='30px'
                       onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}
@@ -107,7 +107,7 @@ class Transaction extends Component {
                     <img
                       className={ classes.displayChainIconSmall }
                       alt=""
-                      src={ (swap.toAsset) ? `/blockchains/${swap.toAsset.chainMetadata?.icon}` : '' }
+                      src={ (swap.toAsset) ? `${swap.toAsset.chainMetadata?.logoUrl}` : '' }
                       height='30px'
                       width='30px'
                       onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}

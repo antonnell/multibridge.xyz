@@ -36,7 +36,7 @@ function ChangeNetwork(props) {
             size='large'
             onClick={ () => { onChainSeleccted(chain) } }
             className={ classes.chainContainer}>
-            <img src={ `/blockchains/${chain.icon}` } className={ classes.chainIcon } />
+            <img src={ `${chain.logoUrl}` } className={ classes.chainIcon } />
             <Typography variant='h5' className={ classes.buttonText }>{ chain.name }</Typography>
           </Button>)
         })

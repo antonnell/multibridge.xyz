@@ -37,7 +37,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
   const onViewTX = (event, val, asset) => {
     event.stopPropagation();
     const chainIDMapping = stores.accountStore.getStore('chainIDMapping')
-    window.open(`${chainIDMapping[asset.chainID].explorer}/${chainIDMapping[asset.chainID].transactionSuffix}/${val}`, '_blank')
+    window.open(`${chainIDMapping[asset.chainID].explorer.tx}`, '_blank')
   }
 
   const isDark = theme.palette.type === 'dark'
@@ -72,7 +72,7 @@ function ShowTX({ theme, swapState, handleBack, handleNext, depositAddress, depo
           <img
             className={ classes.displayChainIcon }
             alt=""
-            src={ `/blockchains/${asset.icon}` }
+            src={ `${asset.logoUrl}` }
             height='40px'
             width='40px'
             onError={(e)=>{e.target.onerror = null; e.target.src="/tokens/unknown-logo.png"}}

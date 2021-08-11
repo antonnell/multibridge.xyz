@@ -56,108 +56,6 @@ const fetch = require('node-fetch');
 const CoinGecko = require('coingecko-api');
 const CoinGeckoClient = new CoinGecko();
 
-const CHAIN_MAP = {
-  1: {
-    name: 'Eth Mainnet',
-    rpcURL: 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31',
-    chainID: '1',
-    explorer: 'https://etherscan.io',
-    transactionSuffix: 'tx',
-    symbol: 'ETH',
-    icon: 'ETH.svg'
-  },
-  5: {
-    name: 'Goerli Test Network',
-    rpcURL: 'https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161',
-    chainID: '5',
-    explorer: 'https://goerli.etherscan.io',
-    transactionSuffix: 'tx',
-    symbol: 'ETH',
-    icon: 'ETH.svg'
-  },
-  56: {
-    name: 'BSC Mainnet',
-    rpcURL: 'https://bsc-dataseed1.binance.org',
-    chainID: '56',
-    explorer: 'https://bscscan.com',
-    transactionSuffix: 'tx',
-    symbol: 'BNB',
-    icon: 'BNB.svg'
-  },
-  100: {
-    name: 'xDAI Chain',
-    rpcURL: 'https://rpc.xdaichain.com',
-    chainID: '100',
-    explorer: 'https://blockscout.com/xdai/mainnet/',
-    transactionSuffix: 'tx',
-    symbol: 'xDAI',
-    icon: 'STAKE.png'
-  },
-  128: {
-    name: 'HT Mainnet',
-    rpcURL: 'https://http-mainnet.hecochain.com',
-    chainID: '128',
-    explorer: 'https://scan.hecochain.com',
-    transactionSuffix: 'tx',
-    symbol: 'HT',
-    icon: 'HT.svg'
-  },
-  137: {
-    name: 'Matic Mainnet',
-    rpcURL: 'https://rpc-mainnet.matic.network',
-    chainID: '137',
-    explorer: 'https://explorer-mainnet.maticvigil.com/',
-    transactionSuffix: 'tx',
-    symbol: 'MATIC',
-    icon: 'MATIC.png'
-  },
-  250: {
-    name: 'FTM Mainnet',
-    rpcURL: 'https://rpcapi.fantom.network',
-    chainID: '250',
-    explorer: 'https://ftmscan.com',
-    transactionSuffix: 'tx',
-    symbol: 'FTM',
-    icon: 'FTM.png'
-  },
-  32659: {
-    name: 'FSN Mainnet',
-    rpcURL: 'https://mainnet.anyswap.exchange',
-    chainID: '32659',
-    explorer: 'https://fsnex.com',
-    transactionSuffix: 'transaction',
-    symbol: 'FSN',
-    icon: 'FSN.svg'
-  },
-  43114: {
-    name: 'Avalanche Mainnet',
-    rpcURL: 'https://api.avax.network/ext/bc/C/rpc',
-    chainID: '43114',
-    explorer: 'https://cchain.explorer.avax.network/',
-    transactionSuffix: 'tx',
-    symbol: 'AVAX',
-    icon: 'AVAX.svg'
-  },
-  1666600000: {
-    name: 'Harmony Mainnet',
-    rpcURL: 'https://api.harmony.one',
-    chainID: '1666600000',
-    explorer: 'https://explorer.harmony.one/#',
-    transactionSuffix: 'tx',
-    symbol: 'ONE',
-    icon: 'ONE.png'
-  },
-  'BTC': {
-    name: 'Bitcoin Mainnet',
-    rpcURL: '??',
-    chainID: 'BTC',
-    explorer: 'https://www.blockchain.com/btc/',
-    transactionSuffix: 'tx',
-    symbol: 'BTC',
-    icon: 'BTC.png'
-  }
-}
-
 class Store {
   constructor(dispatcher, emitter) {
 
@@ -171,7 +69,8 @@ class Store {
       totalLocked: 0,
       transactions: [],
       swapTokens: [],
-      explorerHistory: []
+      explorerHistory: [],
+      chainMap: {}
     }
 
     dispatcher.register(
@@ -238,7 +137,18 @@ class Store {
     const anyswapServerResult = await fetch(`https://bridgeapi.anyswap.exchange/v2/serverInfo/chainid`);
     const anyswapServerJson = await anyswapServerResult.json()
 
-    this.setStore({ anyswapServerJson: anyswapServerJson })
+    const anyswapChainInfoResult = await fetch('https://bridgeapi.anyswap.exchange/data/bridgeChainInfo');
+    const anyswapChainInfoJson = await anyswapChainInfoResult.json()
+
+    let chainIDs = Object.keys(anyswapChainInfoJson)
+    for(let i = 0; i < chainIDs.length; i++) {
+      anyswapChainInfoJson[chainIDs[i]].chainID = chainIDs[i]
+      if(chainIDs[i] === '1') {
+        anyswapChainInfoJson[chainIDs[i]].rpc = 'https://mainnet.infura.io/v3/b7a85e51e8424bae85b0be86ebd8eb31'
+      }
+    }
+
+    this.setStore({ anyswapServerJson: anyswapServerJson, chainMap: anyswapChainInfoJson })
 
     const anyswapServerArray = Object.keys(anyswapServerJson).map((key) => [key, anyswapServerJson[key]]);
 
@@ -422,7 +332,8 @@ class Store {
   }
 
   _getChainInfo = (chainKey) => {
-    return CHAIN_MAP[chainKey]
+    const chainMap = this.getStore('chainMap')
+    return chainMap[chainKey]
   }
 
   // configureNew = async (payload) => {
@@ -588,9 +499,11 @@ class Store {
     let sourceChainIcon = ''
     let destinationChainIcon = ''
 
-    if(CHAIN_MAP[chainKey]) {
-      destinationChainDescription = CHAIN_MAP[chainKey].name
-      destinationChainIcon = CHAIN_MAP[chainKey].icon
+    const chainMap = this.getStore('chainMap')
+
+    if(chainMap[chainKey]) {
+      destinationChainDescription = chainMap[chainKey].name
+      destinationChainIcon = chainMap[chainKey].logoUrl
     } else {
       destinationChainDescription = 'Unknown Network'
       destinationChainIcon = 'unknown-logo.png'
@@ -1371,6 +1284,7 @@ class Store {
     }
 
     try {
+      const chainMap = this.getStore('chainMap')
 
       async.parallel([
         async ( callback ) => {
@@ -1428,10 +1342,10 @@ class Store {
             try {
               swap.from = 1
               swap.fromDescription = 'Eth Mainnet'
-              swap.fromChain = CHAIN_MAP[1]
+              swap.fromChain = chainMap[1]
               swap.to = 250
               swap.toDescription = 'FTM Mainnet'
-              swap.toChain = CHAIN_MAP[250]
+              swap.toChain = chainMap[250]
 
               let asset = this.store.swapAssets.filter((asset) => {
                 return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
@@ -1455,10 +1369,10 @@ class Store {
             try {
               swap.from = 250
               swap.fromDescription = 'FTM Mainnet'
-              swap.fromChain = CHAIN_MAP[250]
+              swap.fromChain = chainMap[250]
               swap.to = 1
               swap.toDescription = 'Eth Mainnet'
-              swap.toChain = CHAIN_MAP[1]
+              swap.toChain = chainMap[1]
 
               let asset = this.store.swapAssets.filter((asset) => {
                 return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
@@ -1481,10 +1395,10 @@ class Store {
             try {
               swap.from = 250
               swap.fromDescription = 'FTM Mainnet'
-              swap.fromChain = CHAIN_MAP[250]
+              swap.fromChain = chainMap[250]
               swap.to = 1
               swap.toDescription = 'Eth Mainnet'
-              swap.toChain = CHAIN_MAP[1]
+              swap.toChain = chainMap[1]
 
               let asset = this.store.swapAssets.filter((asset) => {
                 return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
@@ -1508,10 +1422,10 @@ class Store {
             try {
               swap.from = 1
               swap.fromDescription = 'Eth Mainnet'
-              swap.fromChain = CHAIN_MAP[1]
+              swap.fromChain = chainMap[1]
               swap.to = 250
               swap.toDescription = 'FTM Mainnet'
-              swap.toChain = CHAIN_MAP[250]
+              swap.toChain = chainMap[250]
 
               let asset = this.store.swapAssets.filter((asset) => {
                 return asset.chainID == 250 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
@@ -1535,10 +1449,10 @@ class Store {
             try {
               swap.from = 56
               swap.fromDescription = 'BSC Mainnet'
-              swap.fromChain = CHAIN_MAP[56]
+              swap.fromChain = chainMap[56]
               swap.to = 1
               swap.toDescription = 'Eth Mainnet'
-              swap.toChain = CHAIN_MAP[1]
+              swap.toChain = chainMap[1]
 
               let asset = this.store.swapAssets.filter((asset) => {
                 return asset.chainID == 1 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
@@ -1562,10 +1476,10 @@ class Store {
             try {
               swap.from = 1
               swap.fromDescription = 'Eth Mainnet'
-              swap.fromChain = CHAIN_MAP[1]
+              swap.fromChain = chainMap[1]
               swap.to = 56
               swap.toDescription = 'BSC Mainnet'
-              swap.toChain = CHAIN_MAP[56]
+              swap.toChain = chainMap[56]
 
               let asset = this.store.swapAssets.filter((asset) => {
                 return asset.chainID == 56 && asset.pairID.toLowerCase() === swap.pairid.toLowerCase()
@@ -1750,17 +1664,18 @@ class Store {
 
         let populatedSwapIn = []
         let populatedSwapOut = []
+        const chainMap = this.getStore('chainMap')
 
         if(!swapHistoryInJson.error && swapHistoryInJson.info.length > 0) {
           populatedSwapIn = swapHistoryInJson.info.map((swap) => {
             try {
-              let fromChain = CHAIN_MAP[swap.srcChainID]
-              let toChain = CHAIN_MAP[swap.destChainID]
+              let fromChain = chainMap[swap.srcChainID]
+              let toChain = chainMap[swap.destChainID]
 
-              swap.from = fromChain.chainID
+              swap.from = swap.srcChainID
               swap.fromDescription = fromChain.name
               swap.fromChain = fromChain
-              swap.to = toChain.chainID
+              swap.to = swap.destChainID
               swap.toDescription = toChain.name
               swap.toChain = toChain
 
@@ -1783,13 +1698,13 @@ class Store {
         if(!swapHistoryOutJson.error && swapHistoryOutJson.info.length > 0) {
           populatedSwapOut = swapHistoryOutJson.info.map((swap) => {
             try {
-              const fromChain = CHAIN_MAP[swap.destChainID]
-              const toChain = CHAIN_MAP[swap.srcChainID]
+              const fromChain = chainMap[swap.destChainID]
+              const toChain = chainMap[swap.srcChainID]
 
-              swap.from = fromChain.chainID
+              swap.from = swap.destChainID
               swap.fromDescription = fromChain.name
               swap.fromChain = fromChain
-              swap.to = toChain.chainID
+              swap.to = swap.srcChainID
               swap.toDescription = toChain.name
               swap.toChain = toChain
 

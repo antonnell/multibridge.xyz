@@ -191,7 +191,7 @@ function Header(props) {
           color='secondary'
           onClick={ onNetworkClicked }
           >
-          { chainIDMapping[selectedChainID] && <img src={ `/blockchains/${ chainIDMapping[selectedChainID].icon }`} className={ classes.accountIcon } width={ 30 } height={ 30 } />}
+          { chainIDMapping[selectedChainID] && <img src={ `${ chainIDMapping[selectedChainID].logoUrl }`} className={ classes.accountIcon } width={ 30 } height={ 30 } />}
           { chainIDMapping[selectedChainID] && <Typography variant='h5'>{ chainIDMapping[selectedChainID].name }</Typography> }
         </Button>
       }
