@@ -32,6 +32,11 @@
   padding-top: 12px;
 }
 
+.leftAlign {
+  display: flex;
+  flex-direction: column;
+}
+
 @media screen and (max-width: 1200px) {
   .footerContainer{
     display: none;

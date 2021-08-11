@@ -39,10 +39,15 @@ function Footer(props) {
       <div className={ classes.link }>
         <Typography variant='h5' className={ classes.auditText } color='textPrimary'>$ { formatCurrency(totalLocked) } Locked</Typography>
       </div>
+      <div className={ classes.leftAlign}>
         <a className={ classes.link } href='https://github.com/anyswap/Anyswap-Audit/blob/master/SlowMist/AnySwap%20CrossChain-Bridge%20Security%20Audit%20Report.pdf' target='_blank' rel="noreferrer">
-        <Typography variant='h5' className={ classes.auditText } color='textPrimary'><PolicyIcon className={ classes.policyIcon } /> Security Audit</Typography>
-      </a>
-      <Typography className={classes.smallVersion}>Version 1.0.8</Typography>
+          <Typography variant='h5' className={ classes.auditText } color='textPrimary'><PolicyIcon className={ classes.policyIcon } /> SlowMist Audit</Typography>
+        </a>
+        <a className={ classes.link } href='https://github.com/anyswap/Anyswap-Audit/blob/master/TrialofBits/Anyswap-CrossChain-Bridge-TrialofBits-Audit-Final%20Report.pdf' target='_blank' rel="noreferrer">
+          <Typography variant='h5' className={ classes.auditText } color='textPrimary'><PolicyIcon className={ classes.policyIcon } /> Trail Of Bits Audit</Typography>
+        </a>
+      </div>
+      <Typography className={classes.smallVersion}>Version 1.0.9</Typography>
     </div>
   )
 }
