@@ -310,7 +310,10 @@ class Store {
     }
 
     if(asset && asset.chainID === '250') {
-      return '250' //hard code FTM gas price to 250.
+      //get gas price
+      const web3 = await this.getWeb3Provider()
+      const gasPrice = await web3.eth.getGasPrice()
+      return web3.utils.fromWei(gasPrice, 'gwei')
     }
 
     try {
