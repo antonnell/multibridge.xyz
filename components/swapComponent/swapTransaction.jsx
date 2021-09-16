@@ -46,7 +46,7 @@ class Transaction extends Component {
   onViewTX = (event, val, asset) => {
     event.stopPropagation();
     const chainIDMapping = stores.accountStore.getStore('chainIDMapping')
-    window.open(`${chainIDMapping[asset.chainID].explorer.tx}`, '_blank')
+    window.open(`${chainIDMapping[asset.chainID].explorer.tx}${val}`, '_blank')
   }
 
   render() {
