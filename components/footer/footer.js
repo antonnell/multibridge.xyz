@@ -47,7 +47,7 @@ function Footer(props) {
           <Typography variant='h5' className={ classes.auditText } color='textPrimary'><PolicyIcon className={ classes.policyIcon } /> Trail Of Bits Audit</Typography>
         </a>
       </div>
-      <Typography className={classes.smallVersion}>Version 1.0.9</Typography>
+      <Typography className={classes.smallVersion}>Version 1.0.10</Typography>
     </div>
   )
 }

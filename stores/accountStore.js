@@ -310,7 +310,7 @@ class Store {
     }
 
     if(asset && asset.chainID === '250') {
-      return '80' //hard code FTM gas price to 80.
+      return '250' //hard code FTM gas price to 250.
     }
 
     try {
@@ -321,7 +321,7 @@ class Store {
       if(priceJSON) {
         return priceJSON[gasSpeed].toFixed(0)
       }
-      return '80'
+      return '250'
     } catch(e) {
       console.log(e)
       return {}
