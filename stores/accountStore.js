@@ -309,7 +309,7 @@ class Store {
       gasSpeed = this.getStore('gasSpeed')
     }
 
-    if(asset && asset.chainID === '250') {
+    if(asset && asset.chainID !== '1') {
       //get gas price
       const web3 = await this.getWeb3Provider()
       const gasPrice = await web3.eth.getGasPrice()

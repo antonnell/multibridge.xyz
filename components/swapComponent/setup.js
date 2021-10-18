@@ -34,7 +34,8 @@ import {
   CHANGE_NETWORK,
   NETWORK_CHANGED,
   CONFIGURE_NETWORK,
-  TX_HASH
+  TX_HASH,
+  GET_ASSET_BALANCE
 } from '../../stores/constants'
 import BigNumber from 'bignumber.js'
 
@@ -286,7 +287,6 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
   }
 
   const onAssetSelect = (type, value) => {
-    console.log(value)
     if(type === 'From') {
       setFromAssetValue(value)
       stores.dispatcher.dispatch({ type: CHANGE_NETWORK, content: { network: { chainID: value.chainID } } })
@@ -300,6 +300,8 @@ function Setup({ theme, handleNext, swapState, setSwapState }) {
 
       calculateReceiveAmount(fromAmountValue, fromAssetValue, value)
     }
+
+    stores.dispatcher.dispatch({ type: GET_ASSET_BALANCE, content: { asset: value } })
   }
 
   const fromAmountChanged = (event) => {
@@ -613,9 +615,9 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
     setOpen(false)
   }
 
-  const renderAssetOption = (type, asset) => {
+  const renderAssetOption = (type, asset, idx) => {
     return (
-      <MenuItem val={ asset.Name } key={ asset.Name } className={ classes.assetSelectMenu } onClick={ () => { onLocalSelect(type, asset) } }>
+      <MenuItem val={ asset.Name } key={ asset.Name+'_'+idx } className={ classes.assetSelectMenu } onClick={ () => { onLocalSelect(type, asset) } }>
         <div className={ classes.assetSelectMenuItem }>
           <div className={ classes.displayDualIconContainerSmall }>
             <img
@@ -713,8 +715,8 @@ function AssetSelect({ type, value, assetOptions, onSelect }) {
                 } else {
                   return true
                 }
-              }).map((asset) => {
-                return renderAssetOption(type, asset)
+              }).map((asset, idx) => {
+                return renderAssetOption(type, asset, idx)
               }) : []
             }
           </div>

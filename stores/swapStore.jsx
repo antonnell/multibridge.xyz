@@ -37,7 +37,8 @@ import {
   GET_SWAP_TOKENS,
   SWAP_TOKENS_RETURNED,
   GET_EXPLORER,
-  EXPLORER_RETURNED
+  EXPLORER_RETURNED,
+  GET_ASSET_BALANCE,
 } from './constants';
 
 import stores from './'
@@ -111,6 +112,9 @@ class Store {
             break;
           case GET_EXPLORER:
             this.getExplorer(payload)
+            break;
+          case GET_ASSET_BALANCE:
+            this.getIndividualAssetBalance(payload)
             break;
           default: {
           }
@@ -571,6 +575,82 @@ class Store {
     }
   }
 
+  shouldGetBalanceForThese = () => {
+    return [
+      'FTM',
+      'ETH',
+      'FSN',
+      'HT',
+      'BNB',
+      'ONE',
+      'YFI',
+      'USDC',
+      'USDT',
+      'DAI',
+      'WBTC',
+      // 'KP3R',
+      // 'CREAM',
+      // 'Sushi',
+      // 'LINK',
+      // 'COMP',
+      // 'CRV',
+    ]
+  }
+
+  getIndividualAssetBalance = async (payload) => {
+    const account = await stores.accountStore.getStore('account')
+    if(!account) {
+      return false
+    }
+
+    const theAsset = payload.content.asset
+    const swapAssets = this.getStore('swapAssets')
+
+    async.map(swapAssets, async (asset, callback) => {
+      try {
+        if(asset.tokenMetadata.address !== theAsset.tokenMetadata.address || asset.tokenMetadata.ContractAddress !== theAsset.tokenMetadata.ContractAddress) {
+          return callback(null, asset)
+        }
+
+        const web3 = await stores.accountStore.getReadOnlyWeb3(asset.chainID)
+
+        let erc20Address = asset.tokenMetadata.address
+        if(asset.DelegateToken) {
+          erc20Address = asset.DelegateToken
+        }
+
+        if(['ETH', 'FTM', 'FSN', 'HT', 'BNB', 'ONE'].includes(erc20Address)) {
+          const balanceOf = await web3.eth.getBalance(account.address)
+
+          const balance = BigNumber(balanceOf).div(10**18).toFixed(18, 1)
+          asset.tokenMetadata.balance = balance
+        } else if(erc20Address) {
+          const erc20Contract = new web3.eth.Contract(ERC20ABI, erc20Address)
+
+          const balanceOf = await erc20Contract.methods.balanceOf(account.address).call()
+          const balance = BigNumber(balanceOf).div(10**asset.tokenMetadata.decimals).toFixed(parseInt(asset.tokenMetadata.decimals), 1)
+          asset.tokenMetadata.balance = balance
+        }
+
+        callback(null, asset)
+      } catch(ex) {
+        console.log(asset)
+        console.log(ex)
+        callback(null, asset)
+      }
+    }, (err, swapAssetsMapped) => {
+      if(err) {
+        console.log(err)
+        return this.emitter.emit(ERROR, err)
+      }
+
+      this.setStore({ swapAssets: swapAssetsMapped })
+
+      this.emitter.emit(SWAP_UPDATED)
+      this.emitter.emit(SWAP_BALANCES_RETURNED)
+    })
+  }
+
   getSwapBalances = async () => {
     const account = await stores.accountStore.getStore('account')
     if(!account) {
@@ -588,6 +668,13 @@ class Store {
           erc20Address = asset.DelegateToken
         }
 
+        const getBalancesForThese = this.shouldGetBalanceForThese()
+
+        if(!getBalancesForThese.includes(asset.tokenMetadata.symbol)) {
+          asset.tokenMetadata.balance = null
+          return callback(null, asset)
+        }
+
         if(['ETH', 'FTM', 'FSN', 'HT', 'BNB', 'ONE'].includes(erc20Address)) {
           const balanceOf = await web3.eth.getBalance(account.address)
 
@@ -596,9 +683,8 @@ class Store {
         } else if(erc20Address) {
           const erc20Contract = new web3.eth.Contract(ERC20ABI, erc20Address)
 
-          const decimals = await erc20Contract.methods.decimals().call()
           const balanceOf = await erc20Contract.methods.balanceOf(account.address).call()
-          const balance = BigNumber(balanceOf).div(10**decimals).toFixed(parseInt(decimals), 1)
+          const balance = BigNumber(balanceOf).div(10**asset.tokenMetadata.decimals).toFixed(parseInt(asset.tokenMetadata.decimals), 1)
           asset.tokenMetadata.balance = balance
         }
 
