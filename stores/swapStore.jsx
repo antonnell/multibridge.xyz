@@ -815,7 +815,7 @@ class Store {
           this.createTransactionListener(toWeb3, statusJson.info.swaptx, statusJson.info.txid)
         }
 
-        await this.sleep(3000)
+        await this.sleep(10000)
       }
     } catch(ex) {
       console.log(ex)
