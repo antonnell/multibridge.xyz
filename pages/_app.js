@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Head from 'next/head';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import ShutdownNotice from '../components/shutdownNotice'
 
 import lightTheme from '../theme/light';
 import darkTheme from '../theme/dark';
@@ -61,6 +62,11 @@ export default function MyApp({ Component, pageProps }) {
     }
   },[]);
 
+  const [shutdownNoticeOpen, setShutdownNoticeOpen] = useState(true);
+  const closeShutdown = () => {
+    setShutdownNoticeOpen(false)
+  }
+
   return (
     <React.Fragment>
       <Head>
@@ -75,6 +81,9 @@ export default function MyApp({ Component, pageProps }) {
         }
         {
           !(swapConfigured && accountConfigured) && <Configure {...pageProps} />
+        }
+        { shutdownNoticeOpen &&
+          <ShutdownNotice close={ closeShutdown } />
         }
       </ThemeProvider>
     </React.Fragment>
